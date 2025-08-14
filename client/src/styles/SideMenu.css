@@ -1,0 +1,28 @@
+.custom-drawer {
+    width: 340px;
+    flex-shrink: 0;
+  }
+  
+.custom-drawer .MuiDrawer-paper {
+    width: 340px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 90px;
+    height: calc(100vh - 90px);
+    overflow: auto;
+    background: linear-gradient(to left,#536976,#292e49);
+
+}
+.css-1umw9bq-MuiSvgIcon-root{
+    color : white;
+}
+.listitem_label{
+    color : white;
+}
+.listitem_hover {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.listitem_hover:hover {
+    background-color: #ececf3;
+}
