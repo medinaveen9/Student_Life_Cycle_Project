@@ -42,6 +42,7 @@ const personalInfo = async (formData) => {
     throw error;
   }  
 };
+
 const contactDetails = async (formData) => {
   try {
     // Destructure formData
@@ -77,30 +78,29 @@ const contactDetails = async (formData) => {
     } = formData;
 
     const values = [
-      father_name, father_age, father_occupation, father_income,
-      mother_name, mother_age, mother_occupation, mother_income,
-      spouse_name, spouse_age, spouse_occupation, spouse_income,
+      father_name, father_age, 
+      mother_name, mother_age, 
+      spouse_name, spouse_age, 
       corr_address, corr_country, corr_state, corr_district, corr_pin_code, corr_mobile, corr_email,
       perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
-      father_email, other_info
+       other_info
     ];
 
     const result = await pool.query(
       `INSERT INTO contact_details (
-         father_name, father_age, father_occupation, father_income,
-         mother_name, mother_age, mother_occupation, mother_income,
-         spouse_name, spouse_age, spouse_occupation, spouse_income,
+         father_name, father_age, 
+         mother_name, mother_age, 
+         spouse_name, spouse_age, 
          corr_address, corr_country, corr_state, corr_district, corr_pin_code, corr_mobile, corr_email,
          perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
-         father_email, other_info
+          other_info
        )
        VALUES (
          $1, $2, $3, $4,
          $5, $6, $7, $8,
          $9, $10, $11, $12,
          $13, $14, $15, $16, $17, $18, $19,
-         $20, $21, $22, $23, $24, $25, $26,
-         $27, $28
+         $20, $21
        )
        RETURNING id`,
        values

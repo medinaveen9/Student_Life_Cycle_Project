@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {Box, TextField, FormControl, Select, MenuItem,InputLabel, Typography, Button} from '@mui/material';
+import { useCourse } from "../../CourseContext"; 
 
 const PersonalInformation = () => {
+     const { socialStatus, setSocialStatus } = useCourse();
   const location = useLocation();
   const navigate = useNavigate();
   const { courseName } = location.state || {};
+ 
 
   const [adDetails, setAdDetails] = useState({
     applicationNo:'',
@@ -141,12 +144,23 @@ const PersonalInformation = () => {
 
       <FormControl fullWidth margin="normal" size="small">
         <InputLabel>Social Status</InputLabel>
-        <Select value={adDetails.socialStatus}
+        {/* <Select value={adDetails.socialStatus}
           onChange={(e) => handleAdDetailsChange('socialStatus', e.target.value)}>
           {['SC', 'ST', 'BC', 'OC'].map(status => (
             <MenuItem key={status} value={status}>{status}</MenuItem>
           ))}
-        </Select>
+        </Select> */}
+        <Select
+    value={socialStatus}
+    onChange={(e) => {
+      handleAdDetailsChange('socialStatus', e.target.value);
+      setSocialStatus(e.target.value); // ✅ update context
+    }}
+  >
+    {['SC', 'ST', 'BC', 'OC'].map(status => (
+      <MenuItem key={status} value={status}>{status}</MenuItem>
+    ))}
+  </Select>
       </FormControl>
 
     <TextField  fullWidth  label="Nationality" margin="normal" value={adDetails.nationality}

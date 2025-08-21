@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
   const DocumentsUpload = () => {
-  const { courseName } = useCourse();  
+  const { courseName,socialStatus } = useCourse();  
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -29,8 +29,16 @@ import axios from 'axios';
     'CASTE CERTIFICATE ',
   ];
 
-  const documents = courseName === "MPT" ? mptDocs : gcDocs;
-  
+//   let documents = courseName === "MPT" ? mptDocs : gcDocs;
+//   if (socialStatus === "OC") {
+//   documents = documents.filter(doc => !doc.toLowerCase().includes("caste certificate"));
+// }
+const baseDocs = courseName === "MPT" ? mptDocs : gcDocs;
+
+const documents = socialStatus === "OC"
+  ? baseDocs.filter(doc => !doc.trim().toLowerCase().includes("caste certificate"))
+  : baseDocs;
+
   const [uploadedDocs, setUploadedDocs] = useState({});
   const [formData, setFormData] = useState({
     application_no: '',
