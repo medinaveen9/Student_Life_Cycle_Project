@@ -61,6 +61,17 @@ const documents = socialStatus === "OC"
 
 
 const handleSubmit = async () => {
+    if (!formData.application_no) {
+    alert("⚠️ Please enter Application No before submitting.");
+    return;
+  }
+
+  const hasAtLeastOneFile = Object.keys(uploadedDocs).length > 0;
+  if (!hasAtLeastOneFile) {
+    alert("⚠️ Please upload at least one document before submitting.");
+    return;
+  }
+
   try {
     const uploadForm = new FormData();
     // uploadForm.append("formID", formData.application_no); // match backend "formId"

@@ -47,6 +47,7 @@ const contactDetails = async (formData) => {
   try {
     // Destructure formData
     const {
+      application_no,
       father_name,
       father_age = null,
       father_occupation,
@@ -74,20 +75,23 @@ const contactDetails = async (formData) => {
       perm_mobile,
       perm_email,
       father_email,
+    
       other_info
     } = formData;
 
     const values = [
+      application_no,
       father_name, father_age, 
       mother_name, mother_age, 
       spouse_name, spouse_age, 
       corr_address, corr_country, corr_state, corr_district, corr_pin_code, corr_mobile, corr_email,
       perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
-       other_info
+       other_info,
     ];
 
     const result = await pool.query(
       `INSERT INTO contact_details (
+      application_no,
          father_name, father_age, 
          mother_name, mother_age, 
          spouse_name, spouse_age, 
@@ -100,7 +104,7 @@ const contactDetails = async (formData) => {
          $5, $6, $7, $8,
          $9, $10, $11, $12,
          $13, $14, $15, $16, $17, $18, $19,
-         $20, $21
+         $20, $21,$22
        )
        RETURNING id`,
        values
@@ -122,15 +126,15 @@ return null;
 const educationDetails = async (formData) => {
   try {
     const {
-         qualification, marks_obtained ,  total_marks ,internship_date
+         qualification, marks_obtained ,  total_marks ,internship_date,application_no
       }=formData;
     const average = total_marks > 0 ? marks_obtained / total_marks : 0;
     const percentage = total_marks > 0 ? (marks_obtained / total_marks) * 100 : 0;
 
     const newUser = await pool.query(
-   "INSERT INTO educational_details( qualification, marks_obtained ,  total_marks ,average, percentage, internship_date)   VALUES ($1,$2,$3,$4,$5,$6) RETURNING id",
+   "INSERT INTO educational_details( qualification, marks_obtained ,  total_marks ,average, percentage, internship_date,application_no)   VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
    [
-      qualification, marks_obtained ,  total_marks ,average, percentage, internship_date
+      qualification, marks_obtained ,  total_marks ,average, percentage, internship_date,application_no
    ]
        
     );

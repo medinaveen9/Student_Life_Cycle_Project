@@ -44,6 +44,22 @@ const PersonalInformation = () => {
 
   const handleNext = async () => {
   try {
+     if (!adDetails.applicationNo) {
+      alert("⚠️ Application Number is required.");
+      return;
+    }
+      if (!adDetails.name) {
+      alert("⚠️  Name is required.");
+      return;
+    }
+      if (!adDetails.fatherName) {
+      alert("⚠️ Father's Name is required.");
+      return;
+    }
+       if (!adDetails.nationality) {
+      alert("⚠️ Nationality is required.");
+      return;
+    }
     const payload = {
       application_no: adDetails.applicationNo,
       name: adDetails.name,

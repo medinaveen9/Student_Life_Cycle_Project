@@ -69,6 +69,7 @@ const applicationNo = req.body.application_no;
 
 // File routes
 // router.get("/files", verifyToken, getAllUploadedFiles); // add back when verifyToken is ready
+
 router.get("/files", getAllUploadedFiles);
 router.get('/files/view/:id', streamFile);
 
