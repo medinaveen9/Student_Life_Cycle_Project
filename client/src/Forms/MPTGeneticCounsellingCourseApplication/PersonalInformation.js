@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {Box, TextField, FormControl, Select, MenuItem,InputLabel, Typography, Button} from '@mui/material';
@@ -31,6 +31,12 @@ const PersonalInformation = () => {
     fathersEmail: '',
 
   });
+  // Reset context + form when component mounts (fresh form load)
+  useEffect(() => {
+    setSocialStatus("");   // reset global state
+    setAdDetails(prev => ({ ...prev, socialStatus: "" })); // reset local state
+  }, []);
+
 
   const [photoFile, setPhotoFile] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);

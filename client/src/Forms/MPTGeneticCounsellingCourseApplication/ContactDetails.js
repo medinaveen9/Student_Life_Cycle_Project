@@ -5,9 +5,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const ContactDetails = () => {
-  const [father, setFather] = useState({ name: '', age: '', occupation: '', income: '' });
-  const [mother, setMother] = useState({ name: '', age: '', occupation: '', income: '' });
-  const [spouse, setSpouse] = useState({ name: '', age: '', occupation: '', income: '' });
+  const [father, setFather] = useState({ name: '', age: '' });
+  const [mother, setMother] = useState({ name: '', age: '' });
+  const [spouse, setSpouse] = useState({ name: '', age: ''});
 
   const [formData, setFormData] = useState({
     application_no: "",   
@@ -45,18 +45,18 @@ const ContactDetails = () => {
       application_no: formData.application_no,
       father_name: father.name,
       father_age: toNumberOrNull(father.age),
-      father_occupation: father.occupation,
-      father_income: toNumberOrNull(father.income),
+      // father_occupation: father.occupation,
+      // father_income: toNumberOrNull(father.income),
 
       mother_name: mother.name,
       mother_age: toNumberOrNull(mother.age),
-      mother_occupation: mother.occupation,
-      mother_income: toNumberOrNull(mother.income),
+      // mother_occupation: mother.occupation,
+      // mother_income: toNumberOrNull(mother.income),
 
       spouse_name: spouse.name,
       spouse_age: toNumberOrNull(spouse.age),
-      spouse_occupation: spouse.occupation,
-      spouse_income: toNumberOrNull(spouse.income),
+      // spouse_occupation: spouse.occupation,
+      // spouse_income: toNumberOrNull(spouse.income),
 
       corr_address: formData.correspondence.address,
       corr_country: formData.correspondence.country,
