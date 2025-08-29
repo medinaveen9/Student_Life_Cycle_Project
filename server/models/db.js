@@ -37,7 +37,7 @@ let isConnected = false;
 const uri = process.env.MONGO_URI;
 const dbName = process.env.WAYPOINT;
 
-client = new MongoClient(uri, { }); // Create mongoclient
+client = new MongoClient(uri); // Create mongoclient
 
 async function connectToMongo() {
     try {

@@ -47,12 +47,8 @@ const contactDetails = async (formData) => {
   try {
     // Destructure formData
     const {
-      application_no,
-      father_name,
-      father_age = null,
-      father_occupation,
-      father_income = null,
-      mother_name,
+      application_no, father_name, father_age = null, father_occupation, father_income = null,
+      mother_name, 
       mother_age = null,
       mother_occupation,
       mother_income = null,
