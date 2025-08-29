@@ -5,6 +5,7 @@ require('dotenv').config();
 const { connectToMongo } = require('./models/db');
 const stipendRoutes = require('./routes/StipendRoutes');
 const masterRoutes = require('./routes/MasterRoutes');
+const pgmedicalRoutes =require('./routes/PgMedicalRoutes')
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json()); // to parse JSON bodies
 
 app.use('/api/stipend', stipendRoutes);
 app.use('/api/master', masterRoutes);
+app.use('/api/pgmedical', pgmedicalRoutes);
 
 app.use('/', (req, res) => { 
     res.send('API is working');

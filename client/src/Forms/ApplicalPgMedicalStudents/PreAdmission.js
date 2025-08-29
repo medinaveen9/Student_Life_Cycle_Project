@@ -1,7 +1,7 @@
 import React from 'react';
 import FormComponent from './FormComponent';
 
-const medicalQualificationFields = [
+const constFields = [
     { label: 'PG Entrance Exam Name (e.g..,NEET PG,INI-CET ,State ', name: 'pg_entrance', type: 'text', required: true },
     { label: 'PG Entrance Exam Roll Number', name: 'pg_roll', type: 'text', required: true },
     { label: 'PG Entrance Exam Score/Percentile', name: 'pg_score', type: 'text', required: true },
@@ -21,9 +21,9 @@ const medicalQualificationFields = [
   { label: 'Medical Council Registration Number(State/MCI/NMC', name: 'reg_number', type: 'text', required: true },
   { label: 'Medical Council Registration Date', name: 'reg_date', type: 'date' },
   { label: 'Experience (if any, post-internship/UG)', name: 'experience', type: 'textarea' },
-  { label: 'Preferred PG Specialty 1', name: 'specialty1', type: 'text' },
-  { label: 'Preferred PG Specialty 2', name: 'specialty2', type: 'text' },
-  { label: 'Preferred PG Specialty 3', name: 'specialty3', type: 'text' },
+  { label: 'Preferred PG Specialty 1', name: 'specialty_1', type: 'text' },
+  { label: 'Preferred PG Specialty 2', name: 'specialty_2', type: 'text' },
+  { label: 'Preferred PG Specialty 3', name: 'specialty_3', type: 'text' },
   {
     label: 'Rural Service Bond Status',
     name: 'bond_status',
@@ -49,9 +49,9 @@ const MedicalQualificationFormPage = () => {
   return (
     <FormComponent
       formTitle="Medical Qualification Details"
-      formName="medicalQualificationForm"
-      fields={medicalQualificationFields}
-        nextRoute="/onboard"
+      formName="pg_medical_qualification"
+       fields={constFields}
+     
     />
   );
 };

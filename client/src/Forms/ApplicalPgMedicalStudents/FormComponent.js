@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Typography, Button, Radio, RadioGroup, FormControlLabel, MenuItem} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
 const FormComponent = ({ formTitle, fields, nextRoute,formName }) => {
   const navigate = useNavigate();
 
@@ -32,19 +32,46 @@ const FormComponent = ({ formTitle, fields, nextRoute,formName }) => {
     return true;
   };
   
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  
-    if (validate()) {
-      console.log('Form data:', formData);
-      alert('Form submitted!');
-  
-      if (!nextRoute) {
-        navigate(nextRoute); 
+const handleSubmit = async (e) => {
+  e.preventDefault(); 
+
+  try {
+    const payload = {
+      tableName: formName,
+      formData
+    };
+
+    console.log("🚀 Submitting payload to backend:", payload);
+
+    const response = await axios.post(
+      "http://localhost:4000/api/pgmedical/forms",
+      payload,
+      {
+        headers: { "Content-Type": "application/json" }
       }
+    );
+    console.log("✅ Backend response:", response.data);
+
+    // Navigation after successful submission
+    if (formName === "pg_medical_qualification") {
+      alert("Form submitted successfully!");
+      navigate("/onboard");
+    } else if (formName === "pg_onboarding_phase") {
+      alert("Form submitted successfully!");
+      navigate("/exam");
+    } else if (formName === "pg_examination_assessment") {
+      alert("Form submitted successfully!");
+      navigate("/preadmission");
+    } else if (nextRoute) {
+      navigate(nextRoute);
     }
-  };
-  
+
+  } catch (err) {
+    console.error("❌ Submission failed:", err.response?.data || err.message);
+    alert("Form submission failed!");
+  }
+};
+
   return (
     <Box sx={{maxWidth: "1000px", mx:"auto", mt:10, p:5, border:"1px solid #ccc",color:"black", backgroundColor:"white", boxShadow: 3 }} className="page-break">
  
