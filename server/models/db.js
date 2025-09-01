@@ -5,8 +5,6 @@ require('dotenv').config();
 const  {MongoClient} = require('mongodb');
 
 
-
-
 // const pool = new Pool({
 //     user: "shanmukasagar",
 //     host: "ep-red-grass-a1ch12cb-pooler.ap-southeast-1.aws.neon.tech" ,
@@ -15,13 +13,22 @@ const  {MongoClient} = require('mongodb');
 //     port: 5432,
 //     ssl: { rejectUnauthorized: false }
 // });
+// const pool = new Pool({
+//   user: "neondb_owner",
+//   host: "ep-sparkling-hill-a1u749gy-pooler.ap-southeast-1.aws.neon.tech",
+//   database: "Student_LifeCycle",
+//   password: "npg_VNP9fR0LeObo",
+//   port: 5432,
+//   ssl: { rejectUnauthorized: false }
+// });
+
 const pool = new Pool({
   user: "neondb_owner",
-  host: "ep-sparkling-hill-a1u749gy-pooler.ap-southeast-1.aws.neon.tech",
+  host: "ep-floral-recipe-adwtj77g-pooler.c-2.us-east-1.aws.neon.tech",
   database: "Student_LifeCycle",
-  password: "npg_VNP9fR0LeObo",
+  password: "npg_riZ7A8BKwXuY",
   port: 5432,
-  ssl: { rejectUnauthorized: false }
+  ssl: { require: true, rejectUnauthorized: false }
 });
 
 // const pool = new Pool({

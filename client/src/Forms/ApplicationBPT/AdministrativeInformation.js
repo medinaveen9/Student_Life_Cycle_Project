@@ -3,16 +3,16 @@ import { Typography, TextField, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-
+import axios from 'axios';
 const AdministrativeInformation= () => {
   const [adDetails, setAdDetails] = useState({
-    adNo: '',
-    adDate: '',
-    applicationNo: '',
-    courseCode: '',
-    courseName: '',
-    dateOfEntry: '',
-    lastDate: '',
+    ad_no: '',
+    ad_date: '',
+    application_no: '',
+    course_code: '',
+    course_name: '',
+    date_of_entry: '',
+    last_date: '',
   });
  
   const handleAdDetailsChange = (field, value) => {
@@ -24,21 +24,31 @@ const AdministrativeInformation= () => {
 
   const navigate = useNavigate();
 
-  const handleNext = () => {
-    navigate("/appfee");
-  };
+      const handleNext = async () => {
+    try {
+        
+      console.log("Payload sending:", adDetails); 
+      const response = await axios.post("http://localhost:4000/api/bpt/bpt_administrative_information", adDetails);
+      console.log("Saved:", response.data);
+
+    
+      navigate("/personalinfo");
+    } catch (error) {
+      console.error("Error:", error.response ? error.response.data : error.message);
+    }
+  }
   
   return (
   <Box sx={{maxWidth: "1000px", mx:"auto", mt:10, p:5, border:"1px solid #ccc",color:"black", backgroundColor:"white", boxShadow: 3 }} className="page-break">
     <Box sx={{ mb: 6 }}>
         <Typography variant="h6" gutterBottom>Advertisement Details</Typography>
-        <TextField fullWidth margin="normal" label="Application No." value={adDetails.applicationNo} onChange={(e) => handleAdDetailsChange('applicationNo', e.target.value)} size="small" />
-        <TextField fullWidth margin="normal" label="Course Code" value={adDetails.courseCode} onChange={(e) => handleAdDetailsChange('courseCode', e.target.value)} size="small" />
+        <TextField fullWidth margin="normal" label="Application No." value={adDetails.application_no} onChange={(e) => handleAdDetailsChange('application_no', e.target.value)} size="small" />
+        <TextField fullWidth margin="normal" label="Course Code" value={adDetails.course_code} onChange={(e) => handleAdDetailsChange('course_code', e.target.value)} size="small" />
 
        <FormControl fullWidth margin="normal" size="small">
         <InputLabel>Course Name</InputLabel>
        <Select
-           value={adDetails.courseName} label="Course Name" onChange={(e) => handleAdDetailsChange('courseName', e.target.value)}>
+           value={adDetails.course_name} label="Course Name" onChange={(e) => handleAdDetailsChange('course_name', e.target.value)}>
             <MenuItem value="BPT">BPT</MenuItem>
             <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
             <MenuItem value="MPT">MPT</MenuItem>
@@ -46,14 +56,14 @@ const AdministrativeInformation= () => {
    
     </Select>
       </FormControl>
-       <TextField fullWidth margin="normal" label="Ad. No." value={adDetails.adNo} onChange={(e) => handleAdDetailsChange('adNo', e.target.value)} size="small" />
-       <TextField fullWidth margin="normal" label="Ad. Date" type="date" value={adDetails.adDate} onChange={(e) => handleAdDetailsChange('adDate', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
-       <TextField fullWidth margin="normal" label="Date of Entry" type="datetime-local" value={adDetails.dateOfEntry} onChange={(e) => handleAdDetailsChange('dateOfEntry', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
-        <TextField fullWidth margin="normal" label="Last Date of Receiving Application" type="date" value={adDetails.lastDate} onChange={(e) => handleAdDetailsChange('lastDate', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
+       <TextField fullWidth margin="normal" label="Ad. No." value={adDetails.ad_no} onChange={(e) => handleAdDetailsChange('ad_no', e.target.value)} size="small" />
+       <TextField fullWidth margin="normal" label="Ad. Date" type="date" value={adDetails.ad_date} onChange={(e) => handleAdDetailsChange('ad_date', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
+       <TextField fullWidth margin="normal" label="Date of Entry" type="datetime-local" value={adDetails.date_of_entry} onChange={(e) => handleAdDetailsChange('date_of_entry', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
+        <TextField fullWidth margin="normal" label="Last Date of Receiving Application" type="date" value={adDetails.last_date} onChange={(e) => handleAdDetailsChange('last_date', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
       
-    <Box sx={{ mt: 3, textAlign: 'right' }}>
-  <Button variant="contained" onClick={handleNext}>Next</Button>
-  </Box>
+      <Box sx={{ mt: 3, textAlign: 'right' }}>
+       <Button variant="contained" onClick={handleNext}>Next</Button>
+    </Box>
   </Box>
   </Box>
   );

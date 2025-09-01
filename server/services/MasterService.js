@@ -1,12 +1,10 @@
-
 const {pool} =require("../models/db");
 
 const administrationDetails = async (formData) => {
   try {
     const {
       course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date, department
-    }=formData;
-
+    } = formData;
     const newUser = await pool.query(
    "  INSERT INTO administrative_information (course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date, department)  VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
    [
@@ -48,38 +46,15 @@ const contactDetails = async (formData) => {
     // Destructure formData
     const {
       application_no, father_name, father_age = null, father_occupation, father_income = null,
-      mother_name, 
-      mother_age = null,
-      mother_occupation,
-      mother_income = null,
-      spouse_name,
-      spouse_age = null,
-      spouse_occupation,
-      spouse_income = null,
-      corr_address,
-      corr_country,
-      corr_state,
-      corr_district,
-      corr_pin_code,
-      corr_mobile,
-      corr_email,
-      perm_address,
-      perm_country,
-      perm_state,
-      perm_district,
-      perm_pin_code,
-      perm_mobile,
-      perm_email,
+      mother_name,    mother_age = null,mother_occupation, mother_income = null,spouse_name,spouse_age = null,
+      spouse_occupation, spouse_income = null, corr_address, corr_country,  corr_state,corr_district,corr_pin_code,
+      corr_mobile,corr_email,perm_address, perm_country,perm_state,perm_district, perm_pin_code,perm_mobile, perm_email,
       father_email,
-    
-      other_info
+     other_info
     } = formData;
 
     const values = [
-      application_no,
-      father_name, father_age, 
-      mother_name, mother_age, 
-      spouse_name, spouse_age, 
+      application_no, father_name, father_age,mother_name, mother_age,   spouse_name, spouse_age, 
       corr_address, corr_country, corr_state, corr_district, corr_pin_code, corr_mobile, corr_email,
       perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
        other_info,
@@ -87,19 +62,13 @@ const contactDetails = async (formData) => {
 
     const result = await pool.query(
       `INSERT INTO contact_details (
-      application_no,
-         father_name, father_age, 
-         mother_name, mother_age, 
-         spouse_name, spouse_age, 
+      application_no, father_name, father_age, mother_name, mother_age,  spouse_name, spouse_age, 
          corr_address, corr_country, corr_state, corr_district, corr_pin_code, corr_mobile, corr_email,
          perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
           other_info
        )
        VALUES (
-         $1, $2, $3, $4,
-         $5, $6, $7, $8,
-         $9, $10, $11, $12,
-         $13, $14, $15, $16, $17, $18, $19,
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
          $20, $21,$22
        )
        RETURNING id`,
@@ -146,26 +115,12 @@ const educationDetails = async (formData) => {
 const paymentDetails = async (formData) => {
   try {
     const {
-      applicationNumber,
-      paymentType,
-      transactionId,
-      date,
-      bankName,
-      branchDetails,
-      amount,
-      remarks,  
-      }=formData;
+      applicationNumber,  paymentType, transactionId, date, bankName,  branchDetails,amount, remarks,  
+      } = formData;
 
     const newUser = await pool.query(
    "INSERT INTO payment_details (application_number, payment_type, transaction_id, payment_date, bank_name, branch_details, amount, remarks)  VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
-   [  applicationNumber,
-      paymentType,
-      transactionId,
-      date,
-      bankName,
-      branchDetails,
-      amount,
-      remarks,
+   [  applicationNumber,paymentType,transactionId,  date,bankName,branchDetails, amount,remarks,
    ]
     );
     return newUser;
@@ -175,10 +130,4 @@ const paymentDetails = async (formData) => {
   }  
 };
 module.exports = {
-  administrationDetails,
-  personalInfo,
-  contactDetails,
-  educationDetails,
-  paymentDetails
-
-};
+  administrationDetails,personalInfo, contactDetails,educationDetails,paymentDetails};

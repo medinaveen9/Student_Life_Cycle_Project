@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Typography, Box, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Button
-} from '@mui/material';
+import { Typography, Box, Table, TableBody, TableCell,TableContainer, TableHead, TableRow, Paper, Button, TextField} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const DocumentsUpload = () => {
+const DocumentsUpload = ({ }) => {
   const documents = [
     'CASTE CERTIFICATE',
     '10th Class Marks Memo',
@@ -18,6 +16,16 @@ const DocumentsUpload = () => {
 
   const navigate = useNavigate();
   const [uploadedDocs, setUploadedDocs] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+const [formData, setFormData] = useState({
+    application_no: '', 
+  });
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleFileChange = (index, file) => {
     setUploadedDocs(prev => ({
@@ -25,29 +33,77 @@ const DocumentsUpload = () => {
       [index]: file
     }));
   };
-const handleSubmit = () => {
-  const documentStatus = documents.map((doc, idx) => ({
-    name: doc,
-    uploaded: !!uploadedDocs[idx],
-    file: uploadedDocs[idx] || null
-  }));
 
-  // const updatedFormData = {
-  //   ...formData,
-  //   documentUploads: documentStatus
-  // };
+  const handleSubmit = async () => {
+  
+    const hasAtLeastOneFile = Object.keys(uploadedDocs).length > 0;
+    if (!hasAtLeastOneFile) {
+      alert("⚠️ Please upload at least one document before submitting.");
+      return;
+    }
 
-  // // Set and log the final form data
-  // setFormData(updatedFormData);
-  // console.log("FINAL FORM DATA:", updatedFormData);
-   console.log("FINAL FORM DATA:", { documentUploads: documentStatus });
-  navigate('');
-};
+    try {
+      const uploadForm = new FormData();
+      uploadForm.append("application_no", formData.application_no);
+
+      documents.forEach((doc, idx) => {
+        if (uploadedDocs[idx]) {
+          uploadForm.append(`file_${idx + 1}`, uploadedDocs[idx]);
+          uploadForm.append(`label_name_${idx + 1}`, doc);
+        }
+      });
+
+      const response = await axios.post(
+        `http://localhost:4000/api/bpt/research`,
+        uploadForm,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("Upload successful:", response.data);
+
+      // Save document status in formData
+      const documentStatus = documents.map((doc, idx) => ({
+        name: doc,
+        uploaded: !!uploadedDocs[idx],
+        fileName: uploadedDocs[idx]?.name || null,
+      }));
+
+      const updatedFormData = {
+        ...formData,
+      
+        documentUploads: documentStatus,
+      };
+
+      setFormData(updatedFormData);
+      console.log("FINAL FORM DATA:", updatedFormData);
+
+      setSuccessMessage("✅ Form submitted successfully!");
+      alert("✅ Form Submitted Successfully!");
+
+      setTimeout(() => {
+        navigate('/administrative');
+      }, 2000);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("❌ Upload failed! Check console for details.");
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: "1000px", mx: "auto", mt: 10, p: 5, border: "1px solid #ccc", color: "black", backgroundColor: "white", boxShadow: 3 }} className="page-break">
-      <Typography variant="h6" gutterBottom>Payment Details</Typography>
       <Typography variant="h6" gutterBottom>Document Uploads</Typography>
+
+        <TextField
+             label="Application No"
+             value={formData.application_no}
+             onChange={(e) => handleChange('application_no', e.target.value)}
+             size="small"
+             fullWidth
+             sx={{ mb: 3 }}
+             type="number"
+           />
+     
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -63,8 +119,11 @@ const handleSubmit = () => {
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>{doc}</TableCell>
                 <TableCell>
-                  <input type="file" accept=".pdf,.jpg,.png"
-                    onChange={(e) => handleFileChange(idx, e.target.files[0])} />
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.png"
+                    onChange={(e) => handleFileChange(idx, e.target.files[0])}
+                  />
                   {uploadedDocs[idx] && (
                     <Typography variant="caption" color="primary">
                       {uploadedDocs[idx].name}
@@ -83,7 +142,5 @@ const handleSubmit = () => {
     </Box>
   );
 };
-
-
 
 export default DocumentsUpload;

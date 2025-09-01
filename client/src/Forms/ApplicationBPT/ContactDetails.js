@@ -1,134 +1,214 @@
+
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
-  const ContactDetails = () => {
-  const [familyDetails, setFamilyDetails] = useState([
-    { relation: 'Father', name: '', age: '', occupation: '', income: '' },
-    { relation: 'Mother', name: '', age: '', occupation: '', income: '' },
-    { relation: 'Spouse', name: '', age: '', occupation: '', income: '' }
-  ]);
+const ContactDetails = () => {
+  const [father, setFather] = useState({ name: '', age: '',income:'',occupation:'' });
+  const [mother, setMother] = useState({ name: '', age: '',income:'',occupation:'' });
+  const [spouse, setSpouse] = useState({ name: '', age: '',income:'',occupation:''});
 
   const [formData, setFormData] = useState({
+    application_no: "",   
     correspondence: { address: '', country: '', state: '', district: '', pinCode: '', mobile: '', email: '' },
     permanent: { address: '', country: '', state: '', district: '', pinCode: '', mobile: '', email: '', fatherEmail: '' },
     otherInfo: ''
   });
 
   const navigate = useNavigate();
-    const familyFields = [
-    { name: 'name', label: 'Name' },
-    { name: 'age', label: 'Age (in years)' },
-    { name: 'occupation', label: 'Occupation' },
-    { name: 'income', label: 'Gross Monthly Income (Rs.)' }
-  ];
+  const location = useLocation();
+  const courseName = location.state?.courseName;
 
+  const handleChange = (obj, setObj) => (field, val) =>
+    setObj(prev => ({ ...prev, [field]: val }));
 
-  const addressFields = [
-    { section: 'correspondence', label: 'Address', name: 'address' },
-    { section: 'correspondence', label: 'Country', name: 'country' },
-    { section: 'correspondence', label: 'State', name: 'state' },
-    { section: 'correspondence', label: 'District', name: 'district' },
-    { section: 'correspondence', label: 'Pin Code', name: 'pinCode' },
-    { section: 'correspondence', label: 'Mobile No.', name: 'mobile' },
-    { section: 'correspondence', label: 'Email ID', name: 'email' },
-    { section: 'permanent', label: 'Address', name: 'address' },
-    { section: 'permanent', label: 'Country', name: 'country' },
-    { section: 'permanent', label: 'State', name: 'state' },
-    { section: 'permanent', label: 'District', name: 'district' },
-    { section: 'permanent', label: 'Pin Code', name: 'pinCode' },
-    { section: 'permanent', label: 'Mobile No.', name: 'mobile' },
-    { section: 'permanent', label: 'Email ID', name: 'email' },
-    { section: 'permanent', label: "Father's Email ID", name: 'fatherEmail' }
-  ];
+  const handleAddressChange = (section, field, val) =>
+    setFormData(prev => ({ ...prev, [section]: { ...prev[section], [field]: val } }));
 
+  const toNumberOrNull = (val) => (val === '' ? null : Number(val));
 
-  const handleAddressChange = (section, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value }
-    }));
-  };
-
-  const handleFamilyChange = (index, field, value) => {
-    const updated = [...familyDetails];
-    updated[index][field] = value;
-    setFamilyDetails(updated);
-  };
-
-  const handleNext = () => { 
-      // addressData: formData,
-      // familyDetails: familyDetails
+  const handleNext = async () => {
   
-    navigate('/inter');
+  if (!father.name) {
+      alert("⚠️ Father Name is required.");
+      return;
+    }
+     if (!mother.name) {
+      alert("⚠️ Mother Name  is required.");
+      return;
+    }
+    const payload = {
+       application_no: formData.application_no,
+      father_name: father.name,
+      father_age: toNumberOrNull(father.age),
+      father_occupation: father.occupation,
+      father_income: toNumberOrNull(father.income),
+
+      mother_name: mother.name,
+      mother_age: toNumberOrNull(mother.age),
+      mother_occupation: mother.occupation,
+      mother_income: toNumberOrNull(mother.income),
+
+      spouse_name: spouse.name,
+      spouse_age: toNumberOrNull(spouse.age),
+      spouse_occupation: spouse.occupation,
+      spouse_income: toNumberOrNull(spouse.income),
+
+      corr_address: formData.correspondence.address,
+      corr_country: formData.correspondence.country,
+      corr_state: formData.correspondence.state,
+      corr_district: formData.correspondence.district,
+      corr_pin_code: formData.correspondence.pinCode,
+      corr_mobile: formData.correspondence.mobile,
+      corr_email: formData.correspondence.email,
+
+      perm_address: formData.permanent.address,
+      perm_country: formData.permanent.country,
+      perm_state: formData.permanent.state,
+      perm_district: formData.permanent.district,
+      perm_pin_code: formData.permanent.pinCode,
+      perm_mobile: formData.permanent.mobile,
+      perm_email: formData.permanent.email,
+
+      father_email: formData.permanent.fatherEmail,
+      other_info: formData.otherInfo,
+    };
+
+    try {
+      const res = await axios.post("http://localhost:4000/api/bpt/bpt_contact_details", payload);
+      console.log("✅ Saved:", res.data);
+      navigate("/upload", { state: { courseName } });
+    } catch (error) {
+      console.error("❌ Error saving contact details:", error.response?.data || error.message);
+    }
   };
-  
-return (
-  <Box sx={{ maxWidth: "1000px", mx: "auto", mt: 10, p: 5, border: "1px solid #ccc", color: "black", backgroundColor: "white", boxShadow: 3 }} className="page-break">
-    
-    <Typography variant="h6" gutterBottom>Details of Parents / Spouse</Typography>
-    {familyDetails.map((person, index) => (
-      <Box key={index} sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" sx={{ mb: 1 }}>{person.relation}</Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          {familyFields.map(({ name, label }) => (
-            <TextField
-              key={`${index}-${name}`}
-              label={`${person.relation} ${label}`}
-              value={person[name]}
-              onChange={(e) => handleFamilyChange(index, name, e.target.value)}
-              size="small"
-              sx={{ flex: 1 }}
-            />
-          ))}
-        </Box>
+
+  const renderPersonInputs = (person, onChange, label) => (
+    <>
+      <TextField
+        label={label} 
+        value={person.name}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (/^[a-zA-Z\s]*$/.test(value)) onChange('name', value);
+        }}
+        size="small"
+        fullWidth
+        margin="dense"
+      />
+      <TextField
+        label={`${label} Age (years)`}
+        value={person.age}
+        onChange={e => onChange('age', e.target.value)}
+        size="small"
+        fullWidth
+        margin="dense"
+        type="number"
+      />
+   <TextField
+  label={`${label} Occupation`} 
+  value={person.occupation}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(value)) onChange('occupation', value);
+  }}
+  size="small"
+  fullWidth
+  margin="dense"
+/>
+ <TextField
+      label={`${label} Income`} 
+      value={person.income}
+      onChange={(e) => onChange('income', e.target.value)}
+      size="small"   fullWidth  margin="dense"   type="number" />
+    </>
+  );
+
+  const renderAddressInputs = (section) => {
+    const fields = [
+      { label: 'Address', name: 'address' },
+      { label: 'Country', name: 'country', type: 'alpha' },
+      { label: 'State', name: 'state', type: 'alpha' },
+      { label: 'District', name: 'district', type: 'alpha' },
+      { label: 'Pin Code', name: 'pinCode', type: 'pincode' }, 
+      { label: 'Mobile No.', name: 'mobile', type: 'mobile' },
+      { label: 'Email ID', name: 'email', type: 'email' },
+    ];
+
+    if (section === 'permanent') {
+      fields.push({ label: "Father's Email ID", name: 'fatherEmail', type: 'email' });
+    }
+
+    return fields.map(({ label, name, type }) => (
+      <TextField
+        key={`${section}-${name}`}
+        label={label}
+        value={formData[section][name] || ''}
+        onChange={e => {
+          const value = e.target.value;
+          let isValid = true;
+
+          if (type === 'alpha') isValid = /^[a-zA-Z\s]*$/.test(value);
+          else if (type === 'pincode') isValid = /^[1-9][0-9]{0,5}$/.test(value) || value === '';
+          else if (type === 'mobile') isValid = /^[1-9][0-9]{0,9}$/.test(value) || value === '';
+          else if (type === 'numeric') isValid = /^[0-9]*$/.test(value);
+
+          if (isValid) handleAddressChange(section, name, value);
+        }}
+        size="small"
+        fullWidth
+        margin="dense"
+        type={type === 'email' ? 'email' : 'text'}
+        inputProps={{
+          maxLength: type === 'pincode' ? 6 : type === 'mobile' ? 10 : undefined
+        }}
+      />
+    ));
+  };
+
+  return (
+    <Box sx={{ maxWidth: "1000px", mx: "auto", mt: 10, p: 5, border: "1px solid #ccc", color: "black", backgroundColor: "white", boxShadow: 3 }}>
+      <Typography variant="h5" gutterBottom>Parents / Spouse Details</Typography>
+ 
+       <TextField
+        label="Application No" value={formData.application_no}
+        onChange={(e) => setFormData(prev => ({ ...prev, application_no: e.target.value }))}
+        size="small"  fullWidth  margin="dense"type="number" /> 
+
+      <Box mb={3}>
+        <Typography variant="h6">Father Name</Typography>
+        {renderPersonInputs(father, handleChange(father, setFather), 'Father')}
       </Box>
-    ))}
 
-    <Typography variant="h6" gutterBottom>Correspondence Address</Typography>
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-      {addressFields.filter(f => f.section === 'correspondence').map(({ label, name, section }) => (
-        <TextField
-          key={`${section}-${name}`}
-          label={label}
-          value={formData[section][name]}
-          onChange={(e) => handleAddressChange(section, name, e.target.value)}
-          size="small"
-        />
-      ))}
+      <Box mb={3}>
+        <Typography variant="h6">Mother Name</Typography>
+        {renderPersonInputs(mother, handleChange(mother, setMother), 'Mother')}
+      </Box>
+
+      <Box mb={3}>
+        <Typography variant="h6">Spouse Name</Typography>
+        {renderPersonInputs(spouse, handleChange(spouse, setSpouse), 'Spouse')}
+      </Box>
+
+      <Typography variant="h6" gutterBottom>Correspondence Address</Typography>
+      <Box mb={3}>{renderAddressInputs('correspondence')}</Box>
+
+      <Typography variant="h6" gutterBottom>Permanent Address</Typography>
+      <Box mb={3}>{renderAddressInputs('permanent')}</Box>
+
+      <TextField
+        label="Other Relevant Information" multiline
+        rows={3}  fullWidth   size="small"   value={formData.otherInfo}
+        onChange={e => setFormData(prev => ({ ...prev, otherInfo: e.target.value }))}
+        margin="dense"
+      />
+
+      <Box textAlign="right" mt={2}>
+        <Button variant="contained" onClick={handleNext}>Next</Button>
+      </Box>
     </Box>
-
-    <Typography variant="h6" gutterBottom>Permanent Address</Typography>
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-      {addressFields.filter(f => f.section === 'permanent').map(({ label, name, section }) => (
-        <TextField
-          key={`${section}-${name}`}
-          label={label}
-          value={formData[section][name]}
-          onChange={(e) => handleAddressChange(section, name, e.target.value)}
-          size="small"
-        />
-      ))}
-    </Box>
-
-    <Typography variant="h6" gutterBottom>Other Details</Typography>
-    <TextField
-      label="Any Other Relevant Information"
-      multiline
-      rows={3}
-      fullWidth
-      size="small"
-      value={formData.otherInfo}
-      onChange={(e) => setFormData({ ...formData, otherInfo: e.target.value })}
-      sx={{ mb: 4 }}
-    />
-
-    <Box sx={{ mt: 3, textAlign: 'right' }}>
-      <Button variant="contained" onClick={handleNext}>Next</Button>
-    </Box>
-  </Box>
-);
-
-}
+  );
+};
 
 export default ContactDetails;
