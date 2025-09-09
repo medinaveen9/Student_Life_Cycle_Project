@@ -5,13 +5,9 @@ const express = require('express');
 const router = express.Router();
 const { getAllUploadedFiles, streamFile } = require("../controllers/UploadsController");
 // const verifyToken = require("../middleware/auth"); // uncomment when you have token middleware
-const {administration, personal, contact, education, payment } = require("../controllers/MasterController");
-
+const {administration, personal, contact, education, payment, getCourseName } = require("../controllers/MasterController");
 
 const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
-
-client.connect().then(() => console.log('MongoDB connected!'));
 
 // Use memory storage to get the file buffer
 const upload = multer({ storage: multer.memoryStorage() });
@@ -20,10 +16,13 @@ router.post("/personal_information", personal);
 router.post("/contact_details", contact);
 router.post("/educational_details", education);
 router.post("/payment_details", payment);
+router.get("/course_name", getCourseName);
 
 // File upload route
 router.post('/research', upload.any(), async (req, res) => {
   try {
+    const client = new MongoClient(uri);
+    client.connect().then(() => console.log('MongoDB connected!'));
     const db = client.db('Student_LifeCycle');
     const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
 

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Typography, Box, Table, TableBody, TableCell,TableContainer, TableHead, TableRow, Paper, Button, TextField} from '@mui/material';
+import { Typography, Box, Table, TableBody, TableCell,TableContainer, TableHead, TableRow, Paper, 
+  IconButton, Tooltip, Button, TextField} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 const DocumentsUpload = ({ }) => {
   const documents = [
@@ -27,12 +29,18 @@ const [formData, setFormData] = useState({
     }));
   };
 
+  //Handle file selection
   const handleFileChange = (index, file) => {
-    setUploadedDocs(prev => ({
-      ...prev,
-      [index]: file
-    }));
+    if (file && file.type === "application/pdf") {
+      setUploadedDocs(prev => ({
+        ...prev,
+        [index]: file
+      }));
+    } else {
+      alert("Please upload only PDF files.");
+    }
   };
+
 
   const handleSubmit = async () => {
   
@@ -119,15 +127,20 @@ const [formData, setFormData] = useState({
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>{doc}</TableCell>
                 <TableCell>
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.png"
+                  <input  type="file" accept="application/pdf"
                     onChange={(e) => handleFileChange(idx, e.target.files[0])}
                   />
                   {uploadedDocs[idx] && (
-                    <Typography variant="caption" color="primary">
-                      {uploadedDocs[idx].name}
-                    </Typography>
+                    <Tooltip title="View uploaded PDF">
+                      <IconButton
+                        onClick={() => {
+                          const fileURL = URL.createObjectURL(uploadedDocs[idx]);
+                          window.open(fileURL, "_blank");
+                        }}
+                      >
+                        <PictureAsPdfIcon color="error" />
+                      </IconButton>
+                    </Tooltip>
                   )}
                 </TableCell>
               </TableRow>

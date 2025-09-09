@@ -155,7 +155,7 @@ const isEmpty = (val) => !val || val.trim() === "";
 
       <TextField
         label="Application No" value={formData.application_no}
-        onChange={(e) => setFormData(prev => ({ ...prev, application_no: e.target.value }))}  size="small" fullWidth   margin="dense" type="number" />
+        onChange={(e) => setFormData(prev => ({ ...prev, application_no: e.target.value }))}  size="small" fullWidth   margin="dense"  />
 
       <Box mb={3}>
         <Typography variant="h6">Father Name</Typography>

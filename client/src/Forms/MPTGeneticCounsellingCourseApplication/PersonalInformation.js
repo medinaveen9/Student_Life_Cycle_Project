@@ -138,7 +138,7 @@ const PersonalInformation = () => {
       <Typography variant="h6" gutterBottom> Personal Information </Typography>
 
       <TextField label="Application No" value={adDetails.applicationNo}
-         onChange={(e) =>handleAdDetailsChange('applicationNo', e.target.value)}   type="number"size="small"  fullWidth/>
+         onChange={(e) =>handleAdDetailsChange('applicationNo', e.target.value)} size="small"  fullWidth/>
 
       <TextField fullWidth margin="normal" label="Name"  value={adDetails.name}
         onChange={(e) => { const value = e.target.value;   if (/^[a-zA-Z\s]*$/.test(value)) {

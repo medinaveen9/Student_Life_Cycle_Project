@@ -184,6 +184,33 @@ const paymentDetails = async (formData) => {
     throw error;
   }  
 };
+
+const getSelectedCourseName = async (applicationNo) => {
+  try {
+    const adminResult = await pool.query(
+      "SELECT course_name FROM administrative_information WHERE application_no = $1",
+      [applicationNo]
+    );
+    const personalInfoResult = await pool.query(
+      "SELECT social_status FROM personal_information WHERE application_no = $1",
+      [applicationNo]
+    );
+    if (adminResult.rows.length > 0 && personalInfoResult.rows.length > 0) {
+      return { isSuccess : true, data : { courseName: adminResult.rows[0].course_name, 
+        socialStaus: personalInfoResult.rows[0].social_status } }; 
+    } else if (adminResult.rows.length <= 0) {
+      return { isSuccess : false, message : "No course found for the given application number in administrative information." };
+    } else if (personalInfoResult.rows.length <= 0) {
+      return { isSuccess : false, message : "No course found for the given application number in personal information." };
+    }
+    return { isSuccess : false, message : "No course found for the given application number." };
+  } catch (error) {
+    console.log("Failed to fetch course name", error.message);
+    throw error;
+  }  
+};
+
+
 module.exports = {
-  administrationDetails,personalInfo, contactDetails,educationDetails,paymentDetails
+  administrationDetails, personalInfo, contactDetails, educationDetails, paymentDetails, getSelectedCourseName
 };

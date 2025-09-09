@@ -86,114 +86,114 @@ import MPTReportPersonalAcademicInfo from './Forms/MasterPhysiotherapyApplicatio
 import MPTReportUploads from './Forms/MasterPhysiotherapyApplicationReport/Uploads';
 
 import GcReportPersonalAcademicInfo from './Forms/GeneticCounsellingApplicationCourseReport/GcPersonalAcademicInfo';
-import GcReportUploads from './Forms/GeneticCounsellingApplicationCourseReport/GcUploads'
+import GcReportUploads from './Forms/GeneticCounsellingApplicationCourseReport/GcUploads';
+
+//Certificates
+import SelectCertificatePage from './Forms/Certificates/SelectCertificate';
+
 const App = () => {
   const location = useLocation();
-const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({});
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <CssBaseline />
       <AppBar/>
-      <Sidebar />
+      <Box sx={{ display: 'flex', marginTop: '90px' }}>
+        <Sidebar />
+        <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh', }}>
+          <Routes location={location}>
+            <Route path="/" element={<TransferCertificate />} />
+            <Route path="/login" element={<LoginForm/>} />
+            <Route path="/nurs2y" element={<BscNursing2Year/>} />
+            <Route path="/nurs3y" element={<BscNursing3Year/>} />
+            <Route path="/nurs4y" element={<BscNursing4Year/>} />
+            <Route path="/nursingsem1" element={<NursingSemester1/>} />
+            <Route path="/bpt1" element={<BPTSemester1/>} />
+            <Route path="/bpt2" element={<BPTSemester2/>} />
+            <Route path="/bpt3" element={<BPTSemester3/>} />
+            <Route path="/bpt4" element={<BPTSemester4/>} />
+            <Route path="/bpt5" element={<BPTSemester5/>} />
+            <Route path="/bpt6" element={<BPTSemester6/>} />
+            <Route path="/bpt7" element={<BPTSemester7/>} />
+            <Route path="/bpt8" element={<BPTSemester8/>} />
+            <Route path="/nursingsem4" element={<NursingSemester4/>} />
+            <Route path="/nursingsem3" element={<NursingSemester3/>} />
+            <Route path="/nursingsem2" element={<NursingSemester2/>} />
+            <Route path="/anesthesia1" element={<AnesthesiaFirstYear/>} />
+            <Route path="/anesthesia2" element={<AnesthesiaSecondYear/>} />
+            <Route path="/mlt2" element={<MLTSecondYear/>} />
+            <Route path="/anesthesia3" element={<AnesthesiaThirdYear/>} />
+            <Route path="/mlt3" element={<MLTThirdYear/>} />
+            <Route path="/hmc1" element={<HMCFirstYearSemester1/>} />
+            <Route path="/hmc2" element={<HMCFirstYearSemester2/>} />
+            <Route path="/hmc3" element={<HMCSecondYearSemester3/>} />
+            <Route path="/hmc4" element={<HMCSecondYearSemester4/>} />
+            <Route path="/bonafide" element={<Bonafide/>}/>
+            <Route path="/int" element={<HMCInternship/>}/>
+            <Route path="/mpt1" element={<MPTFirstYear/>} />
+            <Route path="/mpt2" element={<MPTSecondYear/>} />
+            <Route path="/nmt1" element={<NMTFirstYear/>} />
+            <Route path="/nmt2" element={<NMTSecondYear/>} />
+            <Route path="/genetic" element={<GeneticCounsellingCourse/>} />
+        
+            <Route path ="/preadmission" element={<PreAdmission/>} />
+            <Route path="/onboard" element={<OnBoardingPhase/>} />
+            <Route path='/exam' element={<ExaminationAssessment/>} />
+        
+            <Route path="/administrative" element={<AdministrativeInformation/>}/>
+  
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          padding: 3,
-          height: '100vh',
-          overflowY: 'auto',
-        }}
-      >
-     report
-        <Routes location={location}>
-          <Route path="/" element={<TransferCertificate />} />
-          <Route path="/login" element={<LoginForm/>} />
-          <Route path="/nurs2y" element={<BscNursing2Year/>} />
-          <Route path="/nurs3y" element={<BscNursing3Year/>} />
-          <Route path="/nurs4y" element={<BscNursing4Year/>} />
-          <Route path="/nursingsem1" element={<NursingSemester1/>} />
-          <Route path="/bpt1" element={<BPTSemester1/>} />
-          <Route path="/bpt2" element={<BPTSemester2/>} />
-          <Route path="/bpt3" element={<BPTSemester3/>} />
-          <Route path="/bpt4" element={<BPTSemester4/>} />
-          <Route path="/bpt5" element={<BPTSemester5/>} />
-          <Route path="/bpt6" element={<BPTSemester6/>} />
-          <Route path="/bpt7" element={<BPTSemester7/>} />
-          <Route path="/bpt8" element={<BPTSemester8/>} />
-          <Route path="/nursingsem4" element={<NursingSemester4/>} />
-          <Route path="/nursingsem3" element={<NursingSemester3/>} />
-          <Route path="/nursingsem2" element={<NursingSemester2/>} />
-          <Route path="/anesthesia1" element={<AnesthesiaFirstYear/>} />
-          <Route path="/anesthesia2" element={<AnesthesiaSecondYear/>} />
-          <Route path="/mlt2" element={<MLTSecondYear/>} />
-          <Route path="/anesthesia3" element={<AnesthesiaThirdYear/>} />
-          <Route path="/mlt3" element={<MLTThirdYear/>} />
-          <Route path="/hmc1" element={<HMCFirstYearSemester1/>} />
-          <Route path="/hmc2" element={<HMCFirstYearSemester2/>} />
-          <Route path="/hmc3" element={<HMCSecondYearSemester3/>} />
-          <Route path="/hmc4" element={<HMCSecondYearSemester4/>} />
-          <Route path="/bonafide" element={<Bonafide/>}/>
-          <Route path="/int" element={<HMCInternship/>}/>
-          <Route path="/mpt1" element={<MPTFirstYear/>} />
-          <Route path="/mpt2" element={<MPTSecondYear/>} />
-          <Route path="/nmt1" element={<NMTFirstYear/>} />
-          <Route path="/nmt2" element={<NMTSecondYear/>} />
-          <Route path="/genetic" element={<GeneticCounsellingCourse/>} />
-       
-          <Route path ="/preadmission" element={<PreAdmission/>} />
-          <Route path="/onboard" element={<OnBoardingPhase/>} />
-          <Route path='/exam' element={<ExaminationAssessment/>} />
+            <Route path="/inter" element={<IntermediateDetails />}/>
+            <Route path="/academicrecord" element={<AcademicRecord />}/>
+            <Route path="/contact" element={ <ContactDetails />}/>
+            <Route path="/upload" element={<DocumentsUpload />}/>
+        
+            <Route path ="/appfee" element={<FeePaymentDetails/>} /> 
+            <Route path ="/personalinfo" element={<PersonalInformation   />} /> 
+            <Route path ="/identityverify" element={<IdentityVerification  />} /> 
+            <Route path ="/course" element={<CourseSelection />} /> 
+
+            <Route path="/academicinfo" element={<PersonalAcademicInfo/> } />
+            <Route path="/coursedetails" element={<CourseDetails/> } />
+            <Route path="/uploads" element={<Uploads/> } />
+            <Route path="/report" element={<ApplicationReport/>} />
+  {/* Certificates */}
+            <Route path ="/attendancecertificate" element={<Attendance_Certificate/>} />
+            <Route path ="/custodian" element={<Custodian/>} />
+            <Route path ="/custocerificate" element={<CustodianCertificate/>} />
+            <Route path ="/lop" element={<LossOfPay/>} />
+            <Route path ="/maternity" element={<Maternity/>} />
+            <Route path ="/maternityleave" element={<MaternityLeave/>} />
+            <Route path ="/medicalfee" element={<MedicalFeeNote/>} />
+            <Route path ="/observerattendance" element={<ObserversAttendance/>} />
+            <Route path ="/observpermisson" element={<ObserverPermission/>} />
+            <Route path ="/proadmission" element={<ProvisionalAdmission/>} />
+            <Route path ="/stipendform" element={<StipendForm/>} />
+            <Route path ="/stipendtable" element={<StipendTable/>} />
+            <Route path ="/stipendagreements" element={<StipendTableAgreements/>} />
+
+  {/* mptapplicationReport */}
+            <Route path="/mptacademicinfo" element={<MPTReportPersonalAcademicInfo/> } />   
+            <Route path="/mptuploads" element={<MPTReportUploads/> } />
+  {/* geneticcounselling application */}
+            <Route path ="/gcadministration" element ={<GCAdministrativeInformation/>} />
+            <Route path ="/gcappfee" element={<GCFeePaymentDetails/>} />
+            <Route path ="/gcpersonalinfo" element={<GCPersonalInformation />} />
       
-          <Route path="/administrative" element={<AdministrativeInformation/>}/>
- 
+            <Route path="/gcupload" element={<GCDocumentsUpload />}/>
+            <Route path="/gccontact" element={ <GCContactDetails />}/>
+            <Route path="/gceducation" element={<GCEducationalDetails />} />
+        {/* //geneticcounselling report */}
+            <Route path="/gcacademicinfo" element={<GcReportPersonalAcademicInfo/> } />   
+            <Route path="/gcuploads" element={<GcReportUploads/> } /> 
 
-          <Route path="/inter" element={<IntermediateDetails />}/>
-          <Route path="/academicrecord" element={<AcademicRecord />}/>
-          <Route path="/contact" element={ <ContactDetails />}/>
-          <Route path="/upload" element={<DocumentsUpload />}/>
-       
-          <Route path ="/appfee" element={<FeePaymentDetails/>} /> 
-          <Route path ="/personalinfo" element={<PersonalInformation   />} /> 
-          <Route path ="/identityverify" element={<IdentityVerification  />} /> 
-          <Route path ="/course" element={<CourseSelection />} /> 
+            {/* Certificates */}
+            <Route path="/selectcertificate" element={<SelectCertificatePage/>} />
 
-          <Route path="/academicinfo" element={<PersonalAcademicInfo/> } />
-          <Route path="/coursedetails" element={<CourseDetails/> } />
-          <Route path="/uploads" element={<Uploads/> } />
-          <Route path="/report" element={<ApplicationReport/>} />
-{/* Certificates */}
-          <Route path ="/attendancecertificate" element={<Attendance_Certificate/>} />
-           <Route path ="/custodian" element={<Custodian/>} />
-           <Route path ="/custocerificate" element={<CustodianCertificate/>} />
-           <Route path ="/lop" element={<LossOfPay/>} />
-           <Route path ="/maternity" element={<Maternity/>} />
-           <Route path ="/maternityleave" element={<MaternityLeave/>} />
-           <Route path ="/medicalfee" element={<MedicalFeeNote/>} />
-           <Route path ="/observerattendance" element={<ObserversAttendance/>} />
-           <Route path ="/observpermisson" element={<ObserverPermission/>} />
-           <Route path ="/proadmission" element={<ProvisionalAdmission/>} />
-           <Route path ="/stipendform" element={<StipendForm/>} />
-           <Route path ="/stipendtable" element={<StipendTable/>} />
-           <Route path ="/stipendagreements" element={<StipendTableAgreements/>} />
-
-{/* mptapplicationReport */}
-           <Route path="/mptacademicinfo" element={<MPTReportPersonalAcademicInfo/> } />   
-           <Route path="/mptuploads" element={<MPTReportUploads/> } />
- {/* geneticcounselling application */}
-          <Route path ="/gcadministration" element ={<GCAdministrativeInformation/>} />
-          <Route path ="/gcappfee" element={<GCFeePaymentDetails/>} />
-          <Route path ="/gcpersonalinfo" element={<GCPersonalInformation />} />
-    
-          <Route path="/gcupload" element={<GCDocumentsUpload />}/>
-          <Route path="/gccontact" element={ <GCContactDetails />}/>
-          <Route path="/gceducation" element={<GCEducationalDetails />} />
-      {/* //geneticcounselling report */}
-          <Route path="/gcacademicinfo" element={<GcReportPersonalAcademicInfo/> } />   
-           <Route path="/gcuploads" element={<GcReportUploads/> } /> 
-        </Routes>
-      
+          </Routes>
+        
+        </Box>
       </Box>
     </Box>
   );

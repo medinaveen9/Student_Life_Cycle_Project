@@ -9,6 +9,8 @@ const masterRoutes = require('./routes/MasterRoutes');
 const pgmedicalRoutes =require('./routes/PgMedicalRoutes');
 const bptRoutes = require('./routes/BPTRoutes');
 const loginRoutes =require('./routes/LoginRoutes');
+const certificateRoutes = require('./routes/CertificateRoute');
+
 const app = express();
 
 app.use(cookieParser());
@@ -34,6 +36,7 @@ app.use('/api/master', masterRoutes);
 app.use('/api/pgmedical', pgmedicalRoutes);
 app.use('/api/bpt', bptRoutes);
 app.use('/api/login', loginRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 app.use('/', (req, res) => { 
     res.send('API is working');

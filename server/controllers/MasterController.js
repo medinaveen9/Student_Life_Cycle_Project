@@ -1,5 +1,6 @@
 const express = require("express");
-const { administrationDetails,personalInfo, contactDetails,educationDetails,paymentDetails} = require("../services/MasterService");
+const { administrationDetails, personalInfo, contactDetails,educationDetails,
+  paymentDetails, getSelectedCourseName} = require("../services/MasterService");
 
 const administration = async (req, res) => {
   try {
@@ -83,4 +84,22 @@ const payment = async (req, res) => {
   }
 };
 
-module.exports = { administration,personal,  contact, education, payment};
+// New function to get course name by application number
+const getCourseName = async (req, res) => {
+  try {
+    const { applicationNo } = req.query;
+    const result = await getSelectedCourseName(applicationNo);
+
+    if (result.isSuccess) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(404).json({ error: result.message });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+module.exports = { administration, personal,  contact, education, payment, getCourseName};

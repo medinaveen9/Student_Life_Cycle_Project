@@ -9,8 +9,14 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const menuItems = [
-
-   
+    {
+      id: 'Certificates',
+      label: 'Certificates',
+      hasSubMenu: false,
+      subItems: [
+        { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
+      ]
+    },
       {
       id: 'Login',
       label: 'Login Page',
@@ -246,7 +252,7 @@ const Sidebar = () => {
       setExpandedMenu(expandedMenu === item.id ? null : item.id);
     }
     else{
-      handleNavigation(item.path);
+      handleNavigation(item.subItems[0].path);
     }
   };
 

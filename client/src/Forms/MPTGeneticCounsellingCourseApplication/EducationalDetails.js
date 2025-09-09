@@ -79,7 +79,7 @@ const EducationalDetails = () => {
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
          <TextField  label="Application No"  value={formData.application_no}    
-        onChange={(e) => handleChange('application_no', e.target.value)}  size="small"    fullWidth type="number" />
+        onChange={(e) => handleChange('application_no', e.target.value)}  size="small"    fullWidth  />
 
         <TextField
           label="Qualification"   value={formData.qualification}

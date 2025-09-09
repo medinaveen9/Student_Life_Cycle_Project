@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useCourse } from "../../CourseContext"; 
-import { Typography, Box, Table, TableBody, TableCell,TableContainer, TableHead, TableRow, Paper, Button, TextField,Alert } from '@mui/material';
+import { Typography, Box, Table, TableBody, TableCell,TableContainer,  IconButton, Tooltip,
+  TableHead, TableRow, Paper, Button, TextField,Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import axiosInstance from '../../components/AxiosInstance';
 
-  const DocumentsUpload = () => {
-  const { courseName,socialStatus } = useCourse();  
+const DocumentsUpload = () => {
+  
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
+  const [showUploadSection, setShowUploadSection] = useState(false);
+  const [courseName, setCourseName] = useState("");
+  const [socialStatus, setSocialStatus] = useState("OC"); // Default to OC
 
   const mptDocs = [
     'CASTE CERTIFICATE',
@@ -29,10 +35,7 @@ import axios from 'axios';
     'CASTE CERTIFICATE ',
   ];
 
-//   let documents = courseName === "MPT" ? mptDocs : gcDocs;
-//   if (socialStatus === "OC") {
-//   documents = documents.filter(doc => !doc.toLowerCase().includes("caste certificate"));
-// }
+
 const baseDocs = courseName === "MPT" ? mptDocs : gcDocs;
 
 const documents = socialStatus === "OC"
@@ -51,12 +54,41 @@ const documents = socialStatus === "OC"
     }));
   };
 
-  const handleFileChange = (index, file) => {
-    setUploadedDocs(prev => ({
-      ...prev,
-      [index]: file
-    }));
+  // on Enter key press on Application No field
+  const handleKeyDown = async (e) => { 
+    if (e.key === "Enter" && formData.application_no) {
+      try {
+        const res = await axiosInstance.get('/api/master/course_name', {
+          params: { applicationNo: formData.application_no },
+        });
+        setCourseName(res.data.courseName);  
+        setSocialStatus(res.data.socialStatus || "OC");
+        setShowUploadSection(true);
+      } catch (err) {
+          if (err.response && err.response.data.error) {
+            alert(err.response.data.error); // Show API error message
+          } else {
+            alert("Something went wrong. Try again.");
+          }
+          setCourseName("");
+          setShowUploadSection(false);
+          setSocialStatus("OC");
+      }
+    }
   };
+
+  //Handle file selection
+  const handleFileChange = (index, file) => {
+    if (file && file.type === "application/pdf") {
+      setUploadedDocs(prev => ({
+        ...prev,
+        [index]: file
+      }));
+    } else {
+      alert("Please upload only PDF files.");
+    }
+  };
+
 
 
 
@@ -127,57 +159,58 @@ const handleSubmit = async () => {
         Document Uploads for {courseName} Course
       </Typography>
 
-      <TextField
-        label="Application No"
-        value={formData.application_no}
-        onChange={(e) => handleChange('application_no', e.target.value)}
-        size="small"
-        fullWidth
-        sx={{ mb: 3 }}
-        type="number"
-      />
+      <TextField label="Application No" value={formData.application_no} onKeyDown={handleKeyDown}
+        onChange={(e) => handleChange('application_no', e.target.value)} size="small"
+        fullWidth  sx={{ mb: 3 }} />
+      {showUploadSection && (
+        <React.Fragment>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>S.No.</TableCell>
+                  <TableCell>Document Type</TableCell>
+                  <TableCell>Upload File</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map((doc, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>
+                      {doc.includes("*") ? (
+                        <Typography color="error">{doc}</Typography>
+                      ) : (
+                        doc
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <input type="file" accept="application/pdf"
+                        onChange={(e) => handleFileChange(idx, e.target.files[0])} />
+                      {uploadedDocs[idx] && (
+                        <Tooltip title="View uploaded PDF">
+                          <IconButton
+                            onClick={() => {
+                              const fileURL = URL.createObjectURL(uploadedDocs[idx]);
+                              window.open(fileURL, "_blank");
+                            }}
+                          >
+                            <PictureAsPdfIcon color="error" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>S.No.</TableCell>
-              <TableCell>Document Type</TableCell>
-              <TableCell>Upload File</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {documents.map((doc, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{idx + 1}</TableCell>
-                <TableCell>
-                  {doc.includes("*") ? (
-                    <Typography color="error">{doc}</Typography>
-                  ) : (
-                    doc
-                  )}
-                </TableCell>
-                <TableCell>
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.png"
-                    onChange={(e) => handleFileChange(idx, e.target.files[0])}
-                  />
-                  {uploadedDocs[idx] && (
-                    <Typography variant="caption" color="primary">
-                      {uploadedDocs[idx].name}
-                    </Typography>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Box sx={{ mt: 3, textAlign: 'right' }}>
-        <Button variant="contained" onClick={handleSubmit}>Submit</Button>
-      </Box>
+          <Box sx={{ mt: 3, textAlign: 'right' }}>
+            <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+          </Box>
+        </React.Fragment>
+      )}
 
     </Box>
     

@@ -78,7 +78,7 @@ const AdministrativeInformation = () => {
         <Typography variant="h6" gutterBottom>Advertisement Details</Typography>
         <TextField 
           fullWidth   margin="normal" required label="Application No." value={adDetails.application_no} 
-          onChange={(e) => handleAdDetailsChange('application_no', e.target.value)} size="small" type="number" />
+          onChange={(e) => handleAdDetailsChange('application_no', e.target.value)} size="small"  />
 
         <TextField 
           fullWidth   margin="normal" required label="Course Code"  value={adDetails.course_code} 

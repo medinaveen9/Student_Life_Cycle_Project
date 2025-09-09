@@ -78,7 +78,7 @@ const FeePaymentDetails = ({ courseName = "Genetic Counselling" }) => {
         margin="normal"
         value={paymentData.application_number}
         onChange={(e) => handleChange("application_number", e.target.value)}
-        type="number"
+        
       />
 
       <TextField
