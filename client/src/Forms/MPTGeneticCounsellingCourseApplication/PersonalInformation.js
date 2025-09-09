@@ -10,33 +10,15 @@ const PersonalInformation = () => {
   const navigate = useNavigate();
   const { courseName } = location.state || {};
  
-
   const [adDetails, setAdDetails] = useState({
-    applicationNo:'',
-    name: '',
-    fatherName: '',
-    dob: '',
-    age: '',
-    placeOfBirth: '',
-    socialStatus: '',
-    nationality: '',
-    maritalStatus: '',
-    gender: '',
-    differentlyAbled: '',
-    identificationMark1: '',
-    identificationMark2: '',
-    universityArea: '',
-    inservice: '',
-    aadhar: '',
-    fathersEmail: '',
-
-  });
+    applicationNo:'', name: '',fatherName: '',  dob: '', age: '',placeOfBirth: '', socialStatus: '',
+    nationality: '',maritalStatus: '',gender: '', differentlyAbled: '',identificationMark1: '', identificationMark2: '',
+    universityArea: '',inservice: '',aadhar: '',  fathersEmail: '', });
   // Reset context + form when component mounts (fresh form load)
   useEffect(() => {
     setSocialStatus("");   // reset global state
     setAdDetails(prev => ({ ...prev, socialStatus: "" })); // reset local state
   }, []);
-
 
   const [photoFile, setPhotoFile] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);
@@ -50,22 +32,38 @@ const PersonalInformation = () => {
 
   const handleNext = async () => {
   try {
-     if (!adDetails.applicationNo) {
-      alert("⚠️ Application Number is required.");
-      return;
+  const isEmpty = (val) => !val || val.toString().trim() === "";
+
+    const requiredFields = [
+      { field: 'applicationNo', label: 'Application Number' },
+      { field: 'name', label: 'Name' },
+      { field: 'fatherName', label: "Father's Name" },
+      { field: 'dob', label: 'Date of Birth' },
+      { field: 'age', label: 'Age' },
+      { field: 'placeOfBirth', label: 'Place of Birth' },
+      { field: 'socialStatus', label: 'Social Status' },
+      { field: 'nationality', label: 'Nationality' },
+      { field: 'maritalStatus', label: 'Marital Status' },
+      { field: 'gender', label: 'Gender' },
+      { field: 'differentlyAbled', label: 'Differently Abled' },
+      { field: 'identificationMark1', label: 'Identification Mark 1' },
+      { field: 'identificationMark2', label: 'Identification Mark 2' },
+      { field: 'universityArea', label: 'University Area' },
+      { field: 'inservice', label: 'In-service Status' },
+      { field: 'aadhar', label: 'Aadhar Number' },
+      { field: 'fathersEmail', label: "Father's Email" }
+    ];
+
+    for (let f of requiredFields) {
+      if (isEmpty(adDetails[f.field])) {
+        return alert(`⚠️ Please fill ${f.label}`);
+      }
     }
-      if (!adDetails.name) {
-      alert("⚠️  Name is required.");
-      return;
-    }
-      if (!adDetails.fatherName) {
-      alert("⚠️ Father's Name is required.");
-      return;
-    }
-       if (!adDetails.nationality) {
-      alert("⚠️ Nationality is required.");
-      return;
-    }
+   if (!photoFile) return alert("⚠️ Please upload a photograph");
+   if (photoFile.size > 50 * 1024) return alert("⚠️ Photograph must be under 50KB");
+   if (!signatureFile) return alert("⚠️ Please upload a signature");
+   if (signatureFile.size > 20 * 1024) return alert("⚠️ Signature must be under 20KB");
+
     const payload = {
       application_no: adDetails.applicationNo,
       name: adDetails.name,
@@ -87,13 +85,16 @@ const PersonalInformation = () => {
     };
 
     console.log("Payload sending:", payload);
-
-    // 1. Save personal details
+      // 1. Save personal details
     const response = await axios.post(
       "http://localhost:4000/api/master/personal_information",
       payload
     );
     console.log("Saved:", response.data);
+      if (response.data.success === false) {
+       alert(`⚠️ ${response.data.message}`);
+      return; // stop navigation
+    }
   if (photoFile && photoFile.size > 50 * 1024) {
       alert("Photograph must be under 50KB");
       return;
@@ -121,68 +122,54 @@ const PersonalInformation = () => {
         uploadForm,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-
       console.log("Upload successful:", uploadResponse.data);
     }
-
-    // 3. Move to next page
     navigate("/gccontact", { state: { course_name: courseName } });
   } catch (error) {
     console.error("Error:", error.response ? error.response.data : error.message);
-  }
+   alert(
+      error.response?.data?.message || "Something went wrong. Please try again."
+    );
+   }
 };
 
   return (
     <Box sx={{ maxWidth: "1000px",mx: "auto", mt: 10,  p: 5, border: "1px solid #ccc",color: "black",backgroundColor: "white",boxShadow: 3}} className="page-break">
-      <Typography variant="h6" gutterBottom>
-        Personal Information
-      </Typography>
-        <TextField label="Application No" value={adDetails.applicationNo}
-        onChange={(e) =>handleAdDetailsChange('applicationNo', e.target.value)}   type="number"size="small"  fullWidth/>
+      <Typography variant="h6" gutterBottom> Personal Information </Typography>
+
+      <TextField label="Application No" value={adDetails.applicationNo}
+         onChange={(e) =>handleAdDetailsChange('applicationNo', e.target.value)}   type="number"size="small"  fullWidth/>
 
       <TextField fullWidth margin="normal" label="Name"  value={adDetails.name}
         onChange={(e) => { const value = e.target.value;   if (/^[a-zA-Z\s]*$/.test(value)) {
-        handleAdDetailsChange('name', value); }
-       }} size="small"/>
-
+        handleAdDetailsChange('name', value); } }} size="small"/>
 
      <TextField fullWidth  label="Father's Name" margin="normal" value={adDetails.fatherName}
-      onChange={(e) => {  const value = e.target.value;
-        if (/^[a-zA-Z\s]*$/.test(value)) {   handleAdDetailsChange('fatherName', value);
-        }  }} size="small"/>
+        onChange={(e) => {  const value = e.target.value;
+        if (/^[a-zA-Z\s]*$/.test(value)) {   handleAdDetailsChange('fatherName', value); }  }} size="small"/>
 
-      <TextField fullWidth label="Date of Birth" type="date" margin="normal"
-        value={adDetails.dob} onChange={(e) => handleAdDetailsChange('dob', e.target.value)}
-        size="small" InputLabelProps={{ shrink: true }} />
+      <TextField fullWidth label="Date of Birth" type="date" margin="normal"value={adDetails.dob}
+        onChange={(e) => handleAdDetailsChange('dob', e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
 
       <TextField fullWidth label="Age (as on last date)" margin="normal" value={adDetails.age}
         onChange={(e) => handleAdDetailsChange('age', e.target.value)} size="small"  type="number"/>
 
       <TextField fullWidth  label="Place of Birth"  margin="normal" value={adDetails.placeOfBirth}
-        onChange={(e) => {  const value = e.target.value;
-          if (/^[a-zA-Z\s]*$/.test(value)) {
-          handleAdDetailsChange('placeOfBirth', value);
-          } }}  size="small"/>
+        onChange={(e) => {  const value = e.target.value;  
+         if (/^[a-zA-Z\s]*$/.test(value)) {handleAdDetailsChange('placeOfBirth', value);   } }}  size="small"/>
 
       <FormControl fullWidth margin="normal" size="small">
         <InputLabel>Social Status</InputLabel>
-        {/* <Select value={adDetails.socialStatus}
-          onChange={(e) => handleAdDetailsChange('socialStatus', e.target.value)}>
-          {['SC', 'ST', 'BC', 'OC'].map(status => (
-            <MenuItem key={status} value={status}>{status}</MenuItem>
-          ))}
-        </Select> */}
-        <Select
-    value={socialStatus}
-    onChange={(e) => {
+ 
+    <Select value={socialStatus}
+       onChange={(e) => {
       handleAdDetailsChange('socialStatus', e.target.value);
       setSocialStatus(e.target.value); // ✅ update context
-    }}
-  >
+      }}>
     {['SC', 'ST', 'BC', 'OC'].map(status => (
       <MenuItem key={status} value={status}>{status}</MenuItem>
     ))}
-  </Select>
+   </Select>
       </FormControl>
 
     <TextField  fullWidth  label="Nationality" margin="normal" value={adDetails.nationality}
@@ -223,9 +210,7 @@ const PersonalInformation = () => {
       </FormControl>
     <TextField fullWidth  label="Identification Mark 1"  margin="normal" value={adDetails.identificationMark1}
         onChange={(e) => { const value = e.target.value;
-        if (/^[a-zA-Z\s]*$/.test(value)) {
-        handleAdDetailsChange('identificationMark1', value);
-        }}}size="small" />
+        if (/^[a-zA-Z\s]*$/.test(value)) { handleAdDetailsChange('identificationMark1', value); }}}size="small" />
 
     <TextField  fullWidth  label="Identification Mark 2"  margin="normal"  value={adDetails.identificationMark2}
       onChange={(e) => {const value = e.target.value;
@@ -253,18 +238,14 @@ const PersonalInformation = () => {
 
       <TextField fullWidth label="Aadhar Number"margin="normal" value={adDetails.aadhar}
       onChange={(e) => { const value = e.target.value;
-        if (/^\d{0,12}$/.test(value)) {
-          handleAdDetailsChange('aadhar', value);
-         }
-        }} size="small" type="text" />
+        if (/^\d{0,12}$/.test(value)) { handleAdDetailsChange('aadhar', value);      }   }} size="small" type="text" />
 
-      <TextField fullWidth label="Father's Email" type="email" margin="normal"
-        value={adDetails.fathersEmail}
+      <TextField fullWidth label="Father's Email" type="email" margin="normal"  value={adDetails.fathersEmail}
         onChange={(e) => handleAdDetailsChange('fathersEmail', e.target.value)} size="small" />
   <Box mt={2}>
         <Typography variant="subtitle2">Upload Photograph</Typography>
        
-        <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])} />
+        <input type="file" accept="image/jpeg" onChange={(e) => setPhotoFile(e.target.files[0])} />
         {photoFile && <Typography variant="caption" color="primary">{photoFile.name}</Typography>}
       </Box>
         <Typography variant="caption" color="red">
@@ -272,7 +253,7 @@ const PersonalInformation = () => {
   </Typography>
      <Box mt={2}>
         <Typography variant="subtitle2">Upload Signature</Typography>
-        <input type="file" accept="image/*" onChange={(e) => setSignatureFile(e.target.files[0])} />
+        <input type="file" accept="image/jpeg" onChange={(e) => setSignatureFile(e.target.files[0])} />
         { signatureFile&& <Typography variant="caption" color="primary">{signatureFile.name}</Typography>}
       </Box>
    <Typography variant="caption" color="red">

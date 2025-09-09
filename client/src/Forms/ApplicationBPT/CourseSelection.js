@@ -6,7 +6,7 @@ import axiosInstance from '../../components/AxiosInstance';
 import axios from 'axios';
 
 const CourseSelection = () => {
-  const navigate = useNavigate(); // For page navigation
+  const navigate = useNavigate(); 
 
   // State to store course subject details
   const [courseSubjects, setCourseSubjects] = useState([
@@ -24,7 +24,7 @@ const CourseSelection = () => {
 
   // State to store TG EAPCET data
   const [eapcetData, setEapcetData] = useState({
-    registrationNumber: '', hallTicketNumber: '', rank: '' });
+    applicationNo: "",   registrationNumber: '', hallTicketNumber: '', rank: '' });
 
   // Update subject row data
   const handleSubjectChange = (index, field, value) => {
@@ -79,13 +79,27 @@ const CourseSelection = () => {
     }
   };
 
-  // Submit form data and navigate to next page
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const response = await axiosInstance.post("/api/bpt/course-selection",
-          { eapcetData, courseSubjects, studentRecords });
-    navigate('/academicrecord'); 
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await axiosInstance.post("/api/bpt/course-selection", {
+      eapcetData, courseSubjects,studentRecords });
+
+    if (response.data.success) {
+      navigate('/academicrecord');
+    } else {
+      alert(`⚠️ ${response.data.message}`);
+    }
+
+  } catch (error) {
+    console.error("Error submitting course:", error);
+    alert(
+      error.response?.data?.message || "Something went wrong. Please try again."
+    );
+  }
+};
+
 
   return (
     <Box sx={{maxWidth: "1000px", mx:"auto", mt:10, p:5, border:"1px solid #ccc",color:"black", backgroundColor:"white", boxShadow: 3 }} className="page-break">
@@ -96,6 +110,8 @@ const CourseSelection = () => {
 
         {/* TG EAPCET input fields */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, my: 3 }}>
+          <TextField fullWidth margin="normal" label="Application No." value={eapcetData.applicationNo}
+              onChange={(e) => setEapcetData({...eapcetData, applicationNo: e.target.value})}     size="small" />
           <TextField required label="TG EAPCET Registration Number" value={eapcetData.registrationNumber}
             onChange={(e) => setEapcetData({ ...eapcetData, registrationNumber: e.target.value })}
             size="small" fullWidth />

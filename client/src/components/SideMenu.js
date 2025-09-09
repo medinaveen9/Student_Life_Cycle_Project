@@ -10,6 +10,19 @@ const Sidebar = () => {
   const location = useLocation();
   const menuItems = [
 
+   
+      {
+      id: 'Login',
+      label: 'Login Page',
+      hasSubMenu: true,
+      subItems: [
+     
+        { id: 'LoginForm', label: 'Login Form', path: '/login'},
+       
+
+      ]
+    },
+
       {
       id: 'Application Report MPT',
       label: 'MPT Application Report ',

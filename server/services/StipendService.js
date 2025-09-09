@@ -10,3 +10,7 @@ exports.createStipend = async (data) => {
     return await collection.insertOne(data);
   }
 };
+exports.fetchAllStipends = async () => {
+  const collection = getStipendCollection();
+  return await collection.find().toArray();
+};

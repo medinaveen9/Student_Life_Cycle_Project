@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -6,14 +5,8 @@ import axios from 'axios';
 
 const EducationalDetails = () => {
   const [formData, setFormData] = useState({
-    application_no: '',
-    qualification: '',
-    marks_obtained: '',
-    total_marks: '',
-    average: '',
-    percentage: '',
-    internship_date: ''
-  });
+    application_no: '',qualification: '',marks_obtained: '',total_marks: '',
+    average: '',  percentage: '', internship_date: ''});
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -55,19 +48,26 @@ const EducationalDetails = () => {
     }
 
     try {
-      const res = await axios.post(
+      const response = await axios.post(
         "http://localhost:4000/api/master/educational_details",
         formData
       );
 
-      console.log("✅ Saved Educational Details:", res.data);
+      console.log("✅ Saved Educational Details:", response.data);
+         if (response.data.success === false) {
+  
+       alert(`⚠️ ${response.data.message}`);
+      return; // stop navigation
+    }
       navigate("/gcupload");
       
-    } catch (err) {
+    } catch (error) {
       console.error(
-        "❌ Error saving educational details:",
-        err.response?.data || err.message
+        "❌ Error saving educational details:", error.response?.data || error.message
       );
+         alert(
+      error.response?.data?.message || "Something went wrong. Please try again."
+    );
     }
   };
 
@@ -78,71 +78,30 @@ const EducationalDetails = () => {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label="Application No"
-          value={formData.application_no}
-          onChange={(e) => handleChange('application_no', e.target.value)}
-          size="small"
-          fullWidth
-          type="number"
-        />
+         <TextField  label="Application No"  value={formData.application_no}    
+        onChange={(e) => handleChange('application_no', e.target.value)}  size="small"    fullWidth type="number" />
 
         <TextField
-          label="Qualification"
-          value={formData.qualification}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (/^[a-zA-Z\s]*$/.test(value)) {
-              handleChange('qualification', value);
-            }
-          }}
-          size="small"
-          fullWidth
-        />
+          label="Qualification"   value={formData.qualification}
+          onChange={(e) => {   const value = e.target.value;
+            if (/^[a-zA-Z\s]*$/.test(value)) {handleChange('qualification', value);
+            }}} size="small"  fullWidth/>
+
+        <TextField label="Marks Obtained" value={formData.marks_obtained}
+          onChange={(e) => handleChange('marks_obtained', e.target.value)}  size="small"  fullWidth type="number"  />
+
+        <TextField label="Total Marks" value={formData.total_marks} 
+        onChange={(e) => handleChange('total_marks', e.target.value)}   size="small"   fullWidth   type="number"  />
+
+        <TextField label="Average" value={formData.average} InputProps={{ readOnly: true }}  
+        size="small"  fullWidth />
+
+        <TextField label="Percentage (%)" value={formData.percentage}
+         InputProps={{ readOnly: true }}     size="small" fullWidth/>
 
         <TextField
-          label="Marks Obtained"
-          value={formData.marks_obtained}
-          onChange={(e) => handleChange('marks_obtained', e.target.value)}
-          size="small"
-          fullWidth
-          type="number"
-        />
-
-        <TextField
-          label="Total Marks"
-          value={formData.total_marks}
-          onChange={(e) => handleChange('total_marks', e.target.value)}
-          size="small"
-          fullWidth
-          type="number"
-        />
-
-        <TextField
-          label="Average"
-          value={formData.average}
-          InputProps={{ readOnly: true }}
-          size="small"
-          fullWidth
-        />
-
-        <TextField
-          label="Percentage (%)"
-          value={formData.percentage}
-          InputProps={{ readOnly: true }}
-          size="small"
-          fullWidth
-        />
-
-        <TextField
-          label="Date of Completion of Internship"
-          type="date"
-          value={formData.internship_date}
-          onChange={(e) => handleChange('internship_date', e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          size="small"
-          fullWidth
-        />
+          label="Date of Completion of Internship" type="date" value={formData.internship_date}
+          onChange={(e) => handleChange('internship_date', e.target.value)}  InputLabelProps={{ shrink: true }}  size="small" fullWidth />
       </Box>
 
       <Box sx={{ textAlign: 'right', mt: 3 }}>

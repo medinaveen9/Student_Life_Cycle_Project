@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const FeePaymentDetails = ({ courseName = "Genetic Counselling" }) => {
   const [paymentData, setPaymentData] = useState({
-    application_number: "",
-    amount: "",
+    application_number: "", amount: "",
   });
 
   const [upiLink, setUpiLink] = useState("");

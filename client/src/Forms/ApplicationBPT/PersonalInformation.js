@@ -1,23 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {  Box, TextField,FormControl, Select,MenuItem, InputLabel,  Typography, Button} from '@mui/material';
+import { Box, TextField,FormControl, Select,MenuItem, InputLabel,  Typography, Button} from '@mui/material';
 
 const PersonalInformation = () => {
   const navigate = useNavigate();
 
   const [adDetails, setAdDetails] = useState({
-    applicationNo: '',
-    name: '',
-    fatherName: '',
-    dob: '',
-    age: '',
-    placeOfBirth: '',
-    socialStatus: '',
-    nationality: '',
-    maritalStatus: '',
-    gender: '',
-    differentlyAbled: '',
+    applicationNo: '',  name: '',fatherName: '',  dob: '',age: '',placeOfBirth: '',
+    socialStatus: '', nationality: '', maritalStatus: '', gender: '', differentlyAbled: '',
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -31,22 +22,32 @@ const PersonalInformation = () => {
   };
 
   const handleNext = async () => {
-    try {
-      // Validate application no
-      if (!adDetails.applicationNo.trim()) {
-        alert("⚠️ Please enter Application No before submitting.");
-        return;
-      }
+  try {
+  const isEmpty = (val) => !val || val.toString().trim() === "";
 
-      // Validate files
-      if (photoFile && photoFile.size > 50 * 1024) {
-        alert("Photograph must be under 50KB");
-        return;
+    const requiredFields = [
+      { field: 'applicationNo', label: 'Application Number' },
+      { field: 'name', label: 'Name' },
+      { field: 'fatherName', label: "Father's Name" },
+      { field: 'dob', label: 'Date of Birth' },
+      { field: 'age', label: 'Age' },
+      { field: 'placeOfBirth', label: 'Place of Birth' },
+      { field: 'socialStatus', label: 'Social Status' },
+      { field: 'nationality', label: 'Nationality' },
+      { field: 'maritalStatus', label: 'Marital Status' },
+      { field: 'gender', label: 'Gender' },
+      { field: 'differentlyAbled', label: 'Differently Abled' },  
+    ];
+
+    for (let f of requiredFields) {
+      if (isEmpty(adDetails[f.field])) {
+        return alert(`⚠️ Please fill ${f.label}`);
       }
-      if (signatureFile && signatureFile.size > 20 * 1024) {
-        alert("Signature must be under 20KB");
-        return;
-      }
+    }
+if (!photoFile) return alert("⚠️ Please upload a photograph");
+if (photoFile.size > 50 * 1024) return alert("⚠️ Photograph must be under 50KB");
+if (!signatureFile) return alert("⚠️ Please upload a signature");
+if (signatureFile.size > 20 * 1024) return alert("⚠️ Signature must be under 20KB");
 
       const payload = {
         application_no: adDetails.applicationNo,
@@ -69,7 +70,10 @@ const PersonalInformation = () => {
         payload
       );
       console.log("Saved:", response.data);
-
+   if (response.data.success === false) {
+       alert(`⚠️ ${response.data.message}`);
+      return; // stop navigation
+    }
       // Upload files if present
       if (photoFile || signatureFile) {
         const uploadForm = new FormData();
@@ -95,6 +99,9 @@ const PersonalInformation = () => {
       navigate("/identityverify");
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error.message);
+    alert(
+      error.response?.data?.message || "Something went wrong. Please try again."
+    );
     }
   };
 
@@ -147,7 +154,7 @@ const PersonalInformation = () => {
 
       <Box mt={2}>
         <Typography variant="subtitle1">Upload Photograph</Typography>
-        <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => setPhotoFile(e.target.files[0])} />
+        <input type="file" accept="image/jpeg" onChange={(e) => setPhotoFile(e.target.files[0])} />
         {photoFile && <Typography variant="caption" color="primary">{photoFile.name}</Typography>}
       </Box>
           <Typography variant="caption" color="red">
@@ -155,7 +162,7 @@ const PersonalInformation = () => {
         </Typography>
       <Box mt={2}>
         <Typography variant="subtitle1">Upload Applicant Signature</Typography>
-        <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => setSignatureFile(e.target.files[0])} />
+        <input type="file" accept="image/jpeg" onChange={(e) => setSignatureFile(e.target.files[0])} />
         {signatureFile && <Typography variant="caption" color="primary">{signatureFile.name}</Typography>}
       </Box>
           <Typography variant="caption" color="red">

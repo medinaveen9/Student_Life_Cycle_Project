@@ -1,64 +1,110 @@
 const {pool} =require("../models/db");
 
-//Course selection
 const administrationDetails = async (formData) => {
   try {
-    const {
-    course_name, application_no, course_code, ad_no, ad_date, date_of_entry,last_date,
-    } = formData;
+    const { course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date} = formData;
+
+    if (!application_no || !course_name) {
+      return { success: false, message: "Application No. and Course Name are required." };
+    }
+
+    // Check for duplicate application_no
+    const checkExisting = await pool.query(
+      "SELECT id FROM bpt_administrative_information WHERE application_no = $1",
+      [application_no]
+    );
+
+    if (checkExisting.rows?.length > 0) {
+      return { success: false, message: "This Application No. has already Exists." };
+    }
 
     const newUser = await pool.query(
-   "  INSERT INTO bpt_administrative_information (course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date)  VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
-   [
-     course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date
-   ]  
+      `INSERT INTO bpt_administrative_information
+        (course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+      [course_name, application_no, course_code, ad_no, ad_date, date_of_entry, last_date]
     );
-    return newUser;
+
+    if (!newUser?.rows?.length) {
+      return { success: false, message: "Failed to insert record" };
+    }
+
+    return { success: true, id: newUser.rows[0].id };
   } catch (error) {
-    console.log("Failed to insert administration", error.message);
-    throw error;
-  }  
+    console.error("Failed to insert administration:", error.message);
+    return { success: false, message: "Server error" };
+  }
 };
+
+
 
 const personalInfo = async (formData) => {
   try {
     const {
-    application_no,  name, father_name, dob, age, place_of_birth, social_status, nationality, 
-    marital_status, gender, differently_abled } = formData;
+      application_no, name, father_name, dob, age, place_of_birth, social_status,
+      nationality, marital_status, gender, differently_abled,
+   
+    } = formData;
 
-    const newUser = await pool.query(
-   "INSERT INTO bpt_personal_information (application_no,name, father_name, dob, age, place_of_birth, social_status, nationality, marital_status, gender, differently_abled)   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id",
-   [
-   application_no,  name, father_name, dob, age, place_of_birth, social_status, nationality,
-    marital_status, gender, differently_abled
-   ]
+    // Check for duplicate application_no
+    const checkExisting = await pool.query(
+      "SELECT id FROM bpt_personal_information WHERE application_no = $1",
+      [application_no]
     );
 
-    return newUser;
+    if (checkExisting.rows?.length > 0) {
+      return { success: false, message: "This Application No. already exists." };
+    }
+
+    const newUser = await pool.query(
+      `INSERT INTO bpt_personal_information 
+      (application_no, name, father_name, dob, age, place_of_birth, social_status, nationality, marital_status, gender, differently_abled)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      RETURNING id`,
+      [
+        application_no, name, father_name, dob, age, place_of_birth, social_status,
+        nationality, marital_status, gender, differently_abled,
+     
+      ]
+    );
+
+    return { success: true, id: newUser.rows[0].id, message: "Personal information saved successfully." };
+
   } catch (error) {
-    console.log("Failed to insert personalinfo", error.message);
-    throw error;
-  }  
+    console.error("Failed to insert personal info:", error.message);
+    return { success: false, message: "Server error. Please try again." };
+  }
 };
+
 const identityInfo = async (formData) => {
   try {
     const {
-      application_no,id_mark_1, id_mark_2, driving_license, passport_number,in_service,aadhar} 
-      = formData;
+      application_no,id_mark_1,id_mark_2, driving_license,passport_number,in_service,aadhar
+      } = formData;
 
-    const newUser = await pool.query(
-      `INSERT INTO bpt_identity_verification 
-        (application_no,id_mark_1, id_mark_2, driving_license, passport_number, in_service, aadhar)
-       VALUES ($1, $2, $3, $4, $5, $6,$7)   RETURNING id`,
-      [application_no,id_mark_1, id_mark_2, driving_license, passport_number, in_service, aadhar]
+    const checkExisting = await pool.query(
+      "SELECT id FROM bpt_identity_verification WHERE application_no = $1",
+      [application_no]
     );
 
-    return newUser;
+    if (checkExisting.rows?.length > 0) {
+      return { success: false, message: "This Application No. already exists." };
+    }
+    // Insert new record
+    const result = await pool.query(
+      `INSERT INTO bpt_identity_verification 
+        (application_no, id_mark_1, id_mark_2, driving_license, passport_number, in_service, aadhar)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)  RETURNING id`,
+      [application_no, id_mark_1, id_mark_2, driving_license, passport_number, in_service, aadhar]
+    );
+
+    return { success: true, id: result.rows[0].id };
   } catch (err) {
     console.error("Failed to insert identity verification:", err.message);
-    throw err;
+    return { success: false, message: "Database error. Please try again." };
   }
 };
+
 const contactDetails = async (formData) => {
   try {
     // Destructure formData
@@ -80,6 +126,14 @@ const contactDetails = async (formData) => {
       perm_address, perm_country, perm_state, perm_district, perm_pin_code, perm_mobile, perm_email,
        other_info,
     ];
+ const checkExisting = await pool.query(
+      "SELECT id FROM bpt_contact_details WHERE application_no = $1",
+      [application_no]
+    );
+
+    if (checkExisting.rows?.length > 0) {
+      return { success: false, message: "This Application No. already exists." };
+    }
 
     const result = await pool.query(
       `INSERT INTO bpt_contact_details (
@@ -95,11 +149,13 @@ const contactDetails = async (formData) => {
          $20, $21,$22,$23,$24,$25,$26,$27 ,$28)RETURNING id`,
        values
     );
-if (result.rows && result.rows.length > 0) {
-    console.log("✅ Inserted ID:", result.rows[0].id);
-  return result;
-}
-return null;
+
+    if (result.rows && result.rows.length > 0) {
+      console.log("✅ Inserted ID:", result.rows[0].id);
+      return { success: true, id: result.rows[0].id };
+    }
+
+    return null;
   } catch (err) {
     console.error("Failed to insert contact:", err);
     throw err;
@@ -109,16 +165,27 @@ return null;
 const courseSelectionService = async (courseData) => {
     try{
         const { eapcetData, studentRecords, courseSubjects } = courseData;
-        const { registrationNumber, hallTicketNumber, rank } = eapcetData;
+        const {applicationNo, registrationNumber, hallTicketNumber, rank } = eapcetData;
         // Insert into bpt_course_selection table
 
+  const checkExisting = await pool.query(
+      "SELECT id FROM bpt_course_selection WHERE application_no = $1",
+      [applicationNo]
+    );
+
+    if (checkExisting.rows.length > 0) {
+      return {
+        success: false,
+        message: "This Application No. already exists.",
+      };
+    }
         const query = `
             INSERT INTO bpt_course_selection
-            (reg_no, hall_ticket, rank, course_subjects, student_records)
-            VALUES ($1, $2, $3, $4, $5)
+            (application_no,reg_no, hall_ticket, rank, course_subjects, student_records)
+            VALUES ($1, $2, $3, $4, $5,$6)
             RETURNING *;
         `;
-        const values = [registrationNumber, hallTicketNumber, rank, 
+        const values = [applicationNo,registrationNumber, hallTicketNumber, rank, 
             JSON.stringify(courseSubjects),   // Convert to JSON
             JSON.stringify(studentRecords)    // Convert to JSON
         ];
@@ -143,7 +210,53 @@ const courseSelectionService = async (courseData) => {
         };
     }
 };
+const getApplicationByNoService = async (applicationNo) => {
+  try {
+    // query each table
+    const administration = await pool.query(
+      "SELECT * FROM bpt_administrative_information WHERE application_no = $1",
+      [applicationNo]
+    );
+    const personal = await pool.query(
+      "SELECT * FROM bpt_personal_information WHERE application_no = $1",
+      [applicationNo]
+    );
+    const identity = await pool.query(
+      "SELECT * FROM bpt_identity_verification WHERE application_no = $1",
+      [applicationNo]
+    );
+    const contact = await pool.query(
+      "SELECT * FROM bpt_contact_details WHERE application_no = $1",
+      [applicationNo]
+    );
+    const courseSelection = await pool.query(
+      "SELECT * FROM bpt_course_selection WHERE application_no = $1",
+      [applicationNo]
+    );
+
+    if (
+      administration.rows.length === 0 &&
+      personal.rows.length === 0 &&
+      contact.rows.length === 0
+    ) {
+      return null; // no record found
+    }
+
+    return {
+      application_no: applicationNo,
+      administration: administration.rows[0] || null,
+      personal: personal.rows[0] || null,
+      identity: identity.rows[0] || null,
+      contact: contact.rows[0] || null,
+      courseSelection: courseSelection.rows[0] || null,
+    };
+  } catch (error) {
+    console.error("Error fetching application:", error.message);
+    throw error;
+  }
+};
 
 module.exports = {
-  courseSelectionService,administrationDetails,personalInfo,identityInfo,contactDetails
+  courseSelectionService,administrationDetails,personalInfo,identityInfo,contactDetails,
+    getApplicationByNoService 
 };

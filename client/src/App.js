@@ -5,6 +5,7 @@ import  { useState } from 'react';
 
 import AppBar from './components/AppBar';
 import Sidebar from './components/SideMenu';
+import LoginForm from './Forms/LoginPage/LoginForm'
 import TransferCertificate from './Forms/Certificates/TransferCertificate';
 import Bonafide from './Forms/Certificates/Bonafide';
 import BscNursing2Year from './Forms/BscNursingForms/BscNursing2Year';
@@ -49,6 +50,8 @@ import CourseSelection from './Forms/ApplicationBPT/CourseSelection';
 import ContactDetails from './Forms/ApplicationBPT/ContactDetails';
 import OnBoardingPhase from './Forms/ApplicalPgMedicalStudents/OnBoardingPhase'
 import DocumentsUpload from './Forms/ApplicationBPT/DocumentsUpload';
+import ApplicationReport from './Forms/ApplicationBPT/ApplicationReport'
+
 
 import PreAdmission from './Forms/ApplicalPgMedicalStudents/PreAdmission'
 import ExaminationAssessment from './Forms/ApplicalPgMedicalStudents/ExaminationAssessment';
@@ -103,9 +106,10 @@ const [formData, setFormData] = useState({});
           overflowY: 'auto',
         }}
       >
-     
+     report
         <Routes location={location}>
           <Route path="/" element={<TransferCertificate />} />
+          <Route path="/login" element={<LoginForm/>} />
           <Route path="/nurs2y" element={<BscNursing2Year/>} />
           <Route path="/nurs3y" element={<BscNursing3Year/>} />
           <Route path="/nurs4y" element={<BscNursing4Year/>} />
@@ -158,6 +162,7 @@ const [formData, setFormData] = useState({});
           <Route path="/academicinfo" element={<PersonalAcademicInfo/> } />
           <Route path="/coursedetails" element={<CourseDetails/> } />
           <Route path="/uploads" element={<Uploads/> } />
+          <Route path="/report" element={<ApplicationReport/>} />
 {/* Certificates */}
           <Route path ="/attendancecertificate" element={<Attendance_Certificate/>} />
            <Route path ="/custodian" element={<Custodian/>} />
@@ -195,4 +200,3 @@ const [formData, setFormData] = useState({});
 };
 
 export default App;
-

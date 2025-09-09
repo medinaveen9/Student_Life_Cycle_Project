@@ -13,3 +13,11 @@ exports.submitStipend = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getAllStipends = async (req, res) => {
+  try {
+    const stipends = await stipendService.fetchAllStipends();
+    res.json({ success: true, data: stipends });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};

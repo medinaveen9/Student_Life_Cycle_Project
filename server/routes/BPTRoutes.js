@@ -6,7 +6,9 @@ const express = require('express');
 const router = express.Router();
 const { getAllUploadedFiles, streamFile } = require("../controllers/UploadsController");
 
-const {administration, personal, contact, education,identity,courseSelectionController} = require("../controllers/BPTController");
+const {administration, personal, contact, education,identity,courseSelectionController,
+    getApplicationByNo
+} = require("../controllers/BPTController");
 
 
 
@@ -24,7 +26,8 @@ router.post("/bpt_personal_information", personal);
 router.post("/bpt_identity_verification", identity);
 router.post("/bpt_contact_details", contact);
 router.post("/educational_details", education);
-
+//added on 4/9
+router.get("/application/:applicationNo", getApplicationByNo);
 
 router.post("/course-selection", courseSelectionController);
 

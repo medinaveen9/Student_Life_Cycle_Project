@@ -1,15 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config(); 
+const cookieParser = require('cookie-parser');
 
 const { connectToMongo } = require('./models/db');
 const stipendRoutes = require('./routes/StipendRoutes');
 const masterRoutes = require('./routes/MasterRoutes');
 const pgmedicalRoutes =require('./routes/PgMedicalRoutes');
 const bptRoutes = require('./routes/BPTRoutes');
-
+const loginRoutes =require('./routes/LoginRoutes');
 const app = express();
 
+app.use(cookieParser());
 // Middleware
 const allowedOrigins = ['http://localhost', 'http://localhost:3000',];
 
@@ -26,10 +28,12 @@ app.use(cors({
 
 app.use(express.json()); // to parse JSON bodies
 
+
 app.use('/api/stipend', stipendRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/pgmedical', pgmedicalRoutes);
 app.use('/api/bpt', bptRoutes);
+app.use('/api/login', loginRoutes);
 
 app.use('/', (req, res) => { 
     res.send('API is working');
