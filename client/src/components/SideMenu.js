@@ -23,7 +23,9 @@ const Sidebar = () => {
       hasSubMenu: true,
       subItems: [
      
-        { id: 'LoginForm', label: 'Login Form', path: '/login'},
+        { id: 'LoginForm', label: 'Login Form',  path: '/login'},
+        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
+        { id: 'ApproverDashboard' , label:'Approver Dashboard', path:'/approver'}
        
 
       ]

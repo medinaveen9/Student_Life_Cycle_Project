@@ -5,7 +5,10 @@ import  { useState } from 'react';
 
 import AppBar from './components/AppBar';
 import Sidebar from './components/SideMenu';
-import LoginForm from './Forms/LoginPage/LoginForm'
+
+import LoginForm from './Forms/LoginPage/LoginForm';
+import CheckerDashboard from './Forms/LoginPage/CheckerDashboard';
+import ApproverDashboard from './Forms/LoginPage/ApproverDashboard';
 import TransferCertificate from './Forms/Certificates/TransferCertificate';
 import Bonafide from './Forms/Certificates/Bonafide';
 import BscNursing2Year from './Forms/BscNursingForms/BscNursing2Year';
@@ -103,8 +106,16 @@ const App = () => {
         <Sidebar />
         <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh', }}>
           <Routes location={location}>
+
+
+            
             <Route path="/" element={<TransferCertificate />} />
+
+    {/* login page*/}
             <Route path="/login" element={<LoginForm/>} />
+            <Route path="/checker" element ={<CheckerDashboard/>} />
+            <Route path="/approver" element={<ApproverDashboard/>} />
+
             <Route path="/nurs2y" element={<BscNursing2Year/>} />
             <Route path="/nurs3y" element={<BscNursing3Year/>} />
             <Route path="/nurs4y" element={<BscNursing4Year/>} />
@@ -158,7 +169,7 @@ const App = () => {
             <Route path="/coursedetails" element={<CourseDetails/> } />
             <Route path="/uploads" element={<Uploads/> } />
             <Route path="/report" element={<ApplicationReport/>} />
-  {/* Certificates */}
+    {/* Certificates */}
             <Route path ="/attendancecertificate" element={<Attendance_Certificate/>} />
             <Route path ="/custodian" element={<Custodian/>} />
             <Route path ="/custocerificate" element={<CustodianCertificate/>} />
@@ -173,10 +184,10 @@ const App = () => {
             <Route path ="/stipendtable" element={<StipendTable/>} />
             <Route path ="/stipendagreements" element={<StipendTableAgreements/>} />
 
-  {/* mptapplicationReport */}
+    {/* mptapplicationReport */}
             <Route path="/mptacademicinfo" element={<MPTReportPersonalAcademicInfo/> } />   
             <Route path="/mptuploads" element={<MPTReportUploads/> } />
-  {/* geneticcounselling application */}
+    {/* geneticcounselling application */}
             <Route path ="/gcadministration" element ={<GCAdministrativeInformation/>} />
             <Route path ="/gcappfee" element={<GCFeePaymentDetails/>} />
             <Route path ="/gcpersonalinfo" element={<GCPersonalInformation />} />
@@ -184,11 +195,11 @@ const App = () => {
             <Route path="/gcupload" element={<GCDocumentsUpload />}/>
             <Route path="/gccontact" element={ <GCContactDetails />}/>
             <Route path="/gceducation" element={<GCEducationalDetails />} />
-        {/* //geneticcounselling report */}
+    {/* //geneticcounselling report */}
             <Route path="/gcacademicinfo" element={<GcReportPersonalAcademicInfo/> } />   
             <Route path="/gcuploads" element={<GcReportUploads/> } /> 
 
-            {/* Certificates */}
+    {/* Certificates */}
             <Route path="/selectcertificate" element={<SelectCertificatePage/>} />
 
           </Routes>
