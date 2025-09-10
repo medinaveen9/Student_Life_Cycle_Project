@@ -4,7 +4,6 @@ const { createToken } = require("../config/VerifyToken");
 const userLogin = async (req, res) => {
   try {
     const { userId, password, role } = req.body;
-    console.log("Login attempt:", { userId, role });
 
     const result = await userAuthentication({ userId, password, role });
     console.log("Authentication result:", result);
@@ -24,8 +23,6 @@ const userLogin = async (req, res) => {
 };
 
 const verifyUser = async (req, res) => {
-  // req.user contains data from JWT (userId, role, etc.)
-  console.log("Verified user:", req.user);
   res.status(200).json({ user: req.user });
 };
 

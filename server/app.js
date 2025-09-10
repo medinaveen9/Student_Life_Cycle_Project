@@ -36,7 +36,7 @@ app.use('/api/stipend', stipendRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/pgmedical', pgmedicalRoutes);
 app.use('/api/bpt', bptRoutes);
-app.use('/api/login', loginRoutes);
+app.use('/api/user', loginRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/checker', checkerRoutes);
 app.use('/api/file', fileRoutes);
@@ -47,6 +47,5 @@ app.use('/', (req, res) => {
 
 
 app.listen(process.env.PORT, '0.0.0.0', async () => {
-       await connectToMongo();
     console.log(`Server is Running Successfully on Port ${process.env.PORT}`);
 });

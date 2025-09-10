@@ -17,6 +17,7 @@ const LoginForm = () => {
   };
 
   const navigate = useNavigate();
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -27,7 +28,7 @@ const LoginForm = () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/login",
+        "http://localhost:4000/api/user/login",
         formData,
         { withCredentials: true }
       );
