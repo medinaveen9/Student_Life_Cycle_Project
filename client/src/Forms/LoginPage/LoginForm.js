@@ -4,20 +4,18 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import "../../styles/RegistrationForm.css";
+import axiosInstance from '../../components/AxiosInstance';
 
-const LoginForm = ({selectedRole, setSelectedRole}) => {
+const LoginForm = ({ setUser}) => {
+
   const [formData, setFormData] = useState({ userId: '', password: '', role: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null); 
   
-
+  // Handle input changes
   const handleChange = (e) => {
     const name = e.target.name;
-    if (name === 'role') {
-      setSelectedRole(e.target.value);
-    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -29,22 +27,20 @@ const LoginForm = ({selectedRole, setSelectedRole}) => {
     setError('');
     if (!formData.userId.trim()) return setError('User ID required');
     if (!formData.password.trim()) return setError('Password required');
-    if (!formData.role) return setError('Please select a role');
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/user/login",
-        formData,
-        { withCredentials: true }
-      );
-      console.log("Login success response:", res.data);
-      alert("Login successful");
-      if(selectedRole === "Maker") {
+      const res = await axiosInstance.post("/api/user/login", formData, { withCredentials: true } );
+      setUser(res.data.user);
+      const resRole = res?.data?.user?.role;
+      if(resRole === "student") {
         navigate("/selectcertificate");
-      } else if(selectedRole === "Checker") {
+      } else if(resRole === "Checker") {
         navigate("/checker");
-      } else if(selectedRole === "Approver") {
+      } else if(resRole === "Approver") {
+        navigate("/approver");
+      }
+      else if(resRole === "Maker") {
         navigate("/approver");
       }
     } catch (err) {
@@ -62,8 +58,7 @@ const LoginForm = ({selectedRole, setSelectedRole}) => {
 
   const verifyUser = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/login/verify", { withCredentials: true });
-      console.log("Logged-in user:", res.data.user);
+      const res = await axiosInstance.get("/api/login/verify", { withCredentials: true });
       setUser(res.data.user);
     } catch (err) {
       console.log("User not logged in or cookie invalid");
@@ -103,12 +98,6 @@ const LoginForm = ({selectedRole, setSelectedRole}) => {
             required
             InputProps={inputProps}
           />
-          <TextField select label="Role" name="role" fullWidth value={formData.role} onChange={handleChange} required>
-            <MenuItem value="Maker">Maker</MenuItem>
-            <MenuItem value="Checker">Checker</MenuItem>
-            <MenuItem value="Approver">Approver</MenuItem>
-          </TextField>
-
           <Button type="submit" variant="contained" fullWidth sx={{ backgroundColor: "#4b1d77", color: "white", textTransform: "initial", fontSize: "18px" }}>
             Login
           </Button>

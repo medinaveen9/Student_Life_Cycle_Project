@@ -4,7 +4,7 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SideMenu.css";
 
-const Sidebar = ({selectedRole}) => {
+const Sidebar = ({user}) => {
   const [expandedMenu, setExpandedMenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,7 +13,7 @@ const Sidebar = ({selectedRole}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: false,
-      role: ["Maker"],
+      role: ["student"],
       subItems: [
         { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
       ]
@@ -279,7 +279,7 @@ const Sidebar = ({selectedRole}) => {
         <List>
           {menuItems.map((item) => (
             <React.Fragment key={item.id}>
-              {(item.role && item.role.includes(selectedRole)) && (
+              {(item.role && item.role.includes(user?.role)) && (
                 <React.Fragment>
                   <ListItem button onClick={() => handleMenuClick(item)} selected={!item.hasSubMenu && isActive(item.path) || 
                     (item.hasSubMenu && item.subItems.some(sub => isActive(sub.path)))} className = "listitem_hover"

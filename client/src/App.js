@@ -99,18 +99,14 @@ const App = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState('');
-  const [selectedRole, setSelectedRole] = useState('');
 
   // Axios instance to verify user
   const verifyUser = async () => {
     try {
       const res = await axiosInstance.get('/api/user/verify');
-      setUser(res.data?.user?.userId);
-      setSelectedRole(res.data?.user?.role || "");
+      setUser(res.data?.user);
     } catch (error) {
       setUser(null);
-      setSelectedRole('');
       navigate('/login');
       console.log("User is not logged in");
     }
@@ -118,8 +114,10 @@ const App = () => {
 
   // Re-verify user on route change
   useEffect(() => { 
-    verifyUser();
-  }, [location.pathname]);
+    if(window.location.pathname !== '/login')  {
+      verifyUser();
+    }
+  }, [window.location.pathname]);
 
   return (
     <Suspense fallback={
@@ -128,14 +126,14 @@ const App = () => {
       </Box>}>
       {isRegistration ? (
         <Routes>
-          <Route path="/login" element={<LoginForm selectedRole = {selectedRole} setSelectedRole = {setSelectedRole}/>} />
+          <Route path="/login" element={<LoginForm setUser = {setUser} />} />
         </Routes>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <CssBaseline />
-          <AppBar />
+          <AppBar user = {user}/>
           <Box sx={{ display: 'flex', marginTop: '90px' }}>
-            <Sidebar selectedRole = {selectedRole}/>
+            <Sidebar user = {user}/>
             <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                 <Routes location={location}>
                   <Route path="/" element={<TransferCertificate />} />

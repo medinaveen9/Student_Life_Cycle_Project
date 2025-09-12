@@ -18,6 +18,7 @@ router.post("/educational_details", education);
 router.post("/payment_details", payment);
 router.get("/course_name", getCourseName);
 
+
 // File upload route
 router.post('/research', upload.any(), async (req, res) => {
   try {

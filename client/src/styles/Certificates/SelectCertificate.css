@@ -2,6 +2,7 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 20px !important;
+    width : 80% !important;
 }
 .sub_study_main{
     font-size: 25px !important;
