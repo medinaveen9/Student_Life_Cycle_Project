@@ -224,7 +224,7 @@ const App = () => {
                   <Route path="/gcuploads" element={<GcReportUploads />} />
 
                   {/* Certificates */}
-                  <Route path="/selectcertificate" element={<SelectCertificatePage />} />
+                  <Route path="/selectcertificate" element={<SelectCertificatePage user = {user}/>} />
                 </Routes>
               
             </Box>

@@ -42,7 +42,7 @@ const certificateForms = {
     ],
 };
 
-export default function SelectCertificate() {
+export default function SelectCertificate({user}) {
     const [selected, setSelected] = useState(""); // selected certificate type
     const [formData, setFormData] = useState({});
     const fetchOnce = useRef(false);
