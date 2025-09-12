@@ -4,6 +4,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CommentIcon from "@mui/icons-material/Comment";
 import "../../styles/Dashboard/CheckerDashboard.css";
+import axiosInstance from "../../components/AxiosInstance";
 
 const CheckerDashboard = () => {
   const [projectsData, setProjectsData] = useState([]);
@@ -18,6 +19,7 @@ const CheckerDashboard = () => {
     setOpenCommentsDialog(true);
   };
 
+  // Function to handle opening PDF in a new tab
   const handleOpenPdf = (formId) => {
     if (formId) {
       window.open(`http://localhost:4000/api/file/view/${formId}?name=certificate`, "_blank" );
@@ -26,17 +28,20 @@ const CheckerDashboard = () => {
     }
   };
 
+  // Fetch data from the backend API
   useEffect(() => {
     const fetchData = async () => {
-      try { const response = await fetch("http://localhost:4000/api/checker");
-        const data = await response.json();
-        setProjectsData(data);
+      try {
+        const response = await axiosInstance.get("http://localhost:4000/api/checker");
+        setProjectsData(response.data); // Axios gives parsed data here
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
+
     fetchData();
   }, []);
+
 
   const handleOpenDialog = (item) => {
     setCurrentItem(item);
@@ -47,18 +52,18 @@ const CheckerDashboard = () => {
 
   const handleSubmit = async () => {
     if (!currentItem) return;
+
     try {
-      const response = await fetch(`http://localhost:4000/api/checker/certificate/${currentItem.id}/check`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ comment, status })
-        }
+      const response = await axiosInstance.put(
+        `http://localhost:4000/api/checker/certificate/${currentItem.id}/check`,
+        { comment, status } // payload goes directly here
       );
-      const updatedItem = await response.json();
+
+      const updatedItem = response.data; // Axios auto-parses JSON
       setProjectsData((prev) =>
         prev.map((p) => (p.id === updatedItem.id ? updatedItem : p))
       );
+
       setOpenDialog(false);
     } catch (error) {
       console.error("Error updating certificate request:", error);
@@ -97,9 +102,7 @@ const CheckerDashboard = () => {
         <Typography className="no_data">No data available</Typography>
       )}
 
-      <Dialog
-        open={openCommentsDialog}
-        onClose={() => setOpenCommentsDialog(false)}  >
+      <Dialog open={openCommentsDialog} onClose={() => setOpenCommentsDialog(false)}  maxWidth="md" fullWidth>
         <DialogTitle>Approver Comments</DialogTitle>
         <DialogContent dividers>
           <Typography>  {currentItem?.approver_comments || "No comments available"} </Typography>
@@ -107,7 +110,7 @@ const CheckerDashboard = () => {
         <DialogActions>  <Button onClick={() => setOpenCommentsDialog(false)}>Close</Button> </DialogActions>
       </Dialog>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Approval</DialogTitle>
         <DialogContent>
           <TextField  label="Comment" fullWidth multiline minRows={3}
@@ -129,4 +132,4 @@ const CheckerDashboard = () => {
   );
 };
 
-export default CheckerDashboard;
+export default React.memo(CheckerDashboard);

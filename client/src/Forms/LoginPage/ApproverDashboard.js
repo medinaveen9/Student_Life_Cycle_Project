@@ -4,6 +4,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CommentIcon from '@mui/icons-material/Comment';
 import "../../styles/Dashboard/CheckerDashboard.css";
+import axiosInstance from "../../components/AxiosInstance";
 
 const ApproverDashboard = () => {
   const [projectsData, setProjectsData] = useState([]);
@@ -35,9 +36,9 @@ const ApproverDashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try { const response = await fetch("http://localhost:4000/api/checker");
-        const data = await response.json();
-        setProjectsData(data);
+      try {
+        const response = await axiosInstance.get("http://localhost:4000/api/checker");
+        setProjectsData(response.data);  // axios parses JSON automatically
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -45,18 +46,15 @@ const ApproverDashboard = () => {
     fetchData();
   }, []);
 
+
   const handleSubmit = async () => {
     try {
-      const response = await fetch(
+      const response = await axiosInstance.put(
         `http://localhost:4000/api/checker/certificate/${currentItem.id}/approve`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ comment, status })
-        }
+        { comment, status } // send payload directly
       );
 
-      const updatedItem = await response.json();
+      const updatedItem = response.data; // axios auto-parses JSON
       setProjectsData(prev =>
         prev.map(p => (p.id === updatedItem.id ? updatedItem : p))
       );
@@ -66,6 +64,7 @@ const ApproverDashboard = () => {
       console.error("Error updating certificate request:", error);
     }
   };
+
 
   return (
     <Box className="dashboard_main">
@@ -99,7 +98,7 @@ const ApproverDashboard = () => {
       ) : (
         <Typography className="no_data">No data available</Typography>
       )}
-      <Dialog open={openCheckerDialog} onClose={() => setOpenCheckerDialog(false)}>
+      <Dialog open={openCheckerDialog} onClose={() => setOpenCheckerDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Checker Comments</DialogTitle>
         <DialogContent dividers>
           <Typography> {currentItem?.checker_comments || "No comments available"}</Typography>
@@ -107,7 +106,7 @@ const ApproverDashboard = () => {
         <DialogActions> <Button onClick={() => setOpenCheckerDialog(false)}>Close</Button></DialogActions>
       </Dialog>
 
-      <Dialog open={openApprovalDialog} onClose={() => setOpenApprovalDialog(false)}>
+      <Dialog open={openApprovalDialog} onClose={() => setOpenApprovalDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Approval</DialogTitle>
         <DialogContent>
           <TextField  label="Comment" fullWidth  multiline minRows={3} value={comment}

@@ -4,7 +4,7 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SideMenu.css";
 
-const Sidebar = () => {
+const Sidebar = ({selectedRole}) => {
   const [expandedMenu, setExpandedMenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,67 +13,65 @@ const Sidebar = () => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: false,
+      role: ["Maker"],
       subItems: [
         { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
       ]
     },
-      {
-      id: 'Login',
-      label: 'Login Page',
+    {
+      id: 'Certificates',
+      label: 'Certificates',
       hasSubMenu: true,
+      role: ["Approver"],
       subItems: [
-     
-        { id: 'LoginForm', label: 'Login Form',  path: '/login'},
-        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
         { id: 'ApproverDashboard' , label:'Approver Dashboard', path:'/approver'}
-       
-
       ]
     },
+    
+    {
+    id: 'Application Report MPT',
+    label: 'MPT Application Report ',
+    hasSubMenu: true,
+    subItems: [
+    
+      { id: 'Personal&AcademicInfo', label: 'Personal & Academic Info', path: '/mptacademicinfo'},
+      { id: 'Uploaded Documents', label: 'Uploaded Documents', path: '/mptuploads' },   
 
-      {
-      id: 'Application Report MPT',
-      label: 'MPT Application Report ',
-      hasSubMenu: true,
-      subItems: [
-     
-        { id: 'Personal&AcademicInfo', label: 'Personal & Academic Info', path: '/mptacademicinfo'},
-        { id: 'Uploaded Documents', label: 'Uploaded Documents', path: '/mptuploads' },   
+    ]
+  },
 
-      ]
-    },
+  {
+    id:  'Genetic Counselling Course Report ',
+    label: 'M.Sc Genetic Counselling Report ',
+    hasSubMenu: true,
+    subItems: [
+    
+      { id: 'Personal&AcademicInfo', label: 'Personal & Academic Info', path: '/gcacademicinfo'},
+      { id: 'Uploaded Documents', label: 'Uploaded Documents', path: '/gcuploads' },   
 
- {
-      id:  'Genetic Counselling Course Report ',
-      label: 'M.Sc Genetic Counselling Report ',
-      hasSubMenu: true,
-      subItems: [
-     
-        { id: 'Personal&AcademicInfo', label: 'Personal & Academic Info', path: '/gcacademicinfo'},
-        { id: 'Uploaded Documents', label: 'Uploaded Documents', path: '/gcuploads' },   
-
-      ]
-    },
-      { 
-
-      id:'Genetic Counselling Course Application ',
-      label:'MPT & M.SC GC Application',
-      hasSubMenu:true,
-      subItems: [
-        {id: 'AdministrativeInformation', label: 'Administrative Information', path: '/gcadministration' },
-        {id:'FeePaymentDetails' ,label:'Fee Payment Details', path:'/gcappfee' },
-        {id:'PersonalInformation' ,label:'Personal Information', path:'/gcpersonalinfo' },
-        {id:'ContactDetails' ,label:'Contact Details', path:'/gccontact' },
-        {id:'EducationalDetails' , label:' Educational Details',path:'/gceducation' },
-        {id:'DocumentsUpload' ,label:'Documents Upload', path:'/gcupload' },
-         
-      ]
-    },
+    ]
+  },
+  { 
+    id:'Genetic Counselling Course Application ',
+    label:'MPT & M.SC GC Application',
+    hasSubMenu:true,
+    role: ["Checker"],
+    subItems: [
+      {id: 'AdministrativeInformation', label: 'Administrative Information', path: '/gcadministration' },
+      {id:'FeePaymentDetails' ,label:'Fee Payment Details', path:'/gcappfee' },
+      {id:'PersonalInformation' ,label:'Personal Information', path:'/gcpersonalinfo' },
+      {id:'ContactDetails' ,label:'Contact Details', path:'/gccontact' },
+      {id:'EducationalDetails' , label:' Educational Details',path:'/gceducation' },
+      {id:'DocumentsUpload' ,label:'Documents Upload', path:'/gcupload' },
+        
+    ]
+  },
 
     {
       id: 'ApplicationFormBPT',
       label: 'Bachelor of Physiotherapy Application',
       hasSubMenu: true,
+      role: ["Checker"],
       subItems: [
        
         {id:'AdministrativeInformation' ,label:'Administrative Information', path:'/administrative' },
@@ -86,6 +84,15 @@ const Sidebar = () => {
         {id:'AcademicRecord' ,label:'Academic Record', path:'/academicrecord' }, 
         {id:'DocumentsUpload' ,label:'Documents Upload', path:'/upload' },
         {id:'ApplicationReport' ,label:'Application Report', path:'/report' },
+      ]
+    },
+    {
+      id: 'Certificates',
+      label: 'Certificates',
+      hasSubMenu: true,
+      role: ["Checker"],
+      subItems: [
+        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
       ]
     },
     {
@@ -272,24 +279,29 @@ const Sidebar = () => {
         <List>
           {menuItems.map((item) => (
             <React.Fragment key={item.id}>
-              <ListItem button onClick={() => handleMenuClick(item)} selected={!item.hasSubMenu && isActive(item.path) || 
-                  (item.hasSubMenu && item.subItems.some(sub => isActive(sub.path)))} className = "listitem_hover"
-              >
-                <ListItemText primary={item.label} className = "listitem_label" />
-                  {item.hasSubMenu && ( expandedMenu === item.id ? <ExpandLess /> : <ExpandMore /> )}
-                </ListItem>
-                {item.hasSubMenu && (
-                  <Collapse in={expandedMenu === item.id} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx = {{backgroundColor : "#ede0fe"}}>
-                      {item.subItems.map((subItem) => (
-                        <ListItem key={subItem.id} button sx={{ pl: 4 }} onClick={() => handleNavigation(subItem.path)}
-                          selected={isActive(subItem.path)} className = "listitem_hover">
-                          <ListItemText primary={subItem.label} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Collapse>
-                )}
+              {(item.role && item.role.includes(selectedRole)) && (
+                <React.Fragment>
+                  <ListItem button onClick={() => handleMenuClick(item)} selected={!item.hasSubMenu && isActive(item.path) || 
+                    (item.hasSubMenu && item.subItems.some(sub => isActive(sub.path)))} className = "listitem_hover"
+                >
+                  <ListItemText primary={item.label} className = "listitem_label" />
+                    {item.hasSubMenu && ( expandedMenu === item.id ? <ExpandLess /> : <ExpandMore /> )}
+                  </ListItem>
+                  {item.hasSubMenu && (
+                    <Collapse in={expandedMenu === item.id} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding sx = {{backgroundColor : "#ede0fe"}}>
+                        {item.subItems.map((subItem) => (
+                          <ListItem key={subItem.id} button sx={{ pl: 4 }} onClick={() => handleNavigation(subItem.path)}
+                            selected={isActive(subItem.path)} className = "listitem_hover">
+                            <ListItemText primary={subItem.label} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Collapse>
+                  )}
+                </React.Fragment>
+              )}
+              <Divider /> 
             </React.Fragment>
           ))}
         </List>

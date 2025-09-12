@@ -106,8 +106,8 @@ const App = () => {
   const verifyUser = async () => {
     try {
       const res = await axiosInstance.get('/api/user/verify');
-      setUser(res.data.userId);
-      setSelectedRole(res.data.role || "");
+      setUser(res.data?.user?.userId);
+      setSelectedRole(res.data?.user?.role || "");
     } catch (error) {
       setUser(null);
       setSelectedRole('');
@@ -128,14 +128,14 @@ const App = () => {
       </Box>}>
       {isRegistration ? (
         <Routes>
-          <Route path="/login" element={<LoginForm />} />
+          <Route path="/login" element={<LoginForm selectedRole = {selectedRole} setSelectedRole = {setSelectedRole}/>} />
         </Routes>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <CssBaseline />
           <AppBar />
           <Box sx={{ display: 'flex', marginTop: '90px' }}>
-            <Sidebar />
+            <Sidebar selectedRole = {selectedRole}/>
             <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                 <Routes location={location}>
                   <Route path="/" element={<TransferCertificate />} />

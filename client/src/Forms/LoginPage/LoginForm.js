@@ -5,16 +5,22 @@ import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import "../../styles/RegistrationForm.css";
 
-const LoginForm = () => {
+const LoginForm = ({selectedRole, setSelectedRole}) => {
   const [formData, setFormData] = useState({ userId: '', password: '', role: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null); 
+  
 
   const handleChange = (e) => {
+    const name = e.target.name;
+    if (name === 'role') {
+      setSelectedRole(e.target.value);
+    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
 
   const navigate = useNavigate();
   
@@ -34,10 +40,13 @@ const LoginForm = () => {
       );
       console.log("Login success response:", res.data);
       alert("Login successful");
-
-      // Call verify immediately after login
-      await verifyUser();
-         navigate("/administrative");
+      if(selectedRole === "Maker") {
+        navigate("/selectcertificate");
+      } else if(selectedRole === "Checker") {
+        navigate("/checker");
+      } else if(selectedRole === "Approver") {
+        navigate("/approver");
+      }
     } catch (err) {
       console.error("Login failed:", err.response?.data || err);
       setError(err.response?.data?.error || "Login failed");
