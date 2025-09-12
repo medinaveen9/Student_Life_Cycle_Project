@@ -33,9 +33,11 @@ const uploadRequiredDocuments = async (req, res) => {
         const client = new MongoClient(process.env.MONGO_URI);
         await client.connect();
         const db = client.db("Student_LifeCycle");
-        const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
-
-        for (const file of req.files) {
+        const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" })
+    
+          for (const fieldName of Object.keys(req.files)) {
+            const fileArray = req.files[fieldName]; // Each field has an array of files
+            for (const file of fileArray) {
             const newFileName = `${Date.now()}-${file.originalname}`;
 
             const uploadStream = bucket.openUploadStream(newFileName, {
@@ -54,6 +56,7 @@ const uploadRequiredDocuments = async (req, res) => {
             });
 
             uploadStream.end(file.buffer);
+        }
         }
 
         res.status(200).json({ message: "Files uploaded successfully!" });

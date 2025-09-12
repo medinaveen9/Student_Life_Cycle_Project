@@ -37,7 +37,7 @@ const ApproverDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get("http://localhost:4000/api/checker");
+        const response = await axiosInstance.get("/api/checker");
         setProjectsData(response.data);  // axios parses JSON automatically
       } catch (error) {
         console.error("Error fetching data:", error);

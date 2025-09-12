@@ -27,6 +27,9 @@ const certificateForms = {
         { type: "number", label: "Fee Amount", name: "amount" },
         { type: "date", label: "Date of Payment", name: "paymentDate" },
         { type: "file", label: "Documents for Required Certificate", name: "files" },
+        { type: "file", label: "Provisional Certificate",  name: "provfiles" },
+        { type: "file", label: "No Due Certificate", name: "duefiles" },
+        { type: "file", label: "Fee Reciecpt", name: "feefiles" }
     ],
     bonafide: [
         { type: "text", label: "Student Name", name: "studentName" },
@@ -97,16 +100,18 @@ export default function SelectCertificate() {
         );
 
         const responseId = formResponse?.data?.certificate?.id;
-        if (formData.files && formData.files.length > 0 && responseId) {
-            try {
-                const uploadData = new FormData();
-                formData.files.forEach((file) => {
-                    uploadData.append("files", file);
-                });
+         if (responseId) {
+         try {
+            const uploadData = new FormData();
 
-                // Send certificate type also
-                uploadData.append("certificate_type", selected.toUpperCase());
-
+    // Collect all possible file inputs (works for TC + others)
+      ["files", "provfiles", "duefiles", "feefiles"].forEach((field) => {
+        if (formData[field] && formData[field].length > 0) {
+           formData[field].forEach((file) => {
+          uploadData.append("files", file); // all grouped under same "files" key
+        });
+      }
+    });
                 await axiosInstance.post(`/api/certificates/upload/${responseId}`,
                     uploadData,
                     { headers: { "Content-Type": "multipart/form-data" } }
