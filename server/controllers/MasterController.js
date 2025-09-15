@@ -1,11 +1,15 @@
 const express = require("express");
 const { administrationDetails, personalInfo, contactDetails,educationDetails,
-  paymentDetails, getSelectedCourseName} = require("../services/MasterService");
-
+  paymentDetails, getSelectedCourseName,getAdministrtaionInfo,getPersonalInfo} = require("../services/MasterService");
 const administration = async (req, res) => {
   try {
-    const formData = req.body;
-    const result = await administrationDetails(formData);
+    const { course_name, application_no } = req.query; 
+
+    if (!course_name || !application_no) {
+      return res.status(400).json({ message: "Required fields missing" });
+    }
+
+    const result = await administrationDetails({ course_name, application_no });
 
     if (result.success) {
       return res.status(200).json({ id: result.id });
@@ -15,8 +19,27 @@ const administration = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
+   }
+  };
+  
+const fetchAdministration = async (req, res) => {
+  try {
+    const { application_no } = req.query;
+
+    const result = await getAdministrtaionInfo(application_no);
+
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(404).json({ message: result.message });
+    }
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ message: "Server Error" });
   }
 };
+
+
 
 const personal = async (req, res) => {
   try {
@@ -34,7 +57,22 @@ const personal = async (req, res) => {
   }
 };
 
+const fetchPersonal = async (req, res) => {
+  try {
+    const { application_no } = req.query;
 
+    const result = await getPersonalInfo(application_no);
+
+    if (result.success) {
+      return res.status(200).json(result.data);
+    } else {
+      return res.status(404).json({ message: result.message });
+    }
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
 const contact = async (req, res) => {
   try {
     const formData = req.body;
@@ -102,4 +140,5 @@ const getCourseName = async (req, res) => {
 };
 
 
-module.exports = { administration, personal,  contact, education, payment, getCourseName};
+module.exports = { administration, personal,  contact, education, payment, getCourseName,
+  fetchAdministration,fetchPersonal};

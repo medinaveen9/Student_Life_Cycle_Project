@@ -1,5 +1,5 @@
 // certificateForms.js
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect ,useRef} from "react";
 import "../../styles/Certificates/SelectCertificate.css";
 import "../../styles/Certificates/CertificateForm.css";
 import axiosInstance from "../../components/AxiosInstance";
@@ -15,13 +15,12 @@ const certificates = [
 // Form fields for each certificate type
 const certificateForms = {
     tc: [
-        { type: "text", label: "Roll No", name: "applicationNo" },
-        { type: "select", label: "Course Type", name: "courseType", options: ["BPT", "MPT"], },
+       
         { type: "text", label: "Fee Receipt No", name: "receiptNo" },
         { type: "number", label: "Fee Amount", name: "amount" },
         { type: "date", label: "Date of Payment", name: "paymentDate" },
         { type: "file", label: "Documents for Required Certificate", name: "files" },
-	{ type: "file", label: "Provisional Certificate",  name: "provfiles" },
+	    { type: "file", label: "Provisional Certificate",  name: "provfiles" },
         { type: "file", label: "No Due Certificate", name: "duefiles" },
         { type: "file", label: "Fee Reciecpt", name: "feefiles" }
     ],
@@ -42,20 +41,46 @@ const certificateForms = {
     ],
 };
 
-export default function SelectCertificate({user}) {
-    const [selected, setSelected] = useState(""); // selected certificate type
-    const [formData, setFormData] = useState({});
-    const fetchOnce = useRef(false);
+
+    export default function SelectCertificate({ user }) {
+          const [data, setData] = useState({ application_no: "", department: "" ,course_name:"",name:""});
+          const [error, setError] = useState("");
+          const [selected, setSelected] = useState("");
+          const [formData, setFormData] = useState({});
+          const fetchOnce = useRef(false);
+
 
     useEffect(() => {
-        if (!fetchOnce.current) {
-            
-        }
-        fetchOnce.current = true;
-        // Any initial data fetching can be done here
-    }, []);
+       if (user?.user_id) {
+          const fetchUser = async () => {
+          try {
+            const [adminRes, personalRes] = await Promise.all([
+                  axiosInstance.get("/api/master/administrative_information", {
+            params: { application_no: user.user_id },
+            }),
+            axiosInstance.get("/api/master/personal_information", {
+            params: { application_no: user.user_id },
+          }),
+        ]);
 
-    // Handle input
+        setData({
+          application_no: adminRes.data.application_no,
+          department: adminRes.data.department,
+          course_name: adminRes.data.course_name,
+          name: personalRes.data.name,
+        });
+      } catch (err) {
+        console.error("Error fetching info:", err);
+        setError("Failed to fetch info");
+      }
+    };
+
+     fetchUser();
+      }
+    },[user]);
+
+     if (!user) return <p>Loading user data...</p>;
+
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
         if (files) {
@@ -72,11 +97,18 @@ export default function SelectCertificate({user}) {
             alert("Please select a certificate type");
             return;
         }
-        let formPayload = {};
+      
+    let formPayload = {
+        certificate_type: selected.toUpperCase(), // Always include certificate type
+        application_no: data.application_no,      // Always include application_no
+        department: data.department ,
+        course_name:data.course_name  , 
+        name:data.name           // Always include department
+      };
+
         if (selected === "tc") {
             formPayload = {
-                application_no: formData.applicationNo || "",
-                course_type: formData.courseType || "",
+               ...formPayload, 
                 receipt_no: formData.receiptNo || "",
                 amount: formData.amount || "",
                 date_of_payment: formData.paymentDate || "",
@@ -84,7 +116,7 @@ export default function SelectCertificate({user}) {
         }
         formPayload.certificate_type = selected.toUpperCase();
         const formResponse = await axiosInstance.post(
-            "/api/certificates/request_form", formPayload );
+             "/api/certificates/request_form", formPayload );
 
         const responseId = formResponse?.data?.certificate?.id;
         if (responseId) {
@@ -127,14 +159,23 @@ export default function SelectCertificate({user}) {
                     onChange={(e) => {
                     setSelected(e.target.value);
                     setFormData({});
-                    }}
-                >
+                    }}  >
                     <option value="">--Select Certificate--</option>
                     {certificates.map((cert) => (
                     <option key={cert.key} value={cert.key}>{cert.label} </option>
                     ))}
                 </select>
                 </div>
+            {/* 🔹 Common Student Information Block (One for All Certificates) */}
+                <div className="form_group">
+                       <label className="form_label">Student Information</label>
+                      <div className="form_common_block">
+                         <p><strong>Application No:</strong> {data.application_no}</p>
+                         <p><strong>Department:</strong> {data.department}</p>
+                         <p><strong>Course Name:</strong> {data.course_name}</p>
+                        <p><strong>Student Name:</strong> {data.name}</p>
+                    </div>
+               </div>
 
                 {/* Render form fields dynamically */}
                 {selected &&
@@ -173,7 +214,7 @@ export default function SelectCertificate({user}) {
                     return null;
                 })}
 
-                {/* Show buttons only if a certificate type is chosen */}
+        {/* Show buttons only if a certificate type is chosen */}
                 {selected && (
                     <div style={{ display: "flex", gap: "10px" }}>
                         <button type="reset" className="button_style"> Cancel </button>
