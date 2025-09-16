@@ -42,32 +42,31 @@ const certificateForms = {
 };
 
 
-    export default function SelectCertificate({ user }) {
-          const [data, setData] = useState({ application_no: "", department: "" ,course_name:"",name:""});
-          const [error, setError] = useState("");
-          const [selected, setSelected] = useState("");
-          const [formData, setFormData] = useState({});
-          const fetchOnce = useRef(false);
-
+export default function SelectCertificate({ user }) {
+    const [data, setData] = useState({ application_no: "", department: "" ,course_name:"",name:""});
+    const [error, setError] = useState("");
+    const [selected, setSelected] = useState("");
+    const [formData, setFormData] = useState({});
+    const fetchOnce = useRef(false);
 
     useEffect(() => {
-       if (user?.user_id) {
-          const fetchUser = async () => {
-          try {
-            const [adminRes, personalRes] = await Promise.all([
-                  axiosInstance.get("/api/master/administrative_information", {
-            params: { application_no: user.user_id },
+       if (user?.userId) {
+            const fetchUser = async () => {
+            try {
+                const [adminRes, personalRes] = await Promise.all([
+                    axiosInstance.get("/api/master/administrative_information", {
+                params: { application_no: user.userId },
+                }),
+                axiosInstance.get("/api/master/personal_information", {
+                params: { application_no: user.userId },
             }),
-            axiosInstance.get("/api/master/personal_information", {
-            params: { application_no: user.user_id },
-          }),
         ]);
 
         setData({
-          application_no: adminRes.data.application_no,
-          department: adminRes.data.department,
-          course_name: adminRes.data.course_name,
-          name: personalRes.data.name,
+            application_no: adminRes.data.application_no,
+            department: adminRes.data.department,
+            course_name: adminRes.data.course_name,
+            name: personalRes.data.name,
         });
       } catch (err) {
         console.error("Error fetching info:", err);
@@ -122,20 +121,20 @@ const certificateForms = {
         if (responseId) {
             try {
                 const uploadData = new FormData();
+
+                uploadData.append("certificate_type", selected.toUpperCase());
+
                 // Collect all possible file inputs (works for TC + others)
                 ["files", "provfiles", "duefiles", "feefiles"].forEach((field) => {
                     if (formData[field] && formData[field].length > 0) {
-                    formData[field].forEach((file) => {
-                    uploadData.append("files", file); // all grouped under same "files" key
-                    });
-                }
+                        formData[field].forEach((file) => {
+                        uploadData.append(field, file); //use actual field name (not all under "files")
+                        });
+                    }
                 });
 
-                await axiosInstance.post(
-                `/api/certificates/upload/${responseId}`,
-                uploadData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-                );
+                await axiosInstance.post(`/api/certificates/upload/${responseId}`,
+                    uploadData, { headers: { "Content-Type": "multipart/form-data" } } );
             } catch (err) {
                 console.error("File upload error:", err);
                 alert("Error uploading files. Please try again.");

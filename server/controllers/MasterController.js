@@ -1,6 +1,8 @@
 const express = require("express");
 const { administrationDetails, personalInfo, contactDetails,educationDetails,
-  paymentDetails, getSelectedCourseName,getAdministrtaionInfo,getPersonalInfo} = require("../services/MasterService");
+  paymentDetails, getSelectedCourseName,getAdministrtaionInfo,getPersonalInfo, employeeRoleService
+} = require("../services/MasterService");
+
 const administration = async (req, res) => {
   try {
     const { course_name, application_no } = req.query; 
@@ -139,6 +141,25 @@ const getCourseName = async (req, res) => {
   }
 };
 
+// New function to insert employee role
+const employeeRoleController = async (req, res) => {
+  try{
+    const data = req.body;
+    const result = await employeeRoleService(data);
+    if(result){
+      return res.status(201).json({
+        message: "Employee role inserted successfully",
+        result
+      });
+    }
+    return res.status(400).json({ error: "Failed to insert employee role" });
+  }catch(error){
+    console.error("Error inserting employee role:", error.message);
+    res.status(500).json({ error: "Failed to insert employee role" });
+  }
+}
+
+
 
 module.exports = { administration, personal,  contact, education, payment, getCourseName,
-  fetchAdministration,fetchPersonal};
+  fetchAdministration,fetchPersonal, employeeRoleController};

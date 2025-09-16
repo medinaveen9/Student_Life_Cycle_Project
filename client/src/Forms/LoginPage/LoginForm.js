@@ -33,7 +33,7 @@ const LoginForm = ({ setUser}) => {
       const res = await axiosInstance.post("/api/user/login", formData, { withCredentials: true } );
       setUser(res.data.user);
       const resRole = res?.data?.user?.role;
-      if(resRole === "student") {
+      if(resRole === "Maker") {
         navigate("/selectcertificate");
       } else if(resRole === "Checker") {
         navigate("/checker");
@@ -42,6 +42,9 @@ const LoginForm = ({ setUser}) => {
       }
       else if(resRole === "Maker") {
         navigate("/approver");
+      }
+      else if(resRole === "Dean") {
+        navigate("/roleassignment");
       }
     } catch (err) {
       console.error("Login failed:", err.response?.data || err);

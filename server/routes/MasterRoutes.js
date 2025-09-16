@@ -4,7 +4,8 @@ const express = require('express');
 const router = express.Router();
 const { getAllUploadedFiles, streamFile } = require("../controllers/UploadsController");
 // const verifyToken = require("../middleware/auth"); // uncomment when you have token middleware
-const {administration, personal, contact, education, payment, getCourseName,fetchAdministration,fetchPersonal } = require("../controllers/MasterController");
+const {administration, personal, contact, education, payment, getCourseName,
+  fetchAdministration,fetchPersonal, employeeRoleController } = require("../controllers/MasterController");
 
 const uri = process.env.MONGO_URI;
 
@@ -19,6 +20,7 @@ router.get("/course_name", getCourseName);
 
 router.get("/administrative_information",fetchAdministration);
 router.get("/personal_information", fetchPersonal);
+router.post("/employee_role", employeeRoleController);
 // File upload route
 router.post('/research', upload.any(), async (req, res) => {
   try {

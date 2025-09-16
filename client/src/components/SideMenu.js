@@ -9,11 +9,20 @@ const Sidebar = ({user}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const menuItems = [
+      {
+        id: 'RoleAssignment',
+        label: 'RoleAssignment',
+        hasSubMenu: false,
+        role: ["Dean"],
+        subItems: [
+          { id: 'RoleAssignment', label: 'RoleAssigment', path: '/roleassignment' },
+        ]
+    },
     {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: false,
-      role: ["student"],
+      role: ["Maker"],
       subItems: [
         { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
       ]
@@ -55,7 +64,7 @@ const Sidebar = ({user}) => {
     id:'Genetic Counselling Course Application ',
     label:'MPT & M.SC GC Application',
     hasSubMenu:true,
-    role: ["Checker"],
+    role: ["Maker"],
     subItems: [
       {id: 'AdministrativeInformation', label: 'Administrative Information', path: '/gcadministration' },
       {id:'FeePaymentDetails' ,label:'Fee Payment Details', path:'/gcappfee' },
@@ -99,6 +108,7 @@ const Sidebar = ({user}) => {
       id: 'Application Report BPT',
       label: 'BPT Application Report ',
       hasSubMenu: true,
+      role : [""],
       subItems: [
      
         { id: 'Personal&AcademicInfo', label: 'Personal & Academic Info', path: '/academicinfo' },
@@ -111,6 +121,7 @@ const Sidebar = ({user}) => {
       id: 'PG Medical Students',
       label: 'PG Medical Students Application',
       hasSubMenu: true,
+      role : [""],
       subItems: [
      
         { id: 'PreAdmission', label: 'Pre Admission', path: '/preadmission' },
@@ -123,6 +134,7 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
+      role: ["Checker"],
       subItems: [
      
         {id: 'TransferCertificate', label: 'Transfer Certificate', path: '/' },
@@ -148,6 +160,7 @@ const Sidebar = ({user}) => {
       id: 'Nursing(Bsc)-4YDC',
       label: 'Nursing (Bsc)-4YDC',
       hasSubMenu: true,
+      role : [""],
       subItems: [
   
         { id: 'NursingSemester1', label: 'Semester 1', path: '/nursingsem1' },
@@ -160,6 +173,7 @@ const Sidebar = ({user}) => {
       id:'Nursing(Bsc)',
       label:'Nursing (Bsc)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'NursingSecondYear', label: ' Nursing Secondyear', path: '/nurs2y' },
         { id: 'NursingThirdYear', label:  'Nursing Thirdyear'  , path: '/nurs3y' },
@@ -171,6 +185,7 @@ const Sidebar = ({user}) => {
       id: 'Physiotherapy(BPT)',
       label: 'Physiotherapy (BPT)',
       hasSubMenu: true,
+      role : [""],
       subItems: [
   
         { id: 'BPTemester1', label: 'Semester 1', path: '/bpt1' },
@@ -189,6 +204,7 @@ const Sidebar = ({user}) => {
       id:'Anesthesia(Bsc)',
       label:'Anesthesia(Bsc)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'AnesthesiaFirstYear', label: 'Anesthesia FirstYear', path: '/anesthesia1' },
         { id: 'AnesthesiaSecondYear', label: 'Anesthesia SecondYear', path: '/anesthesia2' },
@@ -200,6 +216,7 @@ const Sidebar = ({user}) => {
       id:'Medical Laboratory Technology(Bsc)',
       label:'Medical Laboratory Technology(MLT)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
    
         { id: 'MLTSecondYear', label: 'MLT SecondYear', path: '/mlt2' },
@@ -212,6 +229,7 @@ const Sidebar = ({user}) => {
       id:'HospitalManagementCourse',
       label:'Hospital Management Course (HMC)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'HMCFirstYearSemester1', label: ' HMC FirstYear Semester1', path: '/hmc1' },
         { id: 'HMCFirstYearSemester2', label: ' HMC FirstYear Semester2', path: '/hmc2' },
@@ -224,6 +242,7 @@ const Sidebar = ({user}) => {
       id:'Master of Physiotherapy ',
       label:'Master of Physiotherapy (MPT)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'MPTFirstYear', label: ' MPT FirstYear', path: '/mpt1' },
         { id: 'MPTSecondYear', label: ' MPT SecondYear', path: '/mpt2' },
@@ -236,6 +255,7 @@ const Sidebar = ({user}) => {
       id:'Nuclear Medicine Technology(PG)',
       label:'Nuclear Medicine Technology (PG)',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'NMTTFirstYear', label: ' NMT FirstYear', path: '/nmt1' },
         { id: 'NMTSecondYear', label: ' NMT SecondYear', path: '/nmt2' },
@@ -247,6 +267,7 @@ const Sidebar = ({user}) => {
       id:'Genetic Counselling Course',
       label:'Genetic Counselling Course',
       hasSubMenu:true,
+      role : [""],
       subItems: [
         { id: 'GeneticCounsellingCourse', label: ' Genetic Counselling Course', path: '/genetic' },
       ]
@@ -301,7 +322,6 @@ const Sidebar = ({user}) => {
                   )}
                 </React.Fragment>
               )}
-              <Divider /> 
             </React.Fragment>
           ))}
         </List>

@@ -91,6 +91,7 @@ const GcReportPersonalAcademicInfo = lazy(() => import('./Forms/GeneticCounselli
 const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplicationCourseReport/GcUploads'));
 
 const SelectCertificatePage = lazy(() => import('./Forms/Certificates/SelectCertificate'));
+const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
 
 const App = () => {
   const location = useLocation();
@@ -225,6 +226,7 @@ const App = () => {
 
                   {/* Certificates */}
                   <Route path="/selectcertificate" element={<SelectCertificatePage user = {user}/>} />
+                  <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
                 </Routes>
               
             </Box>
