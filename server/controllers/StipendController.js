@@ -1,5 +1,5 @@
 // const stipendService = require('../services/StipendService');
-const { getStudentDetails, insertStipendDetails  } = require('../services/StipendService');
+const { getStudentDetails, insertStipendDetails ,fetchAllStipends } = require('../services/StipendService');
 
 // exports.submitStipend = async (req, res) => {
 //   try {
@@ -57,4 +57,14 @@ const submitStipend = async (req, res) => {
   }
 };
 
-module.exports = { getStudentInfo, submitStipend };
+const getAllStipends = async (req, res) => {
+  try {
+    const data = await fetchAllStipends(); // call service
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching stipends in controller:', err.message);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+module.exports = { getStudentInfo, submitStipend,getAllStipends };

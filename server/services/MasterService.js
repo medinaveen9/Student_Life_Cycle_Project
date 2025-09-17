@@ -54,6 +54,8 @@ const administrationDetails = async (formData) => {
     return { success: false, message: "Server error" };
   }
 };
+
+
 const getAdministrationDetails = async (application_no) => {
   try {
     if (!application_no) {

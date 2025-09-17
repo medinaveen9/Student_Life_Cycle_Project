@@ -1,4 +1,3 @@
-
 const { getStipendCollection } = require('../models/db');
 const {pool} =require("../models/db");
 
@@ -54,4 +53,14 @@ const insertStipendDetails = async (data) => {
   }
 };
 
-module.exports = { getStudentDetails, insertStipendDetails };
+const fetchAllStipends = async () => {
+  try {
+    const result = await pool.query('SELECT * FROM stipend_details');
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching stipends in service:', err.message);
+    throw error; 
+  }
+};
+
+module.exports = { getStudentDetails, insertStipendDetails,fetchAllStipends };
