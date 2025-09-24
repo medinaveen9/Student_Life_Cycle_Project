@@ -13,7 +13,6 @@ const userLogin = async (req, res) => {
     const token = await createToken({ userId, user_name : result.user.user_name, role: result.user.role });
     res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 3600000 });
 
-    console.log("Login successful, cookie set");
     return res.status(200).json({ success: true, message: "Login successful", user: result.user });
 
   } catch (err) {

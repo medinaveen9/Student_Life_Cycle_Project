@@ -11,7 +11,9 @@ const bptRoutes = require('./routes/BPTRoutes');
 const loginRoutes =require('./routes/LoginRoutes');
 const certificateRoutes = require('./routes/CertificateRoute');
 const checkerRoutes = require ('./routes/CheckerRoutes');
-const fileRoutes = require('./routes/FileRoutes')
+const fileRoutes = require('./routes/FileRoutes');
+const reportRoutes = require('./routes/ReportRoute');
+
 const app = express();
 
 app.use(cookieParser());
@@ -40,6 +42,7 @@ app.use('/api/user', loginRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/checker', checkerRoutes);
 app.use('/api/file', fileRoutes);
+app.use('/api/report', reportRoutes);
 
 app.use('/', (req, res) => { 
     res.send('API is working');

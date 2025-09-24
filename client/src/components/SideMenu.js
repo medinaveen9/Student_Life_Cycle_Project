@@ -9,14 +9,33 @@ const Sidebar = ({user}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const menuItems = [
-      {
-        id: 'RoleAssignment',
-        label: 'RoleAssignment',
-        hasSubMenu: false,
-        role: ["Dean"],
-        subItems: [
-          { id: 'RoleAssignment', label: 'RoleAssigment', path: '/roleassignment' },
-        ]
+    {
+      id: 'Role Assignment',
+      label: 'Role Assignment',
+      hasSubMenu: false,
+      role: ["Dean"],
+      subItems: [
+        { id: 'RoleAssignment', label: 'RoleAssigment', path: '/roleassignment' },
+      ]
+    },
+    {
+      id: 'Course Stipend',
+      label: 'Course Stipend',
+      hasSubMenu: false,
+      role: ["Dean"],
+      subItems: [
+        { id: 'CourseStipend', label: 'CourseStipend', path: '/course_stipend' },
+      ]
+    },
+    {
+      id: 'Stipend Management',
+      label: 'Stipend Management',
+      hasSubMenu: true,
+      role: ["Checker", "Approver", "Verifier", "FA", "FC"],
+      subItems: [
+        {id:'StipendForm', label:'Stipend Form', path:'/stipendform'},
+        {id:'StipendTable', label:'Stipend Table', path:'/stipendtable'},
+      ]
     },
     {
       id: 'Certificates',
@@ -129,12 +148,13 @@ const Sidebar = ({user}) => {
         { id: 'ExaminationAssessment', label:'Examination Assessment', path:'/exam'},
       ]
     },
+    
 
     {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: ["Checker"],
+      role: [],
       subItems: [
      
         {id: 'TransferCertificate', label: 'Transfer Certificate', path: '/' },

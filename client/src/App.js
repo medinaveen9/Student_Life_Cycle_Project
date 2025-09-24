@@ -92,6 +92,7 @@ const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplication
 
 const SelectCertificatePage = lazy(() => import('./Forms/Certificates/SelectCertificate'));
 const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
+const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
 
 const App = () => {
   const location = useLocation();
@@ -100,6 +101,8 @@ const App = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+
+  const [editableData, setEditableData] = useState(null);
 
   // Axios instance to verify user
   const verifyUser = async () => {
@@ -204,8 +207,10 @@ const App = () => {
                   <Route path="/observerattendance" element={<ObserversAttendance />} />
                   <Route path="/observpermisson" element={<ObserverPermission />} />
                   <Route path="/proadmission" element={<ProvisionalAdmission />} />
-                  <Route path="/stipendform" element={<StipendForm />} />
-                  <Route path="/stipendtable" element={<StipendTable />} />
+                  <Route path="/stipendform" element={<StipendForm editableData = {editableData} 
+                    user = {user} setEditableData = {setEditableData}/>} />
+                  <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
+                    user = {user} />} />
                   <Route path="/stipendagreements" element={<StipendTableAgreements />} />
 
                   {/* mptapplicationReport */}
@@ -227,6 +232,7 @@ const App = () => {
                   {/* Certificates */}
                   <Route path="/selectcertificate" element={<SelectCertificatePage user = {user}/>} />
                   <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
+                  <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
                 </Routes>
               
             </Box>

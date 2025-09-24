@@ -40,8 +40,14 @@ const LoginForm = ({ setUser}) => {
       } else if(resRole === "Approver") {
         navigate("/approver");
       }
-      else if(resRole === "Maker") {
+      else if(resRole === "Verifier") {
         navigate("/approver");
+      }
+      else if(resRole === "FA") {
+        navigate("/stipendform");
+      }
+      else if(resRole === "FC") {
+        navigate("/stipendform");
       }
       else if(resRole === "Dean") {
         navigate("/roleassignment");
@@ -101,9 +107,11 @@ const LoginForm = ({ setUser}) => {
             required
             InputProps={inputProps}
           />
-          <Button type="submit" variant="contained" fullWidth sx={{ backgroundColor: "#4b1d77", color: "white", textTransform: "initial", fontSize: "18px" }}>
+          <Button disabled={loading} type="submit" variant="contained" fullWidth
+            sx={{ backgroundColor: "#4b1d77", color: "white", textTransform: "initial", fontSize: "18px", "&.Mui-disabled": { backgroundColor: "#ccc", color: "#666", cursor: "not-allowed" } }}>
             Login
           </Button>
+
         </form>
       </Box>
     </Box>

@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getStudentInfo, submitStipend ,getAllStipends} = require('../controllers/StipendController');
-// const stipendController = require('../controllers/StipendController');
+const { getStudentInfo, submitStipend ,getAllStipends,  addCourseStipendController,
+    stipendApprovalController, stipendBulkApprovalController} = require('../controllers/StipendController');
 
-// router.post('/', stipendController.submitStipend);
-// router.get('/', stipendController.getAllStipends); 
-router.get('/stipend_details', getAllStipends); 
-router.get('/student', getStudentInfo);
-router.post('/submit', submitStipend);
+const { verifyToken } = require('../config/VerifyToken');
+ 
+router.get('/stipend_details', verifyToken, getAllStipends); 
+router.get('/student', verifyToken, getStudentInfo);
+router.post('/submit', verifyToken, submitStipend);
+router.get('/action_status', verifyToken, stipendApprovalController);
+router.post('/bulk_approval', verifyToken, stipendBulkApprovalController);
+router.post('/add_course_stipend', verifyToken, addCourseStipendController);
 
 module.exports = router;
 
