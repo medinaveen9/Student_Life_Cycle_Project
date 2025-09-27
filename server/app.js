@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config(); 
 const cookieParser = require('cookie-parser');
+const path = require("path");
 
 const { connectToMongo } = require('./models/db');
 const stipendRoutes = require('./routes/StipendRoutes');
@@ -18,7 +19,7 @@ const app = express();
 
 app.use(cookieParser());
 // Middleware
-const allowedOrigins = ['http://localhost', 'http://localhost:3000',];
+const allowedOrigins = ['http://localhost', 'http://localhost:3000', 'http://172.19.1.18:3000', ];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -32,6 +33,8 @@ app.use(cors({
 }));
 
 app.use(express.json()); // to parse JSON bodies
+
+app.use("/media", express.static(path.join(__dirname, "media")));
 
 
 app.use('/api/stipend', stipendRoutes);

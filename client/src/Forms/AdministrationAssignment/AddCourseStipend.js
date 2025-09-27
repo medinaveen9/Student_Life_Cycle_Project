@@ -98,10 +98,10 @@ const CourseStipendForm = ({user}) => {
                 <input style={styles.form_input} type="date" required = {true} name="from_date" value={formData.from_date} onChange={handleChange}  />
             </div>
 
-            <div style={styles.form_group}>
+            {/* <div style={styles.form_group}>
                 <label style={styles.form_label}>To Date</label>
                 <input style={styles.form_input} type="date" name="to_date" value={formData.to_date} onChange={handleChange} />
-            </div>
+            </div> */}
 
             <button type="submit" disabled={loading}
                 style={{ ...styles.button_style, cursor: loading ? "not-allowed" : "pointer",

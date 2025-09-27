@@ -47,7 +47,7 @@ const getStudentDetails = async (application_no) => {
   }
 };
 
-
+// Insert Stipend details
 const insertStipendDetails = async (data) => {
   try {
     // Determine the role-specific columns
@@ -70,79 +70,138 @@ const insertStipendDetails = async (data) => {
       const query = `
         UPDATE stipend_details SET 
           roll_no = $1, name = $2, course = $3, account_no = $4, doj = $5, leaves = $6,
-          present = $7, stipend = $8, actual_stipend = $9, cur_month = $10,
-          ${column_id} = $11, ${column_name} = $12 WHERE id = $13 `;
+          present = $7, stipend = $8, actual_stipend = $9, cur_month = $10, 
+          ${column_id} = $11, ${column_name} = $12, ifsc_code = $13, year = $14
+        WHERE id = $15
+      `;
       await pool.query(query, [
-        data.rollNo, data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
-        data.presentAndHolidays, data.stipend, data.actualStipend, data.cur_month || null,
-        data.userId || null, data.user_name || null,  data.id ]);
+        data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
+        data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
+        data.cur_month || null, data.userId || null, data.user_name || null,
+        data.ifsc_code, data.year, data.id
+      ]);
       return;
     }
+
+    // Check if record already exists
     const existingRecord = await pool.query(
-      `SELECT * FROM stipend_details WHERE roll_no = $1 AND cur_month = $2`, 
+      `SELECT * FROM stipend_details WHERE roll_no = $1 AND cur_month = $2`,
       [data.rollNo, data.cur_month]
     );
+
     if (existingRecord.rows.length > 0) {
       const updateRes = await pool.query(
         `UPDATE stipend_details SET 
           name = $1, course = $2, account_no = $3, doj = $4, leaves = $5, 
-          present = $6, stipend = $7, actual_stipend = $8,
-          ${column_id} = $9, ${column_name} = $10
-         WHERE roll_no = $11 AND cur_month = $12`,
+          present = $6, stipend = $7, actual_stipend = $8, 
+          ${column_id} = $9, ${column_name} = $10, ifsc_code = $11, year = $12
+        WHERE roll_no = $13 AND cur_month = $14`,
         [
           data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
-          data.presentAndHolidays, data.stipend, data.actualStipend,  data.userId || null, data.user_name || null,
-          data.rollNo, data.cur_month
+          data.presentAndHolidays, data.stipend, data.actualStipend,
+          data.userId || null, data.user_name || null,
+          data.ifsc_code, data.year, data.rollNo, data.cur_month
         ]
       );
       if (updateRes.rowCount > 0) {
         return;
       }
     }
+
     // Insert new record
     const query = `
       INSERT INTO stipend_details 
-        (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, cur_month, ${column_id}, ${column_name})
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
+         cur_month, ${column_id}, ${column_name}, ifsc_code, year)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     `;
     await pool.query(query, [
       data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
       data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
-      data.cur_month || null, data.userId || null, data.user_name || null ]);
+      data.cur_month || null, data.userId || null, data.user_name || null,
+      data.ifsc_code, data.year
+    ]);
+
   } catch (error) {
     console.error('Error inserting stipend details:', error.message);
     throw error;
   }
 };
 
-
-const fetchAllStipends = async (role, month) => {
+// Fetch all stipends
+const fetchAllStipends = async (role, month, course, year, roll_no) => {
   try {
     let result;
-    if(role === 'Checker'){
-      result = await pool.query('SELECT * FROM stipend_details where cur_month = $1', [month]);
-    } else if(role === 'Verifier'){
-      result = await pool.query("SELECT * FROM stipend_details WHERE checker_status = 'approved' and cur_month = $1", [month]);
-    } else if(role === 'Approver' || role === "FA" || role === "FC"){
-      result = await pool.query("SELECT * FROM stipend_details WHERE checker_status = 'approved' AND verifier_status = 'approved' and cur_month = $1", [month]);
+    let query = '';
+    let params = [];
+    let conditions = [];
+
+    // Month filter
+    if (month !== "All") {
+      conditions.push(`cur_month = $${params.length + 1}`);
+      params.push(month);
     }
+
+    // Course filter
+    if (course !== "All") {
+      conditions.push(`course = $${params.length + 1}`);
+      params.push(course);
+    }
+
+    // Year filter
+    if (year !== "All") {
+      conditions.push(`year = $${params.length + 1}`);
+      params.push(year);
+    }
+
+    // Roll No filter only if not empty
+    if (roll_no && roll_no !== "") {
+      conditions.push(`roll_no = $${params.length + 1}`);
+      params.push(roll_no);
+    }
+
+    // Role-based query
+    if (role === 'Checker') {
+      query = `SELECT * FROM stipend_details`;
+    } else if (role === 'Verifier') {
+      query = `SELECT * FROM stipend_details WHERE checker_status = 'approved'`;
+    } else if (role === 'Approver' || role === 'FA' || role === 'FC') {
+      query = `SELECT * FROM stipend_details WHERE checker_status = 'approved' AND verifier_status = 'approved'`;
+    }
+
+    // Add dynamic conditions
+    if (conditions.length > 0) {
+      query += (query.includes('WHERE') ? ' AND ' : ' WHERE ') + conditions.join(' AND ');
+    }
+
+    result = await pool.query(query, params);
     return result.rows;
-  } catch (error) {
+  } catch (err) {
     console.error('Error fetching stipends in service:', err.message);
-    throw error; 
+    throw err;
   }
 };
 
-const stipendApprovalStatus = async (id, status, role) => {
+
+const stipendApprovalStatus = async (id, status, role, userInfo) => {
   try {
     if (role === 'Checker') {
-      const result = await pool.query('update stipend_details set checker_status = $1 WHERE id = $2', [status, id]);
+      const result = await pool.query(
+        'UPDATE stipend_details SET checker_status = $1 WHERE id = $2',
+        [status, id]
+      );
       return result.rowCount > 0;
     } else if (role === 'Verifier') {
-      const result = await pool.query('update stipend_details set verifier_status = $1 WHERE id = $2', [status, id]);
+      const result = await pool.query(
+        'UPDATE stipend_details SET verifier_status = $1, verifier_id = $2, verifier_name = $3 WHERE id = $4',
+        [status, userInfo.userId, userInfo.user_name, id]
+      );
       return result.rowCount > 0;
     } else if (role === 'Approver') {
-      const result = await pool.query('update stipend_details set approver_status = $1 WHERE id = $2', [status, id]);
+      const result = await pool.query(
+        'UPDATE stipend_details SET approver_status = $1, approver_id = $2, approver_name = $3 WHERE id = $4',
+        [status, userInfo.userId, userInfo.user_name, id]
+      );
       return result.rowCount > 0;
     }
     else {
@@ -155,7 +214,7 @@ const stipendApprovalStatus = async (id, status, role) => {
   }
 };
 
-const stipendBulkApproval = async (data, status, role) => {
+const stipendBulkApproval = async (data, status, role, userInfo) => {
   try {
     if (role === 'Checker') {
       for (let id of data) {
@@ -163,14 +222,20 @@ const stipendBulkApproval = async (data, status, role) => {
       }
       return true;
     } else if (role === 'Verifier') {
-      for (let id of data) {
-        const result = await pool.query('update stipend_details set verifier_status = $1 WHERE id = $2', [status, id]);
-      }
-      return true;
-    } else if (role === 'Approver') {
-      for (let id of data) {
-        const result = await pool.query('update stipend_details set approver_status = $1 WHERE id = $2', [status, id]);
-      }
+        for (let id of data) {
+          const result = await pool.query(
+            'UPDATE stipend_details SET verifier_status = $1, verifier_id = $2, verifier_name = $3 WHERE id = $4',
+            [status, userInfo.userId, userInfo.user_name, id]
+          );
+        }
+        return true;
+      } else if (role === 'Approver') {
+          for (let id of data) {
+            const result = await pool.query(
+              'UPDATE stipend_details SET approver_status = $1, approver_id = $2, approver_name = $3 WHERE id = $4',
+              [status, userInfo.userId, userInfo.user_name, id]
+            );
+          }
       return true;
     }
     return false;

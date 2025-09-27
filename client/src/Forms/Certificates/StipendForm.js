@@ -14,6 +14,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     stipend: '',
     actualStipend: '',
     cur_month : new Date().getMonth() + 1, // current month by default
+    ifsc_code : "",
+    year : ""
   });
   const [studentData, setStudentData] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
@@ -45,7 +47,9 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
           presentAndHolidays: editableData.present || "",
           stipend: editableData.stipend || "",
           actualStipend: editableData.actual_stipend || "",
-          cur_month : editableData.cur_month || (new Date().getMonth() + 1)
+          cur_month : editableData.cur_month || (new Date().getMonth() + 1),
+          ifsc_code : editableData.ifsc_code || "",
+          year : editableData.year || ""
         };
         setFormData(data);
         setIsEdit(true);
@@ -98,9 +102,9 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
   const handleRollNoKeyDown = async (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      setFormData((prev) => ({ ...prev,
+      setFormData((prev) => ({ ...prev, 
           name: '', course: '', accountNo: '', joiningDate: '', leavesBalance: '',
-          presentAndHolidays: '', stipend: '', actualStipend: '', }));
+          presentAndHolidays: '', stipend: '', actualStipend: '', ifsc_code : "", year : "" }));
       if (!formData.rollNo || loading) return; // prevent multiple requests
       setLoading(true); // disable inputs
       try {
@@ -116,6 +120,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
             course: data.course || '',
             accountNo: data.account_no || '',
             joiningDate: data.doj   ?new Date(data.doj).toISOString().split('T')[0] : '',
+            ifsc_code : data.ifsc_code,
+            year : data.year
           }));
           setStudentData(data);
         } else {
@@ -127,7 +133,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
         alert('Student not found');
         setFormData({
           rollNo: '', name: '', course: '', accountNo: '', joiningDate: '', cur_month : new Date().getMonth() + 1,
-          leavesBalance: '', presentAndHolidays: '', stipend: '', actualStipend: '',
+          leavesBalance: '', presentAndHolidays: '', stipend: '', actualStipend: '', ifsc_code : "", year : ""
         });
         setIsFormDisabled(true);
       }  finally {
@@ -146,7 +152,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       });
       alert(res.data.message || "Stipend submitted successfully");
       setFormData({
-        rollNo: '', name: '',   course: '', accountNo: '', joiningDate: '', leavesBalance: '',
+        name: '',   course: '', accountNo: '', joiningDate: '', leavesBalance: '', ifsc_code : "", year : "",
         presentAndHolidays: '', stipend: '', actualStipend: '', cur_month : new Date().getMonth() + 1,});
       setStudentData(null);
       setIsFormDisabled(true);

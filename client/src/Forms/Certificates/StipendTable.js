@@ -15,6 +15,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
+import { TextField } from "@mui/material";
 
 // ✅ MUI Icons (can be grouped)
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -25,7 +26,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 const StipendTable = ({ setEditableData, user }) => {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [dataLoaded, setDataLoaded] = useState(false);
   const fetchOnce = useRef(false);
   const navigate = useNavigate();
@@ -37,6 +37,11 @@ const StipendTable = ({ setEditableData, user }) => {
   const [selectedItem, setSelectedItem] = useState(null); // single selected item for edit/approval
   const [loading, setLoading] = useState(false); // loading state for API calls
 
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [course, setCourse] = useState("All");
+  const [year, setYear] = useState("All");
+  const [rollNo, setRollNo] = useState("");
+
   const months = [
     { number: 1, name: "January" }, { number: 2, name: "February" },
     { number: 3, name: "March" }, { number: 4, name: "April" },
@@ -46,32 +51,33 @@ const StipendTable = ({ setEditableData, user }) => {
     { number: 11, name: "November" }, { number: 12, name: "December" },
   ];
 
+  const fetchStipends = async () => {
+    try {
+      setDataLoaded(true);
+      const response = await axiosInstance.get("/api/stipend/stipend_details", {
+        params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
+      });
+      const result = response.data;
+
+      if (result.success) {
+        setData(result.data);
+      } else {
+        console.error("Failed to fetch stipends:", result.error);
+      }
+    } catch (err) {
+      console.error("Error fetching stipend data:", err);
+    } finally {
+      setDataLoaded(false);
+    }
+  };
+
   // Fetch data from API
   useEffect(() => {
-    const fetchStipends = async () => {
-      try {
-        setDataLoaded(true);
-        const response = await axiosInstance.get("/api/stipend/stipend_details", {
-          params: { role: user.role, month: currentMonth },
-        });
-        const result = response.data;
-
-        if (result.success) {
-          setData(result.data);
-        } else {
-          console.error("Failed to fetch stipends:", result.error);
-        }
-      } catch (err) {
-        console.error("Error fetching stipend data:", err);
-      } finally {
-        setDataLoaded(false);
-      }
-    };
-
+    
     if (!fetchOnce.current) {
       fetchStipends();
     }
-  }, [currentMonth]);
+  }, [currentMonth, course, year]);
 
   // Handle header checkbox
   const handleSelectAll = () => {
@@ -121,7 +127,7 @@ const StipendTable = ({ setEditableData, user }) => {
     if (selected.length === 0) return;
     try{
       const result = await axiosInstance.post("/api/stipend/bulk_approval", {
-        ids: selected, role: user.role
+        ids: selected, role: user.role, userInfo : user
       });
       if(result.data.success){
         alert("Stipends approved successfully");
@@ -153,7 +159,7 @@ const StipendTable = ({ setEditableData, user }) => {
     try {
       setLoading(true);
       const response = await axiosInstance.get("/api/stipend/action_status", {
-        params: { id: selectedItem.id, status : status, role : user.role },
+        params: { id: selectedItem.id, status : status, role : user.role, userInfo : user },
       });
       const result = response.data;
       if (result.success) {
@@ -193,13 +199,13 @@ const StipendTable = ({ setEditableData, user }) => {
       // 🔹 Dynamically get month, year, and batch
       const now = new Date();
       const month = now.toLocaleString("en-US", { month: "long" }); // e.g. "September"
-      const year = now.getFullYear(); // e.g. 2025
-      const batch = `${year - 1}-${year}`; // auto: "2024-2025"
+      const Present_year = now.getFullYear(); // e.g. 2025
+      const batch = `${Present_year - 1}-${Present_year}`; // auto: "2024-2025"
 
       setLoading(true);
       const response = await axiosInstance.post(
         "api/report/stipend_report",
-        { data, month, year, batch }, // send to backend
+        { data, currentMonth, year, batch, course, user }, // send to backend
         {
           headers: { "Content-Type": "application/json" },
           responseType: "blob", // important for PDF
@@ -227,16 +233,43 @@ const StipendTable = ({ setEditableData, user }) => {
 
   return (
     <React.Fragment>
-      <FormControl className="m-4" style={{ minWidth: 200 }}>
-        <InputLabel>Month</InputLabel>
-        <Select value={currentMonth} label="Month" onChange={(e) => setCurrentMonth(e.target.value)}>
-          {months.map((month) => (
-            <MenuItem key={month.number} value={month.number}>
-              {month.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <div style = {{display : "flex", gap : "20px"}}>
+        <TextField className="m-4" style={{ minWidth: 200 }} label="Roll No" value={rollNo}
+          onChange={(e) => setRollNo(e.target.value)} 
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              fetchStipends(); // uses current rollNo from state
+            }
+          }} />
+        <FormControl className="m-4" style={{ minWidth: 200 }}>
+          <InputLabel>Month</InputLabel>
+          <Select value={currentMonth} label="Month" onChange={(e) => setCurrentMonth(e.target.value)}>
+            <MenuItem value="All">All</MenuItem>
+            {months.map((month) => (
+              <MenuItem key={month.number} value={month.number}>
+                {month.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl className="m-4" style={{ minWidth: 200 }}>
+          <InputLabel>Course</InputLabel>
+          <Select value={course}  label="Course" onChange={(e) => setCourse(e.target.value)} >
+            <MenuItem value="All">All</MenuItem>
+            <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+            <MenuItem value="AHS">AHS</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl className="m-4" style={{ minWidth: 200 }}>
+          <InputLabel>Year</InputLabel>
+          <Select value={year} label="Year" onChange={(e) => setYear(e.target.value)} >
+            <MenuItem value="All">All</MenuItem>
+            {[1, 2, 3, 4].map((yr) => (
+              <MenuItem key={yr} value={yr}> {yr} </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
       <div className="mt-16 overflow-x-auto p-4">
         <h2 className="text-xl font-bold mb-4 text-center">
           NIZAM’S INSTITUTE OF MEDICAL SCIENCES, COLLEGE OF ALLIED HEALTH SCIENCES<br />
@@ -270,7 +303,6 @@ const StipendTable = ({ setEditableData, user }) => {
               <th className="border px-2 py-1">Name</th>
               <th className="border px-2 py-1">Course</th>
               <th className="border px-2 py-1">A/C Number</th>
-              <th className="border px-2 py-1">Bank</th>
               <th className="border px-2 py-1">IFSC</th>
               <th className="border px-2 py-1">view</th>
               <th className="border px-2 py-1">Leaves Availed</th>
@@ -303,8 +335,7 @@ const StipendTable = ({ setEditableData, user }) => {
                     <td className="border px-2 py-1">{row.name}</td>
                     <td className="border px-2 py-1">{row.course}</td>
                     <td className="border px-2 py-1">{row.account_no}</td>
-                    <td className="border px-2 py-1">Bank</td>
-                    <td className="border px-2 py-1">IFSC</td>
+                    <td className="border px-2 py-1">{row.ifsc_code || "IFSC"}</td>
                     <td>
                       <button className="text-blue-600 hover:text-blue-800" onClick={() => handleView(row)}>
                         <VisibilityIcon style={{ color: "#4b1d77" }}/>

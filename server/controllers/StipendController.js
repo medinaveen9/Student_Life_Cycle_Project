@@ -23,14 +23,14 @@ const getStudentInfo = async (req, res) => {
 const submitStipend = async (req, res) => {
   try {
     const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, 
-      stipend, actualStipend, cur_month} = req.body;
+      stipend, actualStipend, cur_month, ifsc_code, year} = req.body;
     const {id, isEdit, userId, userRole, user_name} = req.query;
 
     if (!rollNo || !name || !course || !accountNo || !joiningDate) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
-    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month,
+    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year,
       rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, actualStipend});
     return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
   } catch (err) {
@@ -43,7 +43,8 @@ const getAllStipends = async (req, res) => {
   try {
     const role = req.query.role; // e.g., 'Checker', 'Verifier', 'Approver'
     const month = req.query.month; // e.g., '2023-09'
-    const data = await fetchAllStipends(role, month); // call service
+    const {course, year, roll_no} = req.query;
+    const data = await fetchAllStipends(role, month, course, year, roll_no); // call service
     res.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching stipends in controller:', err.message);
@@ -54,11 +55,11 @@ const getAllStipends = async (req, res) => {
 //stipend approval status update
 const stipendApprovalController = async (req, res) => {
   try {
-    const { id, status, role } = req.query;
+    const { id, status, role, userInfo } = req.query;
     if (!id || !status || !role) {
       return res.status(400).json({ success: false, error: 'Missing required query parameters' });
     }
-    const isUpdated = await stipendApprovalStatus(id, status, role);
+    const isUpdated = await stipendApprovalStatus(id, status, role, userInfo);
     if (isUpdated) {
       return res.json({ success: true, message: 'Stipend status updated successfully' });
     } else {
@@ -72,9 +73,9 @@ const stipendApprovalController = async (req, res) => {
 
 const stipendBulkApprovalController = async (req, res) => {
   try {
-    const { ids, role } = req.body;
+    const { ids, role, userInfo } = req.body;
     const status = 'approved'; 
-    const isUpdated = await stipendBulkApproval(ids, status, role);
+    const isUpdated = await stipendBulkApproval(ids, status, role, userInfo);
     if (isUpdated) {
       return res.json({ success: true, message: 'Bulk stipend status updated successfully' });
     } else {
