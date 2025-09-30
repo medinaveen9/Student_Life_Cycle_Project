@@ -65,8 +65,7 @@ const CourseStipendForm = ({user}) => {
                 <label style={styles.form_label}>Course</label>
                 <select style={styles.form_input} required = {true} name="course" value={formData.course} onChange={handleChange} >
                     <option value="">Select</option>
-                    <option value="MPT">MPT</option>
-                    <option value="BPT">BPT</option>
+                    <option value="A.H.S">A.H.S</option>
                     <option value="B.Sc Nursing">B.Sc Nursing</option>
                 </select>
             </div>

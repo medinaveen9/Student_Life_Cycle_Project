@@ -65,20 +65,24 @@ const insertStipendDetails = async (data) => {
       column_name = 'approver_name';
     }
 
+    if(data.isModified === "true") {
+      const updateLeavesQuery = ` UPDATE stipend_data  SET leaves = $1
+        WHERE roll_no = $2 `;
+      await pool.query(updateLeavesQuery, [(data.total_leaves - data.requested_leaves), data.rollNo]);
+    }
+
     // If editing an existing record
     if (data.isEdit && data.id) {
       const query = `
-        UPDATE stipend_details SET 
-          roll_no = $1, name = $2, course = $3, account_no = $4, doj = $5, leaves = $6,
-          present = $7, stipend = $8, actual_stipend = $9, cur_month = $10, 
-          ${column_id} = $11, ${column_name} = $12, ifsc_code = $13, year = $14
-        WHERE id = $15
+        UPDATE stipend_details SET roll_no=$1, name=$2, course=$3, account_no=$4, doj=$5,
+        leaves=$6, present=$7, stipend=$8, actual_stipend=$9, cur_month=$10, requested_leaves=$11,
+        ${column_id}=$12, ${column_name}=$13, ifsc_code=$14, year=$15 WHERE id=$16
       `;
       await pool.query(query, [
         data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
         data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
-        data.cur_month || null, data.userId || null, data.user_name || null,
-        data.ifsc_code, data.year, data.id
+        data.cur_month || null, data.requested_leaves || 0, data.userId || null, data.user_name || null,
+        data.ifsc_code || null, data.year || null, data.id
       ]);
       return;
     }
@@ -93,16 +97,17 @@ const insertStipendDetails = async (data) => {
       const updateRes = await pool.query(
         `UPDATE stipend_details SET 
           name = $1, course = $2, account_no = $3, doj = $4, leaves = $5, 
-          present = $6, stipend = $7, actual_stipend = $8, 
-          ${column_id} = $9, ${column_name} = $10, ifsc_code = $11, year = $12
-        WHERE roll_no = $13 AND cur_month = $14`,
+          present = $6, stipend = $7, actual_stipend = $8, requested_leaves = $9,
+          ${column_id} = $10, ${column_name} = $11, ifsc_code = $12, year = $13
+        WHERE roll_no = $14 AND cur_month = $15`,
         [
           data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
-          data.presentAndHolidays, data.stipend, data.actualStipend,
+          data.presentAndHolidays, data.stipend, data.actualStipend, data.requested_leaves || 0,
           data.userId || null, data.user_name || null,
           data.ifsc_code, data.year, data.rollNo, data.cur_month
         ]
       );
+
       if (updateRes.rowCount > 0) {
         return;
       }
@@ -110,17 +115,19 @@ const insertStipendDetails = async (data) => {
 
     // Insert new record
     const query = `
-      INSERT INTO stipend_details 
-        (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
-         cur_month, ${column_id}, ${column_name}, ifsc_code, year)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-    `;
-    await pool.query(query, [
-      data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
-      data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
-      data.cur_month || null, data.userId || null, data.user_name || null,
-      data.ifsc_code, data.year
-    ]);
+        INSERT INTO stipend_details 
+          (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
+          cur_month, requested_leaves, ${column_id}, ${column_name}, ifsc_code, year)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      `;
+
+      await pool.query(query, [
+        data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
+        data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
+        data.cur_month || null, data.requested_leaves || 0,
+        data.userId || null, data.user_name || null,
+        data.ifsc_code, data.year
+      ]);
 
   } catch (error) {
     console.error('Error inserting stipend details:', error.message);
@@ -131,53 +138,55 @@ const insertStipendDetails = async (data) => {
 // Fetch all stipends
 const fetchAllStipends = async (role, month, course, year, roll_no) => {
   try {
-    let result;
-    let query = '';
     let params = [];
     let conditions = [];
 
     // Month filter
     if (month !== "All") {
-      conditions.push(`cur_month = $${params.length + 1}`);
+      conditions.push(`sd.cur_month = $${params.length + 1}`);
       params.push(month);
     }
 
     // Course filter
     if (course !== "All") {
-      conditions.push(`course = $${params.length + 1}`);
+      conditions.push(`sd.course = $${params.length + 1}`);
       params.push(course);
     }
 
     // Year filter
     if (year !== "All") {
-      conditions.push(`year = $${params.length + 1}`);
+      conditions.push(`sd.year = $${params.length + 1}`);
       params.push(year);
     }
 
-    // Roll No filter only if not empty
+    // Roll No filter
     if (roll_no && roll_no !== "") {
-      conditions.push(`roll_no = $${params.length + 1}`);
+      conditions.push(`sd.roll_no = $${params.length + 1}`);
       params.push(roll_no);
     }
 
-    // Role-based query
-    if (role === 'Checker') {
-      query = `SELECT * FROM stipend_details`;
-    } else if (role === 'Verifier') {
-      query = `SELECT * FROM stipend_details WHERE checker_status = 'approved'`;
-    } else if (role === 'Approver' || role === 'FA' || role === 'FC') {
-      query = `SELECT * FROM stipend_details WHERE checker_status = 'approved' AND verifier_status = 'approved'`;
+    // Base query (role-based)
+    let query = `
+      SELECT sd.*, sdata.leaves AS bal_leaves
+      FROM stipend_details sd
+      LEFT JOIN stipend_data sdata ON sd.roll_no = sdata.roll_no
+    `;
+
+    if (role === "Verifier") {
+      conditions.push(`sd.checker_status = 'approved'`);
+    } else if (role === "Approver" || role === "FA" || role === "FC") {
+      conditions.push(`sd.checker_status = 'approved' AND sd.verifier_status = 'approved'`);
     }
 
-    // Add dynamic conditions
+    // Add conditions
     if (conditions.length > 0) {
-      query += (query.includes('WHERE') ? ' AND ' : ' WHERE ') + conditions.join(' AND ');
+      query += ` WHERE ` + conditions.join(" AND ");
     }
 
-    result = await pool.query(query, params);
+    const result = await pool.query(query, params);
     return result.rows;
   } catch (err) {
-    console.error('Error fetching stipends in service:', err.message);
+    console.error("Error fetching stipends in service:", err.message);
     throw err;
   }
 };
@@ -273,5 +282,37 @@ const addCourseStipend = async (data) => {
   }
 };
 
+//Add student leaves
+const studentLeaveService = async(data) => {
+  const { roll_no, name, course, total_leaves } = data;
+
+  try {
+    // 1. Check if student exists
+    const studentRes = await pool.query(
+      "SELECT * FROM stipend_data WHERE roll_no = $1",
+      [roll_no]
+    );
+
+    if (studentRes.rows.length > 0) {
+      // 2a. Update existing student
+      await pool.query(
+        "UPDATE stipend_data SET name = $1, course = $2, leaves = $3 WHERE roll_no = $4",
+        [name, course, total_leaves, roll_no]
+      );
+      return { message: "Student details updated successfully" };
+    } else {
+      // 2b. Insert new student
+      await pool.query(
+        "INSERT INTO stipend_data (roll_no, name, course, leaves) VALUES ($1, $2, $3, $4)",
+        [roll_no, name, course, total_leaves]
+      );
+      return { message: "Student added successfully" };
+    }
+  } catch (err) {
+    console.error("Error adding/updating student leaves:", err.message);
+    throw err;
+  }
+};
+
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, 
-  stipendApprovalStatus, stipendBulkApproval, addCourseStipend };
+  stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService };

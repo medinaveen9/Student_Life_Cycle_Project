@@ -73,8 +73,7 @@ const MedicalFeeNote = lazy(() => import('./Forms/Certificates/MedicalFeeNote'))
 const ObserversAttendance = lazy(() => import('./Forms/Certificates/ObserverAttendance'));
 const ObserverPermission = lazy(() => import('./Forms/Certificates/ObserverPermission'));
 const ProvisionalAdmission = lazy(() => import('./Forms/Certificates/ProvisionalAdmission'));
-const StipendForm = lazy(() => import('./Forms/Certificates/StipendForm'));
-const StipendTable = lazy(() => import('./Forms/Certificates/StipendTable'));
+
 const StipendTableAgreements = lazy(() => import('./Forms/Certificates/StipendTableAgreements'));
 
 const GCAdministrativeInformation = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/AdministrativeInformation'));
@@ -93,6 +92,9 @@ const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplication
 const SelectCertificatePage = lazy(() => import('./Forms/Certificates/SelectCertificate'));
 const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
 const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
+const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
+const StipendTable = lazy(() => import('./Forms/StipendManagement/StipendTable'));
+const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
 
 const App = () => {
   const location = useLocation();
@@ -210,6 +212,8 @@ const App = () => {
                   <Route path="/stipendform" element={<StipendForm editableData = {editableData} 
                     user = {user} setEditableData = {setEditableData}/>} />
                   <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
+                    user = {user} />} />
+                  <Route path="/leavesmanagement" element={<LeavesManagement setEditableData = {setEditableData} 
                     user = {user} />} />
                   <Route path="/stipendagreements" element={<StipendTableAgreements />} />
 

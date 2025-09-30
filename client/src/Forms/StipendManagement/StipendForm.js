@@ -4,7 +4,7 @@ import axiosInstance from '../../components/AxiosInstance';
 
 const StipendForm = ({ editableData, user, setEditableData }) => {
   const [formData, setFormData] = useState({
-    rollNo: '',
+    rollNo: '', available_leaves : "", requested_leaves : 0,
     name: '',
     course: '',
     accountNo: '',
@@ -20,7 +20,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
   const [studentData, setStudentData] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   const [uniqueID, setUniqueID] = useState(null);
-  
+  const [isModified, setIsModified] = useState(false);
   
 
   const fetchOnce = useRef(false);
@@ -49,7 +49,11 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
           actualStipend: editableData.actual_stipend || "",
           cur_month : editableData.cur_month || (new Date().getMonth() + 1),
           ifsc_code : editableData.ifsc_code || "",
-          year : editableData.year || ""
+          year : editableData.year || "",
+          requested_leaves : editableData.requested_leaves || 0,
+          available_leaves : editableData.bal_leaves,
+          leaves : editableData.bal_leaves
+
         };
         setFormData(data);
         setIsEdit(true);
@@ -68,6 +72,20 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     // allow only after student fetched
     if (!studentData && name !== "rollNo") 
       return;
+
+
+    if (name === "requested_leaves") {
+      if(isEdit && !isModified) {
+        studentData.leaves = Number(studentData.leaves) + Number(formData.requested_leaves);
+        setIsModified(true);
+      }
+      if (studentData.leaves >= value) {
+        setFormData((prev) => ({ ...prev, [name]: value, available_leaves : studentData.leaves}));
+      } else {
+        alert(`You only have ${studentData.leaves} available leave(s). Requested leaves cannot exceed this.`);
+      }
+      return;
+    }
 
     if(name === "cur_month") {
       setFormData((prev) => ({ ...prev, [name]: value,
@@ -121,7 +139,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
             accountNo: data.account_no || '',
             joiningDate: data.doj   ?new Date(data.doj).toISOString().split('T')[0] : '',
             ifsc_code : data.ifsc_code,
-            year : data.year
+            year : data.year,
+            available_leaves : data.leaves
           }));
           setStudentData(data);
         } else {
@@ -147,8 +166,10 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     if (submitting) return; // prevent double submit
     setSubmitting(true);
     try {
+      formData.total_leaves = studentData.leaves;
       const res = await axiosInstance.post("/api/stipend/submit", formData, {
-        params: { id: uniqueID, isEdit, userId : user.userId, userRole : user.role, user_name : user.user_name  },
+        params: { id: uniqueID, isEdit, userId : user.userId, userRole : user.role, 
+          user_name : user.user_name, isModified : isModified  },
       });
       alert(res.data.message || "Stipend submitted successfully");
       setFormData({
@@ -192,9 +213,6 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
               { name: 'November', value: 11 }, { name: 'December', value: 12 },
             ],
           },
-          { label: 'No of Leaves Availed', name: 'leavesBalance', type: 'number', required : true },
-          { label: 'Days Present + Holidays', name: 'presentAndHolidays', type: 'number', required : true },
-          { label: 'Stipend to Pay', name: 'stipend', type: 'text', required : true },
         ].map((field) => (
           <div key={field.name}>
             <label className="block text-sm font-semibold text-gray-700 mb-1">{field.label}</label>
@@ -210,8 +228,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                   ))}
                 </select>
               ) : (   
-                    <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting} 
-                      name={field.name}
+                    <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || field.name === "stipend"} 
+                      name={field.name} 
                       type={field.type}
                       value={formData[field.name]}
                       onChange={handleChange}
@@ -221,6 +239,40 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
               )}
                   </div>
             ))}
+            {formData.course === "A.H.S" && (
+              <React.Fragment>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">No of Available Leaves</label>
+                  <input required={true} disabled  name = "availbale_leaves" type= "text"
+                    value={formData["available_leaves"]} onChange={handleChange} 
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">No of Requested Leaves</label>
+                  <input required={true}  name = "requested_leaves" type= "text"
+                    value={formData["requested_leaves"]} onChange={handleChange} 
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        />
+                </div>
+              </React.Fragment>
+            )}
+            {[
+            { label: 'No of Absents', name: 'leavesBalance', type: 'number', required : true },
+            { label: 'Days Present + Holidays', name: 'presentAndHolidays', type: 'number', required : true },
+            { label: 'Stipend to Pay', name: 'stipend', type: 'text', required : true },
+          ].map((field) => (
+            <div key={field.name}>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                {field.label + ((formData.course === "A.H.S" && field.name === "presentAndHolidays") ? " + Requested Leaves" : "")}
+              </label>
+              <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || field.name === "stipend"} 
+                name={field.name}  type={field.type} value={formData[field.name]}
+                onChange={handleChange} onKeyDown={field.onKeyDown}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
+          ))}
           </div>
 
       <div className="text-center mt-8">

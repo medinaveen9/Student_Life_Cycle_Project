@@ -1,6 +1,6 @@
 // const stipendService = require('../services/StipendService');
 
-const { getStudentDetails, insertStipendDetails ,fetchAllStipends,
+const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend} = require('../services/StipendService');
 
 const getStudentInfo = async (req, res) => {
@@ -22,16 +22,17 @@ const getStudentInfo = async (req, res) => {
 
 const submitStipend = async (req, res) => {
   try {
-    const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, 
-      stipend, actualStipend, cur_month, ifsc_code, year} = req.body;
-    const {id, isEdit, userId, userRole, user_name} = req.query;
+    const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, requested_leaves,  
+      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves} = req.body;
+    const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
 
     if (!rollNo || !name || !course || !accountNo || !joiningDate) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
-    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year,
-      rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, actualStipend});
+    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year, requested_leaves,
+      rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, 
+      actualStipend, total_leaves, isModified});
     return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
   } catch (err) {
     console.error('Error submitting stipend:', err.message);
@@ -105,5 +106,15 @@ const addCourseStipendController = async (req, res) => {
   }   
 };
 
+const addOrUpdateStudentLeave = async (req, res) => {
+  try {
+    const data = req.body;
+    const result = await studentLeaveService(data);
+    res.status(200).json({ message: result.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Something went wrong!" });
+  }
+};
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
-   stipendBulkApprovalController, addCourseStipendController };
+   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave};

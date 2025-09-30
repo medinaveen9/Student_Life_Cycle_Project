@@ -35,8 +35,10 @@ const Sidebar = ({user}) => {
       subItems: [
         {id:'StipendForm', label:'Stipend Form', path:'/stipendform'},
         {id:'StipendTable', label:'Stipend Table', path:'/stipendtable'},
+        {id:'Leaves Management', label:'Leaves Management', path:'/leavesmanagement'},
       ]
     },
+    
     {
       id: 'Certificates',
       label: 'Certificates',
