@@ -174,14 +174,19 @@ const fetchAllStipends = async (role, month, course, year, roll_no) => {
 
     if (role === "Verifier") {
       conditions.push(`sd.checker_status = 'approved'`);
-    } else if (role === "Approver" || role === "FA" || role === "FC") {
+    } else if (role === "Approver") {
       conditions.push(`sd.checker_status = 'approved' AND sd.verifier_status = 'approved'`);
+    } else if (role === "FA" || role === "FC") {
+      conditions.push(`sd.approver_status = 'approved'`);
     }
 
     // Add conditions
     if (conditions.length > 0) {
       query += ` WHERE ` + conditions.join(" AND ");
     }
+
+    // Sort by roll_no
+    query += ` ORDER BY sd.roll_no ASC`;
 
     const result = await pool.query(query, params);
     return result.rows;
@@ -314,5 +319,99 @@ const studentLeaveService = async(data) => {
   }
 };
 
-module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, 
+const autoFillStipendData = async (course, month, userId, user_name) => {
+  try {
+    const year = new Date().getFullYear();
+    const totalDays = new Date(year, month, 0).getDate();
+
+    // 1️⃣ Get students
+    const studentQuery = course === "All"
+      ? `SELECT * FROM stipend_data`
+      : `SELECT * FROM stipend_data WHERE course = $1`;
+    const studentsRes = await pool.query(studentQuery, course === "All" ? [] : [course]);
+    const students = studentsRes.rows;
+    if (students.length === 0) return 0;
+
+    // 2️⃣ Get existing stipend records for this month/year
+    const rollNos = students.map(s => s.roll_no);
+    const existingRes = await pool.query(
+      `SELECT roll_no FROM stipend_details WHERE cur_month=$1 AND year=$2 AND roll_no = ANY($3)`,
+      [month, year, rollNos]
+    );
+    const existingRolls = new Set(existingRes.rows.map(r => r.roll_no));
+
+    // 3️⃣ Fetch stipend per student course + academic year
+    const stipendMap = {}; // key = course_year
+    for (const s of students) {
+      const key = `${s.course}_${s.year}`;
+      if (stipendMap[key] !== undefined) continue;
+
+      const stipendRes = await pool.query(
+        `SELECT stipend 
+         FROM course_stipend
+         WHERE course=$1 AND year=$2
+           AND ((to_date IS NULL AND from_date <= CURRENT_DATE)
+             OR (to_date IS NOT NULL AND from_date <= CURRENT_DATE AND to_date >= CURRENT_DATE))
+         ORDER BY from_date DESC LIMIT 1`,
+        [s.course, s.year]
+      );
+
+      stipendMap[key] = stipendRes.rows[0]?.stipend || 0;
+    }
+
+    // 4️⃣ Prepare bulk insert values
+    const insertValues = [];
+    const params = [];
+    let paramIndex = 1;
+
+    students.forEach(s => {
+      if (existingRolls.has(s.roll_no)) return; // skip existing
+
+      insertValues.push(
+        `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`
+      );
+
+      const stipendVal = stipendMap[`${s.course}_${s.year}`] || 0;
+
+      params.push(
+        s.roll_no,
+        s.name,
+        s.course,
+        s.account_no,
+        s.doj,
+        0,               // leaves
+        totalDays,       // present
+        stipendVal,
+        stipendVal,
+        month,
+        0,               // requested_leaves
+        s.ifsc_code,
+        s.year,
+        userId,
+        user_name
+      );
+    });
+
+    if (insertValues.length === 0) return 0;
+
+    // 5️⃣ Bulk insert
+    const insertQuery = `
+      INSERT INTO stipend_details 
+        (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend,
+         cur_month, requested_leaves, ifsc_code, year, checker_id, checker_name)
+      VALUES ${insertValues.join(", ")}
+    `;
+    await pool.query(insertQuery, params);
+
+    return insertValues.length;
+
+  } catch (err) {
+    console.error("Error in autoFillStipendData:", err.message);
+    throw err;
+  }
+};
+
+
+
+module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService };

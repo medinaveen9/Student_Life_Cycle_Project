@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../components/AxiosInstance';
-import {Button} from "@mui/material"
+import {Box, Button, CircularProgress } from "@mui/material";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 const StipendForm = ({ editableData, user, setEditableData }) => {
   const [formData, setFormData] = useState({
@@ -22,13 +26,24 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [uniqueID, setUniqueID] = useState(null);
   const [isModified, setIsModified] = useState(false);
-  
+    const [selectedCourse, setSelectedCourse] = useState("All");
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
-  const fetchOnce = useRef(false);
+    const fetchOnce = useRef(false);
 
-  const [loading, setLoading] = useState(false); // new state
-  const [submitting, setSubmitting] = useState(false); // disable submit button
-  const [isFormDisabled, setIsFormDisabled] = useState(true); 
+    const months = [
+        { number: 1, name: "January" }, { number: 2, name: "February" },
+        { number: 3, name: "March" }, { number: 4, name: "April" },
+        { number: 5, name: "May" }, { number: 6, name: "June" },
+        { number: 7, name: "July" }, { number: 8, name: "August" },
+        { number: 9, name: "September" }, { number: 10, name: "October" },
+        { number: 11, name: "November" }, { number: 12, name: "December" },
+    ];
+
+    const [loading, setLoading] = useState(false); // new state
+    const [submitting, setSubmitting] = useState(false); // disable submit button
+    const [isFormDisabled, setIsFormDisabled] = useState(true); 
+    const [autoFillLoading, setAutoFillLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -117,6 +132,31 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     }
   };
 
+  //Handle autofill
+  const handleAutoFill = async () => {
+    try {
+        setAutoFillLoading(true);
+
+        // Example API call (GET request with course in query)
+        const res = await axiosInstance.post(`/api/stipend/auto-fill`, null, {
+            params: { course: selectedCourse, month: selectedMonth, userId : user.userId,
+                 userRole : user.role, user_name : user.user_name,
+            },
+        });
+
+        if (res.data.success) {
+            alert(res.data.message || "Auto fill completed successfully!");
+        } else {
+            alert(res.data.error || "Failed to auto fill stipends.");
+        }
+    } catch (error) {
+        console.error("Error autofilling stipends:", error);
+        alert("Server error while autofilling stipend data.");
+    } finally {
+        setAutoFillLoading(false);
+    }
+  };
+
   // 🔹 Fetch details when Roll No entered + Enter pressed
   const handleRollNoKeyDown = async (e) => {
     if (e.key === 'Enter') {
@@ -188,6 +228,41 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
 
   return (
     <React.Fragment>
+        <Box sx = {{display : "flex", justifyContent : "space-between"}}>
+            <Box sx = {{display : "flex", gap : "20px"}}>
+                <FormControl className="m-4" style={{ minWidth: 200 }}>
+                    <InputLabel>Month</InputLabel>
+                    <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
+                        {months.map((month) => (
+                        <MenuItem key={month.number} value={month.number}>
+                            {month.name}
+                        </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl className="m-4" style={{ minWidth: 200 }}>
+                    <InputLabel>Course</InputLabel>
+                    <Select value={selectedCourse}  label="Course" onChange={(e) => setSelectedCourse(e.target.value)} >
+                        <MenuItem value="All">All</MenuItem>
+                        <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+                        <MenuItem value="A.H.S">A.H.S</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
+            <Button variant="contained" sx={{ backgroundColor: "#2563eb", "&:hover": 
+            { backgroundColor: "#1d4ed8" }, "&:disabled": { backgroundColor: "#9ca3af", 
+                cursor: "not-allowed" }, color: "#fff", fontWeight: 600, py: 1.5, px: 4, 
+                    borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
+                        transition: "all 0.3s ease" }}
+                            onClick={handleAutoFill} disabled={autoFillLoading}>
+                                {autoFillLoading ? (
+                                        <CircularProgress size={24} sx={{ color: "white" }} />
+                                    ) : (
+                                        "Auto Fill Stipends"
+                                    )}
+                            </Button>
+            
+        </Box>
       <form
         onSubmit={handleSubmit}
         className="max-w-4xl mx-auto mt-20 p-8 bg-white shadow-lg rounded-3xl border border-gray-200"
@@ -230,7 +305,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                     ))}
                   </select>
                 ) : (   
-                      <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || field.name === "stipend"} 
+                      <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || 
+                            field.name !== "rollNo" || field.name !== "rollNo"} 
                         name={field.name} 
                         type={field.type}
                         value={formData[field.name]}
@@ -241,7 +317,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                 )}
                     </div>
               ))}
-              {formData.course === "A.H.S" && (
+              
                 <React.Fragment>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">No of Available Leaves</label>
@@ -258,7 +334,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                           />
                   </div>
                 </React.Fragment>
-              )}
+              
               {[
               { label: 'No of Absents', name: 'leavesBalance', type: 'number', required : true },
               { label: 'Days Present + Holidays', name: 'presentAndHolidays', type: 'number', required : true },
@@ -268,7 +344,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   {field.label + ((formData.course === "A.H.S" && field.name === "presentAndHolidays") ? " + Requested Leaves" : "")}
                 </label>
-                <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || field.name === "stipend"} 
+                <input required={field.required}  disabled={(isFormDisabled && field.name !== "rollNo") 
+                    || loading || submitting || field.name !== "leavesBalance" } 
                   name={field.name}  type={field.type} value={formData[field.name]}
                   onChange={handleChange} onKeyDown={field.onKeyDown}
                   className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"

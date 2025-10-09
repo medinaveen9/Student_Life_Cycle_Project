@@ -64,6 +64,7 @@ const Header = ({user}) => {
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
+              <MenuItem onClick={() => { handleMenuClose(); navigate("/change-password"); }}>Change Password</MenuItem>
               <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>
           </Stack>

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getStudentInfo, submitStipend ,getAllStipends,  addCourseStipendController, addOrUpdateStudentLeave,
-    stipendApprovalController, stipendBulkApprovalController} = require('../controllers/StipendController');
+    stipendApprovalController, stipendBulkApprovalController, autoFillStipends } = require('../controllers/StipendController');
 
 const { verifyToken } = require('../config/VerifyToken');
  
@@ -12,6 +12,7 @@ router.get('/action_status', verifyToken, stipendApprovalController);
 router.post('/bulk_approval', verifyToken, stipendBulkApprovalController);
 router.post('/add_course_stipend', verifyToken, addCourseStipendController);
 router.post('/add_leave', verifyToken, addOrUpdateStudentLeave);
+router.post("/auto-fill", autoFillStipends);
 
 module.exports = router;
 

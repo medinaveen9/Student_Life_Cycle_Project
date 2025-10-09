@@ -3,6 +3,7 @@ const path = require("path");
 const {numberToWords, formatYear} = require("../config/Utils");
 const {pool} =require("../models/db");
 const fs = require('fs');
+const { generateExcel } = require("../services/ReportService");
 
 const generateReport = async (req, res) => {
   try {
@@ -67,6 +68,7 @@ const generateReport = async (req, res) => {
         <td>${idx + 1}</td>
         <td>${row.roll_no}</td>
         <td style="text-align:left;">${row.name}</td>
+        <td style="text-align:left;">${monthsData[row?.cur_month] + " " + reportYear}</td>
         ${user.role !== "Checker"
           ? `<td>${row.account_no}</td><td>${row.ifsc_code}</td>`
           : ""}
@@ -130,64 +132,66 @@ const generateReport = async (req, res) => {
       </head>
       <body>
         <!-- Page 1 -->
-        <div class="page">
-          <div class="header">
-            <div class="logo-box">
-              <img src="${imgSrc}" alt="NIMS Logo" class="logo" />
-            </div>
-            <div class="university-details">
-              <div>Nizam's Institute of Medical Sciences</div>
-              (A University established under the State Act)<br/>
-              Punjagutta: Hyderabad -500 082
-            </div>
-          </div>
-
-          <div class="rc-date">
-            <div>Rc.No.AC-2/161/2021/Stipend B.Sc (N)</div>
-            <div>Date: ${reportDate}</div>
-          </div>
-
-          <div class="sanction-order-title">SANCTION ORDER</div>
-          <div class="section-heading">Sub:  AD-AC-2 - Sanction of stipend to B.Sc. (N) ${formattedYear} year students for the month of ${monthsData[reportMonth]}, ${reportYear} - Sanction orders - Issued - Reg.</div>
-
-          <div class="section-heading">Ref:</div>
-          <ul>
-            <li>G.O.Ms.No. 150, HM & FW Dept Dt: 03.11.2021</li>
-            <li>This O/o No. AC2/161/2021/Stipend, Dt: 01.04.2022</li>
-            <li>Letter No. CON/03/348, Dated 23/07/2025 received from Principal, CON</li>
-            <li>Note approval Dated 06-08-2025.</li>
-          </ul>
-
-          <p style="text-align:center; font-size:14pt; margin:20px 0;">***</p>
-          <div class="content-block">
-              As per the orders issued vide reference 1st & 2nd cited, the ${formattedYear} year B.Sc.(N) students are eligible to draw the stipend of Rs. ${formattedStipend}/- per month (${formattedStipendWords} only) till the end of 1 year course excluding the students those who are drawing scholarship.
-          </div>
-          <div class="content-block">
-                Sanction is hereby accorded for an amount of Rs. ${formattedTotal}/- (Rupees ${totalInWords} only) towards stipend to be disbursed to the ${formattedYear} year B.Sc (N) students for the month of ${monthsData[reportMonth]}, ${reportYear}. The stipend shall be paid every month based on the attendance received from I/c Principal, College of Nursing.
+        ${(user.role === "FA" || user.role === "FC") ? `
+          <div class="page">
+            <div class="header">
+              <div class="logo-box">
+                <img src="${imgSrc}" alt="NIMS Logo" class="logo" />
+              </div>
+              <div class="university-details">
+                <div>Nizam's Institute of Medical Sciences</div>
+                (A University established under the State Act)<br/>
+                Punjagutta: Hyderabad -500 082
+              </div>
             </div>
 
+            <div class="rc-date">
+              <div>Rc.No.AC-2/161/2021/Stipend B.Sc (N)</div>
+              <div>Date: ${reportDate}</div>
+            </div>
+
+            <div class="sanction-order-title">SANCTION ORDER</div>
+            <div class="section-heading">Sub:  AD-AC-2 - Sanction of stipend to B.Sc. (N) ${formattedYear} year students for the month of ${monthsData[reportMonth]}, ${reportYear} - Sanction orders - Issued - Reg.</div>
+
+            <div class="section-heading">Ref:</div>
+            <ul>
+              <li>G.O.Ms.No. 150, HM & FW Dept Dt: 03.11.2021</li>
+              <li>This O/o No. AC2/161/2021/Stipend, Dt: 01.04.2022</li>
+              <li>Letter No. CON/03/348, Dated 23/07/2025 received from Principal, CON</li>
+              <li>Note approval Dated 06-08-2025.</li>
+            </ul>
+
+            <p style="text-align:center; font-size:14pt; margin:20px 0;">***</p>
             <div class="content-block">
-                The claims section is hereby requested to claim the stipend and arrange for the disbursement of stipend to issue an individual through NEFT transfer to the ${formattedYear} year B.Sc.(N) students mentioned at annexure on the claim made by the Principal, College of Nursing, NIMS.
+                As per the orders issued vide reference 1st & 2nd cited, the ${formattedYear} year B.Sc.(N) students are eligible to draw the stipend of Rs. ${formattedStipend}/- per month (${formattedStipendWords} only) till the end of 1 year course excluding the students those who are drawing scholarship.
             </div>
-
             <div class="content-block">
-                The expenditure shall be debited to the Head of account "General Administration charges" - Academic fund account.
+                  Sanction is hereby accorded for an amount of Rs. ${formattedTotal}/- (Rupees ${totalInWords} only) towards stipend to be disbursed to the ${formattedYear} year B.Sc (N) students for the month of ${monthsData[reportMonth]}, ${reportYear}. The stipend shall be paid every month based on the attendance received from I/c Principal, College of Nursing.
+              </div>
+
+              <div class="content-block">
+                  The claims section is hereby requested to claim the stipend and arrange for the disbursement of stipend to issue an individual through NEFT transfer to the ${formattedYear} year B.Sc.(N) students mentioned at annexure on the claim made by the Principal, College of Nursing, NIMS.
+              </div>
+
+              <div class="content-block">
+                  The expenditure shall be debited to the Head of account "General Administration charges" - Academic fund account.
+              </div>
+            <div class="signature-block">
+              <div>Dr.D.Sree Bhushan Raju</div>
+              Associate Dean (AC-2)
             </div>
-          <div class="signature-block">
-            <div>Dr.D.Sree Bhushan Raju</div>
-            Associate Dean (AC-2)
-          </div>
 
-          <div class="footer-block">
-              To<br/>
-              The Claims Section, NIMS.
-          </div>
+            <div class="footer-block">
+                To<br/>
+                The Claims Section, NIMS.
+            </div>
 
-          <div class="footer-block">
-              Copy to:<br/>
-              The Principal CON, with a request to send the monthly attendance report to claims section.
-          </div>
-        </div>
+            <div class="footer-block">
+                Copy to:<br/>
+                The Principal CON, with a request to send the monthly attendance report to claims section.
+            </div>
+          </div> ` : ""
+        }
 
         <!-- Page 2 -->
         <div class="page">
@@ -207,6 +211,7 @@ const generateReport = async (req, res) => {
                 <th rowspan="2" style="width:5%;">S.No.</th>
                 <th rowspan="2" style="width:8%;">ROLL No.</th>
                 <th rowspan="2" style="width:25%;">NAME OF THE STUDENT</th>
+                <th rowspan="2" style="width:25%;">Month</th>
                 ${extraHeaderColumns}
                 <th colspan="2" style="width:17%;">ATTENDANCE</th>
                 <th rowspan="2" style="width:10%;">AMOUNT</th>
@@ -219,7 +224,7 @@ const generateReport = async (req, res) => {
             <tbody>
               ${rowsHtml}
               <tr class="total-amount-row">
-                <td colspan="${user.role !== 'Checker' ? 7 : 5}">Total:</td>
+                <td colspan="${user.role !== 'Checker' ? 8 : 6}">Total:</td>
                 <td>${formattedTotal}</td>
               </tr>
             </tbody>
@@ -253,4 +258,22 @@ const generateReport = async (req, res) => {
   }
 };
 
-module.exports = { generateReport };
+const downloadExcel = async (req, res) => {
+  try {
+    const excelBuffer = await generateExcel(req.body);
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=stipend-report.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(excelBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error generating Excel");
+  }
+};
+
+module.exports = { generateReport, downloadExcel };

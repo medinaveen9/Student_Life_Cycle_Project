@@ -1,7 +1,7 @@
 // const stipendService = require('../services/StipendService');
 
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService,
-   stipendApprovalStatus, stipendBulkApproval, addCourseStipend} = require('../services/StipendService');
+   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData } = require('../services/StipendService');
 
 const getStudentInfo = async (req, res) => {
   try {
@@ -116,5 +116,25 @@ const addOrUpdateStudentLeave = async (req, res) => {
   }
 };
 
+const autoFillStipends = async (req, res) => {
+  try {
+    const { course, month, userId, user_name } = req.query;
+
+    if (!course) {
+      return res.status(400).json({ success: false, error: "Course is required" });
+    }
+
+    const insertedCount = await autoFillStipendData(course, month, userId, user_name);
+    res.status(200).json({
+      success: true,
+      message: `${insertedCount} stipend records auto-filled successfully`
+    });
+
+  } catch (error) {
+    console.error("Error auto-filling stipend:", error.message);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
-   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave};
+   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends};

@@ -96,6 +96,10 @@ const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
 const StipendTable = lazy(() => import('./Forms/StipendManagement/StipendTable'));
 const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
 
+const DemoStipendForm = lazy(() => import('./Forms/StipendManagement/DemoStipendForm'));
+const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/DemoStipendTable'));
+const ChangePassword = lazy(() => import("./components/ChangePassword"));
+
 const App = () => {
   const location = useLocation();
   const [formData, setFormData] = useState({});
@@ -213,6 +217,13 @@ const App = () => {
                     user = {user} setEditableData = {setEditableData}/>} />
                   <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
                     user = {user} />} />
+
+                  <Route path="/demo/stipendform" element={<DemoStipendForm editableData = {editableData} 
+                    user = {user} setEditableData = {setEditableData}/>} />
+                  <Route path="/demo/stipendtable" element={<DemoStipendTable setEditableData = {setEditableData} 
+                    user = {user} />} />
+
+
                   <Route path="/leavesmanagement" element={<LeavesManagement setEditableData = {setEditableData} 
                     user = {user} />} />
                   <Route path="/stipendagreements" element={<StipendTableAgreements />} />
@@ -237,6 +248,9 @@ const App = () => {
                   <Route path="/selectcertificate" element={<SelectCertificatePage user = {user}/>} />
                   <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
                   <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
+
+                  {/*Change Password */}
+                  <Route path="/change-password" element={<ChangePassword user = {user}/>} />
                 </Routes>
               
             </Box>

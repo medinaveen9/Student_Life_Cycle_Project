@@ -9,8 +9,8 @@ const RoleAssignment = () => {
     department: "",
     section: "",
     role: "",
-    fromDate: "",
-    toDate: "",
+    fromDate: null,
+    toDate: null,
   });
 
   // Internal styles object

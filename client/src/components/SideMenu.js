@@ -36,6 +36,8 @@ const Sidebar = ({user}) => {
         {id:'StipendForm', label:'Stipend Form', path:'/stipendform'},
         {id:'StipendTable', label:'Stipend Table', path:'/stipendtable'},
         {id:'Leaves Management', label:'Leaves Management', path:'/leavesmanagement'},
+        {id:'DemoStipendForm', label:'Demo Stipend Form', path:'/demo/stipendform'},
+        {id:'DemoStipendTable', label:'Demo Stipend Table', path:'/demo/stipendtable'},
       ]
     },
     
@@ -52,7 +54,7 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: ["Approver"],
+      role: [],
       subItems: [
         { id: 'ApproverDashboard' , label:'Approver Dashboard', path:'/approver'}
       ]
@@ -101,7 +103,7 @@ const Sidebar = ({user}) => {
       id: 'ApplicationFormBPT',
       label: 'Bachelor of Physiotherapy Application',
       hasSubMenu: true,
-      role: ["Checker"],
+      role: [],
       subItems: [
        
         {id:'AdministrativeInformation' ,label:'Administrative Information', path:'/administrative' },
@@ -120,7 +122,7 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: ["Checker"],
+      role: [],
       subItems: [
         { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
       ]

@@ -1,4 +1,5 @@
 const {pool} =require("../models/db");
+const bcrypt = require('bcrypt');
 
 const getAdministrtaionInfo = async (application_no) => {
   try {
@@ -279,22 +280,51 @@ const employeeRoleService = async (data) => {
   try {
     // Check if employee already exists
     const checkEmp = await pool.query(
-      "SELECT * FROM employees_role WHERE employee_code = $1", [data.employeeCode] );
+      "SELECT * FROM employees_role WHERE employee_code = $1", [data.employeeCode]
+    );
 
     let employee;
     if (checkEmp.rowCount > 0) {
       // Update existing employee
-      const updateQuery = "UPDATE employees_role SET employee_name = $2, department = $3, section = $4, role = $5, from_date = $6, to_date = $7 WHERE employee_code = $1 RETURNING *;";
-      const updateValues = [data.employeeCode, data.employeeName, data.department, data.section, data.role, data.fromDate, data.toDate];
+      const updateQuery = `
+        UPDATE employees_role 
+        SET employee_name = $2, department = $3, section = $4, role = $5, from_date = $6, to_date = $7 
+        WHERE employee_code = $1 
+        RETURNING *;
+      `;
+      const updateValues = [
+        data.employeeCode,
+        data.employeeName,
+        data.department,
+        data.section,
+        data.role,
+        data.fromDate,
+        data.toDate
+      ];
       const updateResult = await pool.query(updateQuery, updateValues);
       employee = updateResult.rows[0];
-    } 
-    else {
-      const insertQuery = "INSERT INTO employees_role (employee_code, employee_name, department, section, role, from_date, to_date) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;";
-      const insertValues = [data.employeeCode, data.employeeName, data.department, data.section, data.role, data.fromDate, data.toDate];
+    } else {
+      const insertQuery = `
+        INSERT INTO employees_role 
+        (employee_code, employee_name, department, section, role, from_date, to_date) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        RETURNING *;
+      `;
+      const insertValues = [
+        data.employeeCode,
+        data.employeeName,
+        data.department,
+        data.section,
+        data.role,
+        data.fromDate,
+        data.toDate
+      ];
       const insertResult = await pool.query(insertQuery, insertValues);
       employee = insertResult.rows[0];
     }
+
+    // Hash the default password
+    const hashedPassword = await bcrypt.hash("12345", 10); // 10 salt rounds
 
     // Check if user already exists
     const checkUser = await pool.query(
@@ -309,10 +339,14 @@ const employeeRoleService = async (data) => {
         [data.employeeCode, data.role, data.employeeName]
       );
     } else {
-      // Insert new user with default password
-      await pool.query( `INSERT INTO users_details (user_id, password, role, user_name)
-         VALUES ($1, $2, $3, $4)`, [data.employeeCode, "12345", data.role, data.employeeName] );
+      // Insert new user with hashed password
+      await pool.query(
+        `INSERT INTO users_details (user_id, password, role, user_name)
+         VALUES ($1, $2, $3, $4)`,
+        [data.employeeCode, hashedPassword, data.role, data.employeeName]
+      );
     }
+
     return employee;
   } catch (error) {
     console.error("Failed to insert/update employee role:", error.message);
