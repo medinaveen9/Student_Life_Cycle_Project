@@ -29,6 +29,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     const [selectedCourse, setSelectedCourse] = useState("All");
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
     const fetchOnce = useRef(false);
 
     const months = [
@@ -123,12 +125,37 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       const stipendPerDay = studentData.actualStipend / daysInMonth;
       const presentDays = daysInMonth - Number(value);
       const calStipend = presentDays * stipendPerDay;
-      setFormData((prev) => ({ ...prev, stipend: Math.floor(calStipend), 
+      // Round down if below .5, else round up
+      const roundedStipend = calStipend % 1 < 0.5 ? Math.floor(calStipend) : Math.ceil(calStipend);
+
+      setFormData((prev) => ({ ...prev, stipend: roundedStipend, 
           presentAndHolidays : presentDays, actualStipend : studentData.actualStipend,
         [name]: value }));
     }
     else{
       setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Handle Delete Stipend Records
+  const handleDeleteStipend = async () => {
+    try {
+      setDeleteLoading(true);
+
+      const res = await axiosInstance.post(`/api/stipend/delete`, null, {
+        params: { course: selectedCourse, month: selectedMonth },
+      });
+
+      if (res.data.success) {
+        alert(res.data.message || "Stipend records deleted successfully!");
+      } else {
+        alert(res.data.error || "Failed to delete stipend records.");
+      }
+    } catch (error) {
+      console.error("Error deleting stipends:", error);
+      alert("Server error while deleting stipend data.");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -249,18 +276,33 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                     </Select>
                 </FormControl>
             </Box>
-            <Button variant="contained" sx={{ backgroundColor: "#2563eb", "&:hover": 
-            { backgroundColor: "#1d4ed8" }, "&:disabled": { backgroundColor: "#9ca3af", 
-                cursor: "not-allowed" }, color: "#fff", fontWeight: 600, py: 1.5, px: 4, 
-                    borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
-                        transition: "all 0.3s ease" }}
-                            onClick={handleAutoFill} disabled={autoFillLoading}>
-                                {autoFillLoading ? (
-                                        <CircularProgress size={24} sx={{ color: "white" }} />
-                                    ) : (
-                                        "Auto Fill Stipends"
-                                    )}
-                            </Button>
+            <Box sx = {{display : "flex", gap : "20px",}}>
+              <Button variant="contained" sx={{ textTransform : "initial", backgroundColor: "#2563eb", "&:hover": 
+                { backgroundColor: "#1d4ed8" }, "&:disabled": { backgroundColor: "#9ca3af", 
+                    cursor: "not-allowed" }, color: "#fff", fontWeight: 600, py: 1.5, px: 4, 
+                        borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
+                            transition: "all 0.3s ease" }}
+                                onClick={handleAutoFill} disabled={autoFillLoading}>
+                                    {autoFillLoading ? (
+                                            <CircularProgress size={24} sx={{ color: "white" }} />
+                                        ) : (
+                                            "Auto Fill Stipends"
+                                        )}
+                                </Button>
+              <Button variant="contained" sx={{ textTransform: "initial", backgroundColor: "#dc2626",
+                    "&:hover": { backgroundColor: "#b91c1c" },
+                    "&:disabled": { backgroundColor: "#9ca3af", cursor: "not-allowed" },
+                    color: "#fff", fontWeight: 600, py: 1.5, px: 4, borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    transition: "all 0.3s ease",
+                  }}
+                  onClick={handleDeleteStipend} disabled={deleteLoading} >
+                  {deleteLoading ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Delete Stipends"
+                  )}
+              </Button>
+            </Box>
             
         </Box>
       <form

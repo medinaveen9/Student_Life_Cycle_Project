@@ -33,14 +33,13 @@ const Sidebar = ({user}) => {
       hasSubMenu: true,
       role: ["Checker", "Approver", "Verifier", "FA", "FC"],
       subItems: [
-        {id:'StipendForm', label:'Stipend Form', path:'/stipendform'},
-        {id:'StipendTable', label:'Stipend Table', path:'/stipendtable'},
+        // {id:'StipendForm', label:'Stipend Form', path:'/stipendform'},
+        // {id:'StipendTable', label:'Stipend Table', path:'/stipendtable'},
+        {id:'Stipend Form', label:'Stipend Form', path:'/stipendform'},
+        {id:'Stipend Table', label:'Stipend Table', path:'/stipendtable'},
         {id:'Leaves Management', label:'Leaves Management', path:'/leavesmanagement'},
-        {id:'DemoStipendForm', label:'Demo Stipend Form', path:'/demo/stipendform'},
-        {id:'DemoStipendTable', label:'Demo Stipend Table', path:'/demo/stipendtable'},
       ]
     },
-    
     {
       id: 'Certificates',
       label: 'Certificates',

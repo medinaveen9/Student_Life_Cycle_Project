@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, InputAdornment, IconButton, Typography, MenuItem } from '@mui/material';
+import { Box, TextField, Button, InputAdornment, IconButton, Typography, MenuItem, Link } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
@@ -36,12 +36,12 @@ const LoginForm = ({ setUser}) => {
       if(resRole === "Maker") {
         navigate("/selectcertificate");
       } else if(resRole === "Checker") {
-        navigate("/checker");
+        navigate("/stipendform");
       } else if(resRole === "Approver") {
-        navigate("/approver");
+        navigate("/stipendform");
       }
       else if(resRole === "Verifier") {
-        navigate("/approver");
+        navigate("/stipendform");
       }
       else if(resRole === "FA") {
         navigate("/stipendform");
@@ -97,13 +97,8 @@ const LoginForm = ({ setUser}) => {
 
         <form onSubmit={handleSubmit} className="form_container">
           <TextField label="User ID" name="userId" fullWidth value={formData.userId} onChange={handleChange} required />
-          <TextField
-            label="Password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            fullWidth
-            value={formData.password}
-            onChange={handleChange}
+          <TextField label="Password" name="password" type={showPassword ? 'text' : 'password'}
+            fullWidth value={formData.password} onChange={handleChange}
             required
             InputProps={inputProps}
           />
@@ -111,7 +106,8 @@ const LoginForm = ({ setUser}) => {
             sx={{ backgroundColor: "#4b1d77", color: "white", textTransform: "initial", fontSize: "18px", "&.Mui-disabled": { backgroundColor: "#ccc", color: "#666", cursor: "not-allowed" } }}>
             Login
           </Button>
-
+          <Typography onClick = {() => navigate("/forgot-password")} 
+            className = "forgot-link">Forgot Password?</Typography>
         </form>
       </Box>
     </Box>
@@ -119,3 +115,4 @@ const LoginForm = ({ setUser}) => {
 };
 
 export default LoginForm;
+ 

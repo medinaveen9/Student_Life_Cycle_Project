@@ -11,7 +11,10 @@ const RoleAssignment = () => {
     role: "",
     fromDate: null,
     toDate: null,
+    email : ""
   });
+
+  const [loading, setLoading] = useState(false);
 
   // Internal styles object
   const styles = {
@@ -67,11 +70,14 @@ const RoleAssignment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       await axiosInstance.post("/api/master/employee_role", formData);
       alert("Employee Role Assigned successfully!");
     } catch (error) {
       console.error("Error saving employee:", error);
       alert("Failed to Assign Role");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,6 +137,13 @@ const RoleAssignment = () => {
         />
       </div>
 
+      {/* Email */}
+      <div style={styles.form_group}>
+        <label style={styles.form_label}>Email</label>
+        <input style={styles.form_input} type="text" name="email" value={formData.email}
+          onChange={handleInputChange} required />
+      </div>
+
       {/* Role */}
       <div style={styles.form_group}>
         <label style={styles.form_label}>Select Role</label>
@@ -175,9 +188,7 @@ const RoleAssignment = () => {
         />
       </div>
 
-      <button type="submit" style={styles.button_style}>
-        Submit
-      </button>
+      <button type="submit" style={styles.button_style} disabled = {loading}>Submit </button>
     </form>
   );
 };

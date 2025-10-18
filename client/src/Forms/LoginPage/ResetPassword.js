@@ -1,41 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Alert } from "@mui/material";
-import axiosInstance from "./AxiosInstance";
+import axiosInstance from "../../components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
+import "../../styles/RegistrationForm.css";
 
-const ChangePassword = ({ user }) => {
-  const [oldPassword, setOldPassword] = useState("");
+const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [severity, setSeverity] = useState("success"); // "success" | "error"
+  const [severity, setSeverity] = useState("success");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const token = new URLSearchParams(window.location.search).get("token");
 
   const handleSubmit = async () => {
     if (newPassword !== confirmPassword) {
-      setMessage("New password and confirm password do not match.");
+      setMessage("Passwords do not match");
       setSeverity("error");
       return;
     }
 
     try {
       setLoading(true);
-      await axiosInstance.post("/api/user/change-password", {
-        userId: user.userId,
-        oldPassword,
+      const res = await axiosInstance.post("/api/user/reset-password", {
+        token,
         newPassword,
       });
-      setMessage("Password changed successfully!");
-      alert("Password changed successfully! Please log in again.");
-      setSeverity("success");
-      navigate("/login");
 
-      // Clear inputs after success
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      setMessage(res.data.message || "Password reset successfully!");
+      setSeverity("success");
+
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setMessage(err.response?.data?.message || "Error occurred");
       setSeverity("error");
@@ -43,14 +39,6 @@ const ChangePassword = ({ user }) => {
       setLoading(false);
     }
   };
-
-  // Auto-hide message after 3 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(""), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
 
   return (
     <Box
@@ -63,19 +51,10 @@ const ChangePassword = ({ user }) => {
       }}
     >
       <Typography variant="h6" mb={2}>
-        Change Password
+        Reset Password
       </Typography>
 
-      <TextField
-        fullWidth
-        type="password"
-        label="Old Password"
-        value={oldPassword}
-        onChange={(e) => setOldPassword(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-
-      <TextField
+      <TextField required
         fullWidth
         type="password"
         label="New Password"
@@ -83,8 +62,7 @@ const ChangePassword = ({ user }) => {
         onChange={(e) => setNewPassword(e.target.value)}
         sx={{ mb: 2 }}
       />
-
-      <TextField
+      <TextField required
         fullWidth
         type="password"
         label="Confirm Password"
@@ -99,16 +77,14 @@ const ChangePassword = ({ user }) => {
         </Alert>
       )}
 
-      <Button
-        variant="contained"
-        fullWidth
-        disabled={loading}
-        onClick={handleSubmit}
-      >
-        Change Password
+      <Button variant="contained" fullWidth onClick={handleSubmit} disabled={loading}
+        sx={{ backgroundColor: "#4b1d77", color: "white", textTransform: "initial", fontSize: "18px", "&.Mui-disabled": { backgroundColor: "#ccc", color: "#666", cursor: "not-allowed" } }}>
+        Reset Password
       </Button>
+      <Typography onClick = {() => navigate("/login")} 
+                      className = "forgot-link">Back to Login</Typography>
     </Box>
   );
 };
 
-export default ChangePassword;
+export default ResetPassword;

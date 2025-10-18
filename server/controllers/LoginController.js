@@ -1,4 +1,4 @@
-const { userAuthentication } = require("../services/LoginService");
+const { userAuthentication, changePasswordService, forgotPasswordService , resetPasswordService   } = require("../services/LoginService");
 const { createToken } = require("../config/VerifyToken");
 
 // Controller for user login
@@ -38,4 +38,58 @@ const userLogout = async (req, res) => {
     }
 };
 
-module.exports = { userLogin ,verifyUser, userLogout};
+//Change password
+const changePassword = async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    if (!userId || !oldPassword || !newPassword)
+      return res.status(400).json({ success: false, message: "All fields required" });
+
+    const result = await changePasswordService(userId, oldPassword, newPassword);
+    res.status(result.success ? 200 : 400).json(result);
+
+  } catch (err) {
+    console.error("Change Password Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const forgotPasswordController = async (req, res) => {
+  try {
+    const { email, userId } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    await forgotPasswordService(email, userId);
+
+    res.status(200).json({ message: "Password reset link sent to your email" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message || "Something went wrong" });
+  }
+};
+
+// Reset password controller
+const resetPasswordController = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "Token and new password are required" });
+    }
+
+    await resetPasswordService(token, newPassword);
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: err.message || "Invalid token or expired" });
+  }
+};
+
+module.exports = { userLogin ,verifyUser, userLogout, changePassword, forgotPasswordController,
+  resetPasswordController
+};

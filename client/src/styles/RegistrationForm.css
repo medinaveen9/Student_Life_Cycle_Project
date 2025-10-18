@@ -68,6 +68,17 @@
   margin-bottom: 6px;
 }
 
+.forgot-link {
+  text-align: right;
+  text-decoration: none;
+  cursor: pointer;
+  color: #1976d2;
+  padding-top : 10px;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
   
 
   

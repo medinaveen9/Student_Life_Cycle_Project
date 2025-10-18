@@ -333,17 +333,20 @@ const employeeRoleService = async (data) => {
     );
 
     if (checkUser.rowCount > 0) {
-      // Update only role and user_name
+      // Update only role, user_name, and email
       await pool.query(
-        `UPDATE users_details SET role = $2, user_name = $3 WHERE user_id = $1`,
-        [data.employeeCode, data.role, data.employeeName]
+        `UPDATE users_details 
+        SET role = $2, user_name = $3, email = $4 
+        WHERE user_id = $1`,
+        [data.employeeCode, data.role, data.employeeName, data.email] // use data.email
       );
     } else {
       // Insert new user with hashed password
       await pool.query(
-        `INSERT INTO users_details (user_id, password, role, user_name)
-         VALUES ($1, $2, $3, $4)`,
-        [data.employeeCode, hashedPassword, data.role, data.employeeName]
+        `INSERT INTO users_details 
+        (user_id, password, role, user_name, email, reset_token, reset_token_expiry)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [data.employeeCode, hashedPassword, data.role, data.employeeName, data.email, null, null]
       );
     }
 

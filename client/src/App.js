@@ -98,7 +98,9 @@ const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesMana
 
 const DemoStipendForm = lazy(() => import('./Forms/StipendManagement/DemoStipendForm'));
 const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/DemoStipendTable'));
-const ChangePassword = lazy(() => import("./components/ChangePassword"));
+const PasswordManager = lazy(() => import("./components/ChangePassword"));
+const ForgotPassword = lazy(() => import("./Forms/LoginPage/ForgotPassword"));
+const ResetPassword = lazy(() => import("./Forms/LoginPage/ResetPassword"));
 
 const App = () => {
   const location = useLocation();
@@ -124,7 +126,7 @@ const App = () => {
 
   // Re-verify user on route change
   useEffect(() => { 
-    if(window.location.pathname !== '/login')  {
+    if (!["/login", "/forgot-password", "/reset-password"].includes(window.location.pathname)) {
       verifyUser();
     }
   }, [window.location.pathname]);
@@ -137,6 +139,7 @@ const App = () => {
       {isRegistration ? (
         <Routes>
           <Route path="/login" element={<LoginForm setUser = {setUser} />} />
+          
         </Routes>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -213,14 +216,10 @@ const App = () => {
                   <Route path="/observerattendance" element={<ObserversAttendance />} />
                   <Route path="/observpermisson" element={<ObserverPermission />} />
                   <Route path="/proadmission" element={<ProvisionalAdmission />} />
-                  <Route path="/stipendform" element={<StipendForm editableData = {editableData} 
-                    user = {user} setEditableData = {setEditableData}/>} />
-                  <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
-                    user = {user} />} />
 
-                  <Route path="/demo/stipendform" element={<DemoStipendForm editableData = {editableData} 
+                  <Route path="/stipendform" element={<DemoStipendForm editableData = {editableData} 
                     user = {user} setEditableData = {setEditableData}/>} />
-                  <Route path="/demo/stipendtable" element={<DemoStipendTable setEditableData = {setEditableData} 
+                  <Route path="/stipendtable" element={<DemoStipendTable setEditableData = {setEditableData} 
                     user = {user} />} />
 
 
@@ -250,9 +249,10 @@ const App = () => {
                   <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
 
                   {/*Change Password */}
-                  <Route path="/change-password" element={<ChangePassword user = {user}/>} />
+                  <Route path="/change-password" element={<PasswordManager user={user} />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                 </Routes>
-              
             </Box>
           </Box>
         </Box>

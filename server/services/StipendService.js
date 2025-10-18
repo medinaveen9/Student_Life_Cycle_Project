@@ -335,8 +335,8 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
     // 2️⃣ Get existing stipend records for this month/year
     const rollNos = students.map(s => s.roll_no);
     const existingRes = await pool.query(
-      `SELECT roll_no FROM stipend_details WHERE cur_month=$1 AND year=$2 AND roll_no = ANY($3)`,
-      [month, year, rollNos]
+      `SELECT roll_no FROM stipend_details WHERE cur_month=$1 AND roll_no = ANY($2)`,
+      [month, rollNos]
     );
     const existingRolls = new Set(existingRes.rows.map(r => r.roll_no));
 
@@ -411,7 +411,27 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
   }
 };
 
+// Delete stipend data
+const deleteStipendData = async (course, month) => {
+  try {
+    const year = new Date().getFullYear();
+
+    const deleteQuery = course === "All"
+      ? `DELETE FROM stipend_details WHERE cur_month=$1`
+      : `DELETE FROM stipend_details WHERE cur_month=$1 AND course=$2`;
+
+    const params = course === "All" ? [month] : [month, course];
+
+    const result = await pool.query(deleteQuery, params);
+    return result.rowCount;
+  } catch (err) {
+    console.error("Error in deleteStipendData:", err.message);
+    throw err;
+  }
+};
+
+
 
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
-  stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService };
+  stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData};

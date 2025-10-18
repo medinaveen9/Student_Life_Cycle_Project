@@ -1,6 +1,6 @@
 // const stipendService = require('../services/StipendService');
 
-const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService,
+const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData } = require('../services/StipendService');
 
 const getStudentInfo = async (req, res) => {
@@ -136,5 +136,24 @@ const autoFillStipends = async (req, res) => {
   }
 };
 
+const deleteStipends = async (req, res) => {
+  try {
+    const { course, month } = req.query;
+    if (!course || month === undefined) {
+      return res.status(400).json({ success: false, error: "Course and month are required" });
+    }
+
+    const deletedCount = await deleteStipendData(course, month);
+    res.status(200).json({
+      success: true,
+      message: `${deletedCount} stipend records deleted successfully`
+    });
+  } catch (error) {
+    console.error("Error deleting stipend records:", error.message);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
-   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends};
+   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
+  deleteStipends};

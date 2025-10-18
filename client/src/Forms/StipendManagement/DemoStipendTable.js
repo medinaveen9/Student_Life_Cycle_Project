@@ -112,7 +112,7 @@ const StipendTable = ({ setEditableData, user }) => {
   // Handle Edit
   const handleEdit = (row) => {
     setEditableData(row);
-    navigate("/demo/stipendform");
+    navigate("/stipendform");
   };
 
   // Handle Approval

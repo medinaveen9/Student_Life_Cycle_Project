@@ -20,6 +20,14 @@ const Header = ({user}) => {
     setAnchorEl(null);
   };
 
+  //Handle Profile click
+  const handleProfileClick = () => {
+    handleMenuClose();
+    navigate("/change-password");
+  }
+
+
+
   //Handle logout
   const handleLogoutClick = async () => {
     handleMenuClose();
@@ -64,7 +72,7 @@ const Header = ({user}) => {
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-              <MenuItem onClick={() => { handleMenuClose(); navigate("/change-password"); }}>Change Password</MenuItem>
+              <MenuItem onClick={handleProfileClick}>Change Password</MenuItem>
               <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>
           </Stack>
