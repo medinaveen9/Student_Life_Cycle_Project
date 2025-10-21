@@ -53,9 +53,18 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: [],
+      role: ["Approver",],
       subItems: [
         { id: 'ApproverDashboard' , label:'Approver Dashboard', path:'/approver'}
+      ]
+    },
+    {
+      id: 'Certificates',
+      label: 'Certificates',
+      hasSubMenu: true,
+      role: ["Checker"],
+      subItems: [
+        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
       ]
     },
     
@@ -117,15 +126,7 @@ const Sidebar = ({user}) => {
         {id:'ApplicationReport' ,label:'Application Report', path:'/report' },
       ]
     },
-    {
-      id: 'Certificates',
-      label: 'Certificates',
-      hasSubMenu: true,
-      role: [],
-      subItems: [
-        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
-      ]
-    },
+    
     {
       id: 'Application Report BPT',
       label: 'BPT Application Report ',

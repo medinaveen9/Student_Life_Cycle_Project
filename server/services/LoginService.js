@@ -12,7 +12,7 @@ const userAuthentication = async ({ userId, password }) => {
     const result = await pool.query(sql, [userId]);
 
     if (result.rows.length === 0) {
-      return { success: false, message: "User not found or role mismatch" };
+      return { success: false, message: "User not found" };
     }
 
     const user = result.rows[0];
