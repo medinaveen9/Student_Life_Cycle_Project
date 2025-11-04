@@ -1,6 +1,7 @@
 const express = require("express");
-const { administrationDetails, personalInfo, contactDetails,educationDetails,
-  paymentDetails, getSelectedCourseName,getAdministrtaionInfo,getPersonalInfo, employeeRoleService
+const { administrationDetails, personalInfo, contactDetails,educationDetails, 
+  paymentDetails, getSelectedCourseName,getAdministrtaionInfo,getPersonalInfo, employeeRoleService,
+  getStudentInfo
 } = require("../services/MasterService");
 
 const administration = async (req, res) => {
@@ -41,6 +42,28 @@ const fetchAdministration = async (req, res) => {
   }
 };
 
+// Controller for fetching combined student information
+const fetchStudentInfo = async (req, res) => {
+  try {
+    const { application_no } = req.query;
+
+    if (!application_no) {
+      return res.status(400).json({ success: false, message: "Application number is required" });
+    }
+
+    const result = await getStudentInfo(application_no);
+
+    if (result.success) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(404).json(result);
+    }
+  } catch (err) {
+    console.error("Error in fetchStudentInfo:", err.message);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
 
 
 const personal = async (req, res) => {
@@ -75,6 +98,7 @@ const fetchPersonal = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
 const contact = async (req, res) => {
   try {
     const formData = req.body;
@@ -162,4 +186,4 @@ const employeeRoleController = async (req, res) => {
 
 
 module.exports = { administration, personal,  contact, education, payment, getCourseName,
-  fetchAdministration,fetchPersonal, employeeRoleController};
+  fetchAdministration,fetchPersonal, employeeRoleController, fetchStudentInfo};

@@ -6,38 +6,21 @@ const  {MongoClient} = require('mongodb');
 
 
 // const pool = new Pool({
-//     user: "shanmukasagar",
-//     host: "ep-red-grass-a1ch12cb-pooler.ap-southeast-1.aws.neon.tech" ,
-//     database: "research_forms",
-//     password: "NIMSforms@123",
-//     port: 5432,
-//     ssl: { rejectUnauthorized: false }
-// });
-// const pool = new Pool({
 //   user: "neondb_owner",
-//   host: "ep-sparkling-hill-a1u749gy-pooler.ap-southeast-1.aws.neon.tech",
+//   host: "ep-floral-recipe-adwtj77g-pooler.c-2.us-east-1.aws.neon.tech",
 //   database: "Student_LifeCycle",
-//   password: "npg_VNP9fR0LeObo",
+//   password: "npg_riZ7A8BKwXuY",
 //   port: 5432,
-//   ssl: { rejectUnauthorized: false }
+//   ssl: { require: true, rejectUnauthorized: false }
 // });
 
 const pool = new Pool({
-  user: "neondb_owner",
-  host: "ep-floral-recipe-adwtj77g-pooler.c-2.us-east-1.aws.neon.tech",
-  database: "Student_LifeCycle",
-  password: "npg_riZ7A8BKwXuY",
-  port: 5432,
-  ssl: { require: true, rejectUnauthorized: false }
+    user: "postgres",          // default user
+    host: "localhost",         // local db
+    database: "Student_LifeCycle",  // database you created
+    password: "postgres", // the password you set
+    port: 5432
 });
-
-// const pool = new Pool({
-//     user: "postgres",          // default user
-//     host: "localhost",         // local db
-//     database: "student_lifecycle",  // database you created
-//     password: "naveen", // the password you set
-//     port: 5432
-// });
 
 let client;
 let isConnected = false;

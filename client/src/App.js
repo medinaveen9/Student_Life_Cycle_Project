@@ -7,8 +7,9 @@ import AppBar from './components/AppBar';
 import Sidebar from './components/SideMenu';
 
 // Lazy imports
+{/* Login Component */}
 const LoginForm = lazy(() => import('./Forms/LoginPage/LoginForm'));
-const CheckerDashboard = lazy(() => import('./Forms/LoginPage/CheckerDashboard'));
+
 const ApproverDashboard = lazy(() => import('./Forms/LoginPage/ApproverDashboard'));
 
 const TransferCertificate = lazy(() => import('./Forms/Certificates/TransferCertificate'));
@@ -89,18 +90,28 @@ const MPTReportUploads = lazy(() => import('./Forms/MasterPhysiotherapyApplicati
 const GcReportPersonalAcademicInfo = lazy(() => import('./Forms/GeneticCounsellingApplicationCourseReport/GcPersonalAcademicInfo'));
 const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplicationCourseReport/GcUploads'));
 
-const SelectCertificatePage = lazy(() => import('./Forms/Certificates/SelectCertificate'));
 const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
 const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
 const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
 const StipendTable = lazy(() => import('./Forms/StipendManagement/StipendTable'));
 const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
 
+{/*Welcome Page Component */}
+const WelcomePage = lazy(() => import('./components/Welcome'));
+
+{/* Demo Components for Stipend Management */}
 const DemoStipendForm = lazy(() => import('./Forms/StipendManagement/DemoStipendForm'));
 const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/DemoStipendTable'));
+
+{/* Password Management Components */}
 const PasswordManager = lazy(() => import("./components/ChangePassword"));
 const ForgotPassword = lazy(() => import("./Forms/LoginPage/ForgotPassword"));
 const ResetPassword = lazy(() => import("./Forms/LoginPage/ResetPassword"));
+
+{/* Certificate Selection and Dashboard Components */ }
+const CertificateSelection = lazy(() => import('./Forms/CertificateForms/SelectCertificate'));
+const CertificatesDashboard = lazy(() => import('./Forms/CertificateForms/CertificatesDashboard'));
+
 
 const App = () => {
   const location = useLocation();
@@ -149,8 +160,8 @@ const App = () => {
             <Sidebar user = {user}/>
             <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                 <Routes location={location}>
-                  <Route path="/" element={<TransferCertificate />} />
-                  <Route path="/checker" element ={<CheckerDashboard/>} />
+                  <Route path="/tc" element={<TransferCertificate />} />
+                  
                   <Route path="/approver" element={<ApproverDashboard/>} />
                   <Route path="/nurs2y" element={<BscNursing2Year />} />
                   <Route path="/nurs3y" element={<BscNursing3Year />} />
@@ -205,6 +216,9 @@ const App = () => {
                   <Route path="/uploads" element={<Uploads />} />
                   <Route path="/report" element={<ApplicationReport />} />
 
+                  {/* Welcome Page */}
+                  <Route path="/" element={<WelcomePage user={user} />} />
+
                   {/* Certificates */}
                   <Route path="/attendancecertificate" element={<Attendance_Certificate />} />
                   <Route path="/custodian" element={<Custodian />} />
@@ -244,7 +258,10 @@ const App = () => {
                   <Route path="/gcuploads" element={<GcReportUploads />} />
 
                   {/* Certificates */}
-                  <Route path="/selectcertificate" element={<SelectCertificatePage user = {user}/>} />
+                  <Route path="/selectcertificate" element={<CertificateSelection user = {user}/>} />
+                  <Route path="/certificates/dashboard" element ={<CertificatesDashboard user = {user}/>} />
+
+                  {/* Administration Assignment */ }
                   <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
                   <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
 

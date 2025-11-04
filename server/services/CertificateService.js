@@ -1,26 +1,79 @@
 const {pool} =require("../models/db");
+const { v4: uuidv4 } = require("uuid");
 
 //Certificate Request Service
+
 const CertificateService = async (data) => {
     try {
-        const result = await pool.query(
-            `INSERT INTO certificate_requests 
-                (application_no,name, department, course_name, course_type, certificate_type, receipt_no, amount, 
-                date_of_payment,approver_status,approver_comments,checker_status,checker_comments) 
-                VALUES ($1, $2, $3, $4, $5, $6,$7,$8,$9,$10,$11,$12,$13) 
-                RETURNING *`,
-                [
-                  data.application_no,data.name,data.department, data.course_name, data.course_type, 
-                  data.certificate_type, data.receipt_no,data.amount,  data.date_of_payment,
-                  data.approver_status,data.approver_comments,data.checker_status,data.checker_comments
-                ]
-        );
+        // Generate a unique ID
+        const requestId = uuidv4();
+        const query = `
+            INSERT INTO certificates
+                (request_id, roll_no, name, department, course_name, certificate_type, data)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+            `;
+            const values = [requestId, 
+                data.roll_no, data.name, data.department, data.course_name, data.certificate_type,
+                data.data, // JSONB
+            ];
+
+            const result = await pool.query(query, values);
+            return requestId;
+    } catch (err) {
+        console.error("Failed to create certificate request:", err);
+        throw err;
+    }
+};
+
+// Fetch certificates based on role
+const getAllCertificates = async (userData) => {
+    try {
+        const role = userData.role?.toLowerCase(); // checker | approver | verifier
+        let query = `SELECT * FROM certificates`;
+        let values = [];
+
+        if (role === "approver") {
+            query += ` WHERE verifier_status IN ('approved', 'rejected')`;
+        } 
+        else if (role === "verifier") {
+            query += ` WHERE checker_status IN ('approved', 'rejected')`;
+        }
+        // ✅ "checker" gets everything (default)
+        query += ` ORDER BY created_at DESC`;
+        const result = await pool.query(query, values);
+        return result.rows;
+    } catch (err) {
+        console.error("Failed to fetch certificates:", err);
+        throw err;
+    }
+};
+
+const updateVerificationStatus = async (requestId, certificateId, status, answers, user) => {
+    try {
+        const role = user.role?.toLowerCase(); // role: checker | approver | verifier
+        const statusField = `${role}_status`;  // dynamic field name
+        const idField = `${role}_id`;          // e.g., checker_id
+        const nameField = `${role}_name`;      // e.g., checker_name
+
+        const query = `
+            UPDATE certificates SET ${statusField} = $1, verification = $2, ${idField} = $3,
+          ${nameField} = $4
+            WHERE request_id = $5 AND id = $6
+            RETURNING *; `;
+
+        const values = [
+            status, JSON.stringify(answers), user.userId, user.user_name, requestId, certificateId
+        ];
+
+        const result = await pool.query(query, values);
         return result.rows[0];
-    } catch (error) {
-        console.error("Failed to create certificate request:", error.message);
-        throw error;
+
+    } catch (err) {
+        console.error("Failed to update verification status:", err);
+        throw err;
     }
 };
 
 
-module.exports = { CertificateService };
+module.exports = { CertificateService, getAllCertificates, updateVerificationStatus  };

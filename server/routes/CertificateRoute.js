@@ -1,20 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const multer = require("multer");
+const { verifyToken } = require('../config/VerifyToken');
 
-const { createCertificateRequest, uploadRequiredDocuments, fetchUploadedFiles,
-  getFileById  } = require('../controllers/CertificateController');
+const { createCertificateRequest, uploadRequiredDocuments, fetchUploadedFiles, getCertificatesDashboard,
+  getFileById , updateStatus } = require('../controllers/CertificateController');
 const { get } = require('mongoose');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Route to fetch student information based on application number and course type
-router.post('/request_form', createCertificateRequest);
+router.post("/request_form", verifyToken, createCertificateRequest);
+router.get("/dashboard",  verifyToken, getCertificatesDashboard);
+router.get("/files",  verifyToken, fetchUploadedFiles);
+router.post("/verification",  verifyToken, updateStatus);
 
-router.post( "/upload/:responseId",
-  upload.fields([ { name: "files" }, { name: "provfiles" },  { name: "duefiles" }, 
-    { name: "feefiles" },  
-  ]),
+// Upload certificate files
+router.post("/upload/:responseId",
+  upload.fields([
+    { name: "Required Certificates" }, { name: "Provisional Certificate" }, { name: "No Due" }, { name: "Fee Receipt" }, ]),
   uploadRequiredDocuments
 );
 

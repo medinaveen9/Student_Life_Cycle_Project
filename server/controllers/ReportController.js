@@ -195,6 +195,7 @@ const generateReport = async (req, res) => {
 
         <!-- Page 2 -->
         <div class="page">
+          <!--
           <div class="note-section">
             <div class="note-title">
               <div>Note: -349-</div>
@@ -202,6 +203,7 @@ const generateReport = async (req, res) => {
             </div>
             186) Kindly peruse the letter... attendance details as follows:
           </div>
+          -->
 
           <div class="main-heading">ATTENDANCE DETAILS FOR ${formattedYear} YEAR ${monthsData[reportMonth]}, ${reportYear}</div>
 
@@ -234,11 +236,13 @@ const generateReport = async (req, res) => {
       </html>
     `;
 
-    // ---- Puppeteer ----
+     // ---- Puppeteer ----
     const browser = await puppeteer.launch({
       headless: "new",
+      executablePath: "C:\\Users\\Tullimilli\\.cache\\puppeteer\\chrome\\win64-142.0.7444.59\\chrome-win64\\chrome.exe", // 👈 local offline Chromium
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
+
     const page = await browser.newPage();
 
     await page.setContent(combinedHtml, { waitUntil: "domcontentloaded" });
@@ -253,7 +257,7 @@ const generateReport = async (req, res) => {
     });
     res.send(pdfBuffer);
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    console.error("❌ Error generating PDF:", error);
     res.status(500).send("Error generating PDF");
   }
 };

@@ -53,7 +53,7 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: ["Approver",],
+      role: ["",],
       subItems: [
         { id: 'ApproverDashboard' , label:'Approver Dashboard', path:'/approver'}
       ]
@@ -62,9 +62,9 @@ const Sidebar = ({user}) => {
       id: 'Certificates',
       label: 'Certificates',
       hasSubMenu: true,
-      role: ["Checker"],
+      role: ["Checker", "Verifier", "Approver"],
       subItems: [
-        { id: 'CheckerDashboard' ,label:'Checker Dashboard', path:'/checker'},
+        { id: 'CertificatesDashboard' ,label:'Certificates Dashboard', path:'/certificates/dashboard'},
       ]
     },
     

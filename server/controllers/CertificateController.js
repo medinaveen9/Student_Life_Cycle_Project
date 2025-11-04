@@ -1,69 +1,61 @@
-const { CertificateService } = require('../services/CertificateService');
+const { CertificateService, getAllCertificates, updateVerificationStatus} = require('../services/CertificateService');
 const { MongoClient, GridFSBucket, ObjectId  } = require('mongodb');
 
 // Create certificate request
 const createCertificateRequest = async (req, res) => {
     try {
-        const data = req.body; 
-        const certificate = await CertificateService(data);
-        if(!certificate) {
-            return res.status(400).json({ error: "Failed to create certificate request" });
+        const { roll_no, name, department, course_name, certificate_type, certificate_details } = req.body;
+
+        if (!roll_no || !certificate_type) {
+        return res.status(400).json({ error: "Roll number and certificate type are required" });
         }
-        return res.status(201).json({
-            message: "Certificate request created successfully",
-            certificate
+
+        const certificate_id = await CertificateService({
+            roll_no, name, department, course_name, certificate_type, data: certificate_details,
         });
-    } 
-    catch (error) {
-        console.error("Error creating certificate request:", error.message);
+
+        res.status(201).json({ message: "Certificate request created successfully", certificate_id });
+    } catch (err) {
+        console.error("Error creating certificate request:", err);
         res.status(500).json({ error: "Failed to create certificate request" });
     }
 };
 
+// Upload files to MongoDB GridFS
 const uploadRequiredDocuments = async (req, res) => {
     try {
         const responseId = req.params.responseId;
-        if (!responseId) {
-            return res.status(400).json({ error: "Response ID is required" });
-        }
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ error: "No files uploaded" });
-        }
-        
+        if (!responseId) return res.status(400).json({ error: "Response ID is required" });
+        if (!req.files || Object.keys(req.files).length === 0)
+        return res.status(400).json({ error: "No files uploaded" });
+
         const client = new MongoClient(process.env.MONGO_URI);
         await client.connect();
         const db = client.db("Student_LifeCycle");
-        const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" })
-    
+        const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
+
         for (const fieldName of Object.keys(req.files)) {
-            const fileArray = req.files[fieldName]; // Each field has an array of files
-            for (const file of fileArray) {
-                const newFileName = `${Date.now()}-${file.originalname}`;
-
-                const uploadStream = bucket.openUploadStream(newFileName, {
-                    chunkSizeBytes: 255 * 1024,
-                    metadata: {
-                        form_id: responseId,
-                        file_name: newFileName,
-                        originalName: file.originalname,
-                        contentType: file.mimetype,
-                        certificate_type: req.body.certificate_type || "N/A",
-                        fieldName: file.fieldname,
-                    },
-                });
-
-                uploadStream.on("finish", () => {
-                    console.log(`File saved with _id: ${uploadStream.id}`);
-                });
-
-                uploadStream.end(file.buffer);
-            }
+        const fileArray = req.files[fieldName];
+        for (const file of fileArray) {
+            const newFileName = `${Date.now()}-${file.originalname}`;
+            const uploadStream = bucket.openUploadStream(newFileName, {
+            chunkSizeBytes: 255 * 1024,
+            metadata: {
+                certificate_id: responseId,
+                originalName: file.originalname,
+                fieldName: file.fieldname,
+                certificate_type: req.body.certificate_type || "N/A",
+            },
+            });
+            uploadStream.end(file.buffer);
         }
+        }
+
         res.status(200).json({ message: "Files uploaded successfully!" });
-    } catch (error) {
-        console.error("Upload failed:", error);
+    } catch (err) {
+        console.error("Upload failed:", err);
         res.status(500).json({ error: "Upload failed" });
-    }   
+    }
 };
 
 // Fetch uploaded files by response ID
@@ -77,15 +69,14 @@ const fetchUploadedFiles = async (req, res) => {
         await client.connect();
         const db = client.db("Student_LifeCycle");
         const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
-        const filesCursor = bucket.find({ "metadata.form_id": responseId });
+        const filesCursor = bucket.find({ "metadata.certificate_id": responseId });
         const files = await filesCursor.toArray();
         if (files.length === 0) {
-            return res.status(404).json({ error: "No files found for this response ID" });
+            return res.status(200).json([]);
         }
         const fileInfos = files.map(file => ({
             id: file._id,
             filename: file.filename,
-            contentType: file.metadata.contentType,
             originalName: file.metadata.originalName,   
             uploadDate: file.uploadDate,
             certificate_type: file.metadata.certificate_type,
@@ -111,7 +102,7 @@ const getFileById = async (req, res) => {
         // fetch metadata to know contentType
         const fileDoc = await filesColl.findOne({ _id: oid });
         if (!fileDoc) {
-        return res.status(404).json({ error: "File not found" });
+            return res.status(404).json({ error: "File not found" });
         }
 
         const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
@@ -135,4 +126,38 @@ const getFileById = async (req, res) => {
     }
 };
 
-module.exports = { createCertificateRequest, uploadRequiredDocuments, fetchUploadedFiles, getFileById };
+// Fetch Certificates
+const getCertificatesDashboard = async (req, res) => {
+    try {
+        const userData = req.user; // Assuming user data is attached to req object
+        const certificates = await getAllCertificates(userData);
+        res.status(200).json(certificates);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const updateStatus = async (req, res) => {
+    try {
+        const { request_id, certificate_id, status, answers, user } = req.body;
+
+        if (!request_id || !certificate_id || !status) {
+            return res.status(400).json({ error: "Missing required fields!" });
+        }
+
+        const updated = await updateVerificationStatus(
+            request_id, certificate_id, status, answers, user );
+
+        if (!updated)
+            return res.status(404).json({ error: "Certificate not found!" });
+
+        res.json({ message: "Status updated successfully!", data: updated });
+    } catch (err) {
+        console.error("Error:", err);
+        res.status(500).json({ error: "Failed to update status!" });
+    }
+};
+
+
+module.exports = { createCertificateRequest, uploadRequiredDocuments, fetchUploadedFiles, 
+    getFileById, getCertificatesDashboard, updateStatus };

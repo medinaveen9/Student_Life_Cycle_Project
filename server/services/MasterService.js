@@ -357,8 +357,32 @@ const employeeRoleService = async (data) => {
   }
 };
 
+// Service function for combined student data
+const getStudentInfo = async (application_no) => {
+  try {
+    const query = `
+      SELECT a.application_no, a.department, a.course_name, p.name, p.father_name, p.dob,
+        p.age FROM administrative_information a JOIN personal_information p
+        ON a.application_no = p.application_no
+        WHERE a.application_no = $1
+      `;
+
+    const result = await pool.query(query, [application_no]);
+
+    if (result.rows.length === 0) {
+      return { success: false, message: "No student found with this application number" };
+    }
+
+    return { success: true, data: result.rows[0] };
+  } catch (err) {
+    console.error("Error fetching student info:", err.message);
+    return { success: false, message: "Database error" };
+  }
+};
+
+
 
 module.exports = {
-  administrationDetails, personalInfo, contactDetails, educationDetails, paymentDetails, 
+  administrationDetails, personalInfo, contactDetails, educationDetails, paymentDetails,  getStudentInfo,
   getSelectedCourseName,getAdministrationDetails ,getAdministrtaionInfo,getPersonalInfo, employeeRoleService
 };
