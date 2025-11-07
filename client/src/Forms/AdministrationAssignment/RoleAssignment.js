@@ -125,7 +125,7 @@ const RoleAssignment = () => {
       </div>
 
       {/* Section */}
-      <div style={styles.form_group}>
+      {/* <div style={styles.form_group}>
         <label style={styles.form_label}>Section</label>
         <input
           style={styles.form_input}
@@ -135,7 +135,7 @@ const RoleAssignment = () => {
           onChange={handleInputChange}
           required
         />
-      </div>
+      </div> */}
 
       {/* Email */}
       <div style={styles.form_group}>

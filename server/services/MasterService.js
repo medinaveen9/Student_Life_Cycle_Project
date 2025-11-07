@@ -288,7 +288,7 @@ const employeeRoleService = async (data) => {
       // Update existing employee
       const updateQuery = `
         UPDATE employees_role 
-        SET employee_name = $2, department = $3, section = $4, role = $5, from_date = $6, to_date = $7 
+        SET employee_name = $2, department = $3, role = $4, from_date = $5, to_date = $6 
         WHERE employee_code = $1 
         RETURNING *;
       `;
@@ -296,7 +296,6 @@ const employeeRoleService = async (data) => {
         data.employeeCode,
         data.employeeName,
         data.department,
-        data.section,
         data.role,
         data.fromDate,
         data.toDate
@@ -306,15 +305,14 @@ const employeeRoleService = async (data) => {
     } else {
       const insertQuery = `
         INSERT INTO employees_role 
-        (employee_code, employee_name, department, section, role, from_date, to_date) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        (employee_code, employee_name, department, role, from_date, to_date) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
         RETURNING *;
       `;
       const insertValues = [
         data.employeeCode,
         data.employeeName,
         data.department,
-        data.section,
         data.role,
         data.fromDate,
         data.toDate
