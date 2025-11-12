@@ -206,10 +206,11 @@ const StipendTable = ({ setEditableData, user }) => {
       setLoading(true);
       const response = await axiosInstance.post(
         "api/report/stipend_report",
-        { data, currentMonth, year, batch, course, user }, // send to backend
+        { currentMonth, year, batch, course, user }, // send to backend
         {
           headers: { "Content-Type": "application/json" },
           responseType: "blob", // important for PDF
+          params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
         }
       );
 
@@ -245,10 +246,11 @@ const StipendTable = ({ setEditableData, user }) => {
 
       const response = await axiosInstance.post(
         "api/report/stipend_excel", // backend endpoint for Excel
-        { data, currentMonth, year, batch, course, user },
+        {  currentMonth, year, batch, course, user },
         {
           headers: { "Content-Type": "application/json" },
           responseType: "blob", // important for Excel
+          params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
         }
       );
 

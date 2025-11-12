@@ -1,0 +1,45 @@
+.study-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.sub-study-main {
+    font-size: 25px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.form-input {
+    padding: 8px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.button-style {
+    background-color: #4b1d77;
+    color: white;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    width: auto;
+    align-self: center;
+    border: none;
+    border-radius: 6px;
+    margin-top: 10px;
+}

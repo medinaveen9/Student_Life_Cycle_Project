@@ -1,7 +1,8 @@
 // const stipendService = require('../services/StipendService');
 
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
-   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData } = require('../services/StipendService');
+   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
+  promoteStudentsService , addStudentService } = require('../services/StipendService');
 
 const getStudentInfo = async (req, res) => {
   try {
@@ -154,6 +155,57 @@ const deleteStipends = async (req, res) => {
   }
 };
 
+const promoteStudentsController = async (req, res) => {
+    try {
+        const { course, batchYear, currentYear } = req.body;
+
+        if (!course || !batchYear || !currentYear) {
+            return res.status(400).json({ message: "All fields required" });
+        }
+
+        const updatedCount = await promoteStudentsService(course, batchYear, currentYear);
+
+        if(updatedCount === 0) {
+            return res.status(404).json({ message: "No students found to promote" });
+        }
+
+        return res.status(200).json({
+            message: "Students promoted successfully",
+            updatedCount
+        });
+
+    } catch (error) {
+        console.error("Promote error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+const addStudentController = async (req, res) => {
+    try {
+        const {
+            roll_no, course, name, batch_year, studentYear, account_no, doj,
+            ifsc_code, leaves } = req.body;
+
+        // Validate required fields
+        if (!roll_no || !course || !name || !batch_year || !studentYear || !account_no || !doj || !ifsc_code) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const response = await addStudentService(req.body);
+
+        return res.status(200).json({ message: "Student added successfully", id: response });
+
+    } catch (error) {
+        console.error("Add student error:", error);
+
+        if (error.code === "ROLL_EXISTS") {
+            return res.status(409).json({ message: "Roll number already exists" });
+        }
+
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
    stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
-  deleteStipends};
+  deleteStipends, promoteStudentsController, addStudentController};

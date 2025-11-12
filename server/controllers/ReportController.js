@@ -4,10 +4,16 @@ const {numberToWords, formatYear} = require("../config/Utils");
 const {pool} =require("../models/db");
 const fs = require('fs');
 const { generateExcel } = require("../services/ReportService");
+const {fetchAllStipends} = require("../services/StipendService");
 
 const generateReport = async (req, res) => {
   try {
-    const { data, currentMonth, year, batch, course, user } = req.body;
+    const { currentMonth, year, batch, course, user } = req.body;
+    const { role, month, roll_no} = req.query;
+    const selectedCourse = req.query.course;
+    const studentYear = req.query.year;
+    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no); // call service
+
 
     const monthsData = {1:"January",2:"February",3:"March",4:"April",5:"May",6:"June",
       7:"July",8:"August",9:"September",10:"October",11:"November",12:"December"};
@@ -264,6 +270,12 @@ const generateReport = async (req, res) => {
 
 const downloadExcel = async (req, res) => {
   try {
+    const { role, month, roll_no} = req.query;
+    const selectedCourse = req.query.course;
+    const studentYear = req.query.year;
+    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no); // call service
+    req.body.data = data;
+    
     const excelBuffer = await generateExcel(req.body);
     res.setHeader(
       "Content-Disposition",

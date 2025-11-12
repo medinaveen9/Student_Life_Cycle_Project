@@ -325,9 +325,13 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
     const totalDays = new Date(year, month, 0).getDate();
 
     // 1️⃣ Get students
-    const studentQuery = course === "All"
-      ? `SELECT * FROM stipend_data`
-      : `SELECT * FROM stipend_data WHERE course = $1`;
+    const studentQuery =
+      course === "All"
+        ? `SELECT * FROM stipend_data 
+          WHERE CAST(year AS INTEGER) <= 4`
+        : `SELECT * FROM stipend_data 
+          WHERE course = $1 
+          AND CAST(year AS INTEGER) <= 4`;
     const studentsRes = await pool.query(studentQuery, course === "All" ? [] : [course]);
     const students = studentsRes.rows;
     if (students.length === 0) return 0;
@@ -416,11 +420,17 @@ const deleteStipendData = async (course, month) => {
   try {
     const year = new Date().getFullYear();
 
-    const deleteQuery = course === "All"
-      ? `DELETE FROM stipend_details WHERE cur_month=$1`
-      : `DELETE FROM stipend_details WHERE cur_month=$1 AND course=$2`;
+    const deleteQuery =
+      course === "All"
+        ? `DELETE FROM stipend_details 
+          WHERE cur_month = $1 
+          AND CAST(year AS INTEGER) <= 4`
+        : `DELETE FROM stipend_details 
+          WHERE cur_month = $1 
+          AND course = $2 
+          AND CAST(year AS INTEGER) <= 4`;
 
-    const params = course === "All" ? [month] : [month, course];
+        const params = course === "All" ? [month] : [month, course];
 
     const result = await pool.query(deleteQuery, params);
     return result.rowCount;
@@ -430,8 +440,58 @@ const deleteStipendData = async (course, month) => {
   }
 };
 
+const promoteStudentsService = async (course, batchYear, currentYear) => {
+    // Next year calculation for VARCHAR
+    const nextYear = String(Number(currentYear) + 1);
 
+    const query = ` UPDATE stipend_data SET year = $1
+        WHERE course = $2  AND batch_year = $3 AND year = $4 `;
 
+    const result = await pool.query(query, [
+        nextYear, course,  batchYear,  currentYear 
+    ]);
+    return result.rowCount;
+};
+
+const addStudentService = async (data) => {
+  try{
+    const {
+        roll_no, course, name, batch_year, studentYear, account_no,
+        doj, ifsc_code, leaves } = data;
+
+    // Check duplicate roll number
+    const existing = await pool.query(
+        `SELECT roll_no FROM stipend_data WHERE roll_no = $1`, [roll_no] );
+
+    if (existing.rows.length > 0) {
+        const error = new Error("Duplicate roll_no");
+        error.code = "ROLL_EXISTS";
+        throw error;
+    }
+
+    // Insert student
+    const insertQuery = `
+        INSERT INTO stipend_data 
+        (roll_no, course, name, batch_year, year, account_no, doj, ifsc_code, leaves)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id
+    `;
+
+    const values = [
+        roll_no, course, name, batch_year, studentYear,  account_no, doj,
+        ifsc_code, leaves
+    ];
+
+    const result = await pool.query(insertQuery, values);
+
+    return result.rows[0].id;
+  }
+  catch (error) {
+    console.error("Error adding student:", error);
+    throw error;
+  }
+};
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
-  stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData};
+  stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData,
+  promoteStudentsService, addStudentService};

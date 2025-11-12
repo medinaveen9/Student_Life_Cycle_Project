@@ -38,6 +38,8 @@ const Sidebar = ({user}) => {
         {id:'Stipend Form', label:'Stipend Form', path:'/stipendform'},
         {id:'Stipend Table', label:'Stipend Table', path:'/stipendtable'},
         {id:'Leaves Management', label:'Leaves Management', path:'/leavesmanagement'},
+        {id:'Year Promotion', label:'Year Promotion', path:'/promotion'},
+        {id:'Add Student', label:'Add Student', path:'/student'},
       ]
     },
     {
