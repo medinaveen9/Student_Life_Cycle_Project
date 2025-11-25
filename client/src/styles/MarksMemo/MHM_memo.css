@@ -1,0 +1,137 @@
+/* Layout */
+.container {
+  padding: 20px;
+}
+
+/* Form */
+.form-box {
+  max-width: 70%;
+  background: white;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.col {
+  flex: 1;
+}
+
+.subject-block {
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  color: white;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.preview-btn {
+  background: #0077ff;
+}
+
+.submit-btn {
+  background: #28a745;
+}
+
+/* PREVIEW */
+.preview-box {
+  background: white;
+  padding: 20px;
+  margin-top: 30px;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.top-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.semester-title {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.marks-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.marks-table th,
+.marks-table td {
+  border: 1px solid #444;
+  padding: 6px;
+  text-align: center;
+}
+
+.footer-section {
+  margin-top: 20px;
+}
+
+.signature {
+  margin-top: 30px;
+  text-align: right;
+  font-weight: bold;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 768px) {
+  .top-info {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  .preview-box {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .marks-table th, .marks-table td {
+    font-size: 12px;
+    padding: 4px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+}

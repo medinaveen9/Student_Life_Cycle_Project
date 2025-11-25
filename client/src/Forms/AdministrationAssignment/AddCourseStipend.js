@@ -59,42 +59,41 @@ const CourseStipendForm = ({user}) => {
 
     return (
         <form style={styles.study_main} onSubmit={handleSubmit}>
-            <div style={styles.sub_study_main}>Stipend Form</div>
+            <div style={styles.sub_study_main}>Stipend Master</div>
 
             <div style={styles.form_group}>
                 <label style={styles.form_label}>Course</label>
-                <select style={styles.form_input} required = {true} name="course" value={formData.course} onChange={handleChange} >
+                <select style={styles.form_input} required={true} name="course" value={formData.course} onChange={handleChange}>
                     <option value="">Select</option>
                     <option value="A.H.S">A.H.S</option>
-                    <option value="B.Sc Nursing">B.Sc Nursing</option>
+                    <option value="Bachelor of Science Nursing">Bachelor of Science Nursing</option>
                 </select>
             </div>
 
-            
             <div style={styles.form_group}>
                 <label style={styles.form_label}>Year</label>
-                <select style={styles.form_input} name="year" required = {true} value={formData.year} onChange={handleChange} >
-                <option value="">Select</option>
-                {[1, 2, 3, 4].map((y) => <option key={y} value={y}>{y}</option>)}
+                <select style={styles.form_input} name="year" required={true} value={formData.year} onChange={handleChange}>
+                    <option value="">Select</option>
+                    {[1, 2, 3, 4].map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
             </div>
 
             <div style={styles.form_group}>
                 <label style={styles.form_label}>Semester</label>
-                <select style={styles.form_input} name="semester" required = {true} value={formData.semester} onChange={handleChange} >
-                <option value="">Select</option>
-                {[1, 2].map((s) => <option key={s} value={s}>{s}</option>)}
+                <select style={styles.form_input} name="semester" required={true} value={formData.semester} onChange={handleChange}>
+                    <option value="">Select</option>
+                    {[1, 2].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
 
             <div style={styles.form_group}>
                 <label style={styles.form_label}>Stipend</label>
-                <input style={styles.form_input} required = {true} type="number" name="stipend" value={formData.stipend} onChange={handleChange} />
+                <input style={styles.form_input} required={true} type="number" name="stipend" value={formData.stipend} onChange={handleChange} />
             </div>
 
             <div style={styles.form_group}>
                 <label style={styles.form_label}>From Date</label>
-                <input style={styles.form_input} type="date" required = {true} name="from_date" value={formData.from_date} onChange={handleChange}  />
+                <input style={styles.form_input} type="date" required={true} name="from_date" value={formData.from_date} onChange={handleChange} />
             </div>
 
             {/* <div style={styles.form_group}>

@@ -35,20 +35,21 @@ const uploadRequiredDocuments = async (req, res) => {
         const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
 
         for (const fieldName of Object.keys(req.files)) {
-        const fileArray = req.files[fieldName];
-        for (const file of fileArray) {
-            const newFileName = `${Date.now()}-${file.originalname}`;
-            const uploadStream = bucket.openUploadStream(newFileName, {
-            chunkSizeBytes: 255 * 1024,
-            metadata: {
-                certificate_id: responseId,
-                originalName: file.originalname,
-                fieldName: file.fieldname,
-                certificate_type: req.body.certificate_type || "N/A",
-            },
-            });
-            uploadStream.end(file.buffer);
-        }
+            const fileArray = req.files[fieldName];
+            for (const file of fileArray) {
+                const newFileName = `${Date.now()}-${file.originalname}`;
+                const uploadStream = bucket.openUploadStream(newFileName, {
+                chunkSizeBytes: 255 * 1024,
+                contentType: file.mimetype,
+                metadata: {
+                    certificate_id: responseId,
+                    originalName: file.originalname,
+                    fieldName: file.fieldname,
+                    certificate_type: req.body.certificate_type || "N/A",
+                },
+                });
+                uploadStream.end(file.buffer);
+            }
         }
 
         res.status(200).json({ message: "Files uploaded successfully!" });
@@ -90,41 +91,47 @@ const fetchUploadedFiles = async (req, res) => {
 };
 
 const getFileById = async (req, res) => {
-    try {
-        const fileId = req.params.id;
-        const oid = new ObjectId(fileId);
+  try {
+    const fileId = req.params.id;
+    const oid = new ObjectId(fileId);
 
-        const client = new MongoClient(process.env.MONGO_URI);
-        await client.connect();
-        const db = client.db("Student_LifeCycle");
-        const filesColl = db.collection("certificate_uploads.files");
+    const client = new MongoClient(process.env.MONGO_URI);
+    await client.connect();
+    const db = client.db("Student_LifeCycle");
+    const filesColl = db.collection("certificate_uploads.files");
 
-        // fetch metadata to know contentType
-        const fileDoc = await filesColl.findOne({ _id: oid });
-        if (!fileDoc) {
-            return res.status(404).json({ error: "File not found" });
-        }
-
-        const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
-
-        // 👉 Set correct content type
-        res.setHeader("Content-Type", fileDoc.contentType || "application/octet-stream");
-
-        // 👉 Inline for preview in browser
-        res.setHeader("Content-Disposition", `inline; filename="${fileDoc.filename}"`);
-
-        const downloadStream = bucket.openDownloadStream(oid);
-        downloadStream.on("error", (err) => {
-        console.error("Error downloading file:", err);
-        res.status(404).json({ error: "File not found" });
-        });
-
-        downloadStream.pipe(res);
-    } catch (error) {
-        console.error("Error fetching file by ID:", error);
-        res.status(500).json({ error: "Failed to fetch file" });
+    const fileDoc = await filesColl.findOne({ _id: oid });
+    if (!fileDoc) {
+      return res.status(404).json({ error: "File not found" });
     }
+
+    const bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
+    const contentType = fileDoc.contentType || "application/octet-stream";
+
+    // ✅ Correct MIME type for browser
+    res.setHeader("Content-Type", contentType);
+
+    // ✅ Inline means open in tab, not download
+    res.setHeader("Content-Disposition", `inline; filename="${fileDoc.filename}"`);
+
+    // ✅ Allow browser rendering
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+
+    const downloadStream = bucket.openDownloadStream(oid);
+
+    downloadStream.on("error", (err) => {
+      console.error("Error streaming file:", err);
+      res.status(404).json({ error: "File not found" });
+    });
+
+    downloadStream.pipe(res);
+  } catch (error) {
+    console.error("Error fetching file by ID:", error);
+    res.status(500).json({ error: "Failed to fetch file" });
+  }
 };
+
+
 
 // Fetch Certificates
 const getCertificatesDashboard = async (req, res) => {
@@ -139,22 +146,26 @@ const getCertificatesDashboard = async (req, res) => {
 
 const updateStatus = async (req, res) => {
     try {
-        const { request_id, certificate_id, status, answers, user } = req.body;
+        const { request_id, certificate_id, status, answers } = req.body;
+        const user = req.user || req.body.user;
 
-        if (!request_id || !certificate_id || !status) {
+        // use null/undefined checks so values like false or 0 are accepted
+        if (request_id == null || certificate_id == null || status == null) {
             return res.status(400).json({ error: "Missing required fields!" });
         }
 
         const updated = await updateVerificationStatus(
-            request_id, certificate_id, status, answers, user );
+            request_id, certificate_id, status, answers, user
+        );
 
-        if (!updated)
+        if (!updated) {
             return res.status(404).json({ error: "Certificate not found!" });
+        }
 
-        res.json({ message: "Status updated successfully!", data: updated });
+        return res.json({ message: "Status updated successfully!", data: updated });
     } catch (err) {
         console.error("Error:", err);
-        res.status(500).json({ error: "Failed to update status!" });
+        return res.status(500).json({ error: "Failed to update status!" });
     }
 };
 

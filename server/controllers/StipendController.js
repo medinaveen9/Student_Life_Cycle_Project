@@ -2,15 +2,16 @@
 
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
-  promoteStudentsService , addStudentService } = require('../services/StipendService');
+  promoteStudentsService , addStudentService, fetchStudentsByFilter } = require('../services/StipendService');
 
+  // Get student info by application number
 const getStudentInfo = async (req, res) => {
   try {
-    const { application_no } = req.query;
+    const { application_no, selectedMonth } = req.query;
     if (!application_no) {
       return res.status(400).json({ error: 'application_no query parameter is required' });
     }
-    const student = await getStudentDetails(application_no);
+    const student = await getStudentDetails(application_no, selectedMonth);
     if (!student) {
       return res.status(404).json({ error: 'Student not found' });
     }
@@ -21,10 +22,11 @@ const getStudentInfo = async (req, res) => {
   }
 };
 
+// Submit stipend details
 const submitStipend = async (req, res) => {
   try {
     const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, requested_leaves,  
-      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves} = req.body;
+      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves, available_leaves} = req.body;
     const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
 
     if (!rollNo || !name || !course || !accountNo || !joiningDate) {
@@ -33,7 +35,7 @@ const submitStipend = async (req, res) => {
 
     await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year, requested_leaves,
       rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, 
-      actualStipend, total_leaves, isModified});
+      actualStipend, total_leaves, available_leaves, isModified});
     return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
   } catch (err) {
     console.error('Error submitting stipend:', err.message);
@@ -155,57 +157,85 @@ const deleteStipends = async (req, res) => {
   }
 };
 
-const promoteStudentsController = async (req, res) => {
-    try {
-        const { course, batchYear, currentYear } = req.body;
+// const promoteStudentsController = async (req, res) => {
+//     try {
+//         const { course, batchYear, currentYear } = req.body;
 
-        if (!course || !batchYear || !currentYear) {
-            return res.status(400).json({ message: "All fields required" });
-        }
+//         if (!course || !batchYear || !currentYear) {
+//             return res.status(400).json({ message: "All fields required" });
+//         }
 
-        const updatedCount = await promoteStudentsService(course, batchYear, currentYear);
+//         const updatedCount = await promoteStudentsService(course, batchYear, currentYear);
 
-        if(updatedCount === 0) {
-            return res.status(404).json({ message: "No students found to promote" });
-        }
+//         if(updatedCount === 0) {
+//             return res.status(404).json({ message: "No students found to promote" });
+//         }
 
-        return res.status(200).json({
-            message: "Students promoted successfully",
-            updatedCount
-        });
+//         return res.status(200).json({
+//             message: "Students promoted successfully",
+//             updatedCount
+//         });
 
-    } catch (error) {
-        console.error("Promote error:", error);
-        res.status(500).json({ message: "Server error" });
+//     } catch (error) {
+//         console.error("Promote error:", error);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
+// controllers/student.controller.js
+const addStudentController = async (req, res) => {
+  try {
+    const id = await addStudentService(req.body);
+    return res.status(201).json({ success: true, message: "Student added successfully" });
+
+  } catch (error) {
+    if (error.code === "ROLL_EXISTS") {
+      return res.status(400).json({ success: false, message: "Roll number already exists" });
     }
+    if (error.code === "APPLICATION_EXISTS") {
+      return res.status(400).json({ success: false, message: "Application number already exists" });
+    }
+    
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 };
 
-const addStudentController = async (req, res) => {
-    try {
-        const {
-            roll_no, course, name, batch_year, studentYear, account_no, doj,
-            ifsc_code, leaves } = req.body;
 
-        // Validate required fields
-        if (!roll_no || !course || !name || !batch_year || !studentYear || !account_no || !doj || !ifsc_code) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+// Filtered student retrieval
+const getFilteredStudents = async (req, res) => {
+  try {
+    const { course, batchYear, currentYear } = req.query;
+    if (!course || !batchYear || !currentYear)
+      return res.status(400).json({ message: "Missing required filters" });
 
-        const response = await addStudentService(req.body);
+    const students = await fetchStudentsByFilter(course, batchYear, currentYear);
+    res.status(200).json({ students });
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-        return res.status(200).json({ message: "Student added successfully", id: response });
+// Promote selected students
+const promoteSelectedStudents = async (req, res) => {
+  try {
+    const { course, batchYear, currentYear, selectedStudents, newDOJ  } = req.body;
+    if (!course || !batchYear || !currentYear || !newDOJ)
+      return res.status(400).json({ message: "Missing required data" });
 
-    } catch (error) {
-        console.error("Add student error:", error);
+    if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0)
+      return res.status(400).json({ message: "No students selected" });
 
-        if (error.code === "ROLL_EXISTS") {
-            return res.status(409).json({ message: "Roll number already exists" });
-        }
+    const nextYear = (parseInt(currentYear) + 1).toString();
 
-        return res.status(500).json({ message: "Server error" });
-    }
+    const count = await promoteStudentsService(selectedStudents, nextYear, newDOJ);
+    res.status(200).json({ message: `${count} students promoted to year ${nextYear}` });
+  } catch (err) {
+    console.error("Error promoting students:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
    stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
-  deleteStipends, promoteStudentsController, addStudentController};
+  deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents};

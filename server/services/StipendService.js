@@ -15,10 +15,10 @@ exports.fetchAllStipends = async () => {
   return await collection.find().toArray();
 };
 
-const getStudentDetails = async (application_no) => {
+const getStudentDetails = async (application_no, selectedMonth) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM stipend_data WHERE roll_no = $1`, [application_no] );
+      `SELECT * FROM students WHERE roll_no = $1`, [application_no] );
 
     if (result.rows.length === 0) return null; // No student found
 
@@ -39,8 +39,17 @@ const getStudentDetails = async (application_no) => {
     );
 
     student.actualStipend = stipendResult.rows[0]?.stipend || 0;
+    const stipendHistoryResult = await pool.query(
+      `SELECT * FROM stipend_details
+       WHERE roll_no = $1 AND year = $2 AND cur_month = $3
+       ORDER BY cur_month DESC`,
+      [application_no, student.year, selectedMonth]
+    );
+    if(stipendHistoryResult.rows.length > 0) {
+      let requested_leaves = stipendHistoryResult.rows[0].requested_leaves;
+      student.leaves_used -= requested_leaves;
+    }
     return student;
-
   } catch (error) {
     console.error("Error fetching student details:", error.message);
     throw error;
@@ -66,7 +75,7 @@ const insertStipendDetails = async (data) => {
     }
 
     if(data.isModified === "true") {
-      const updateLeavesQuery = ` UPDATE stipend_data  SET leaves = $1
+      const updateLeavesQuery = ` UPDATE students  SET leaves = $1
         WHERE roll_no = $2 `;
       await pool.query(updateLeavesQuery, [(data.total_leaves - data.requested_leaves), data.rollNo]);
     }
@@ -109,25 +118,45 @@ const insertStipendDetails = async (data) => {
       );
 
       if (updateRes.rowCount > 0) {
+        const requestedLeaves = Number(data.requested_leaves) || 0;
+        const totalLeaves = Number(data.total_leaves) || 0;
+        const availableLeaves = Number(data.available_leaves) || 0;
+        if (requestedLeaves > 0) {
+          await pool.query(
+        `UPDATE students SET leaves_used = $1 WHERE roll_no = $2`,
+        [(totalLeaves - availableLeaves + requestedLeaves), data.rollNo]
+          );
+        }
         return;
       }
     }
 
     // Insert new record
     const query = `
-        INSERT INTO stipend_details 
-          (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
-          cur_month, requested_leaves, ${column_id}, ${column_name}, ifsc_code, year)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      INSERT INTO stipend_details 
+        (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
+        cur_month, requested_leaves, ${column_id}, ${column_name}, ifsc_code, year)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       `;
 
-      await pool.query(query, [
-        data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
-        data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
-        data.cur_month || null, data.requested_leaves || 0,
-        data.userId || null, data.user_name || null,
-        data.ifsc_code, data.year
-      ]);
+    await pool.query(query, [
+      data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
+      data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
+      data.cur_month || null, data.requested_leaves || 0,
+      data.userId || null, data.user_name || null,
+      data.ifsc_code, data.year
+    ]);
+
+    // Update students.leaves_used by requested_leaves for this roll_no
+    const requestedLeaves = Number(data.requested_leaves) || 0;
+    const totalLeaves = Number(data.total_leaves) || 0;
+    const availableLeaves = Number(data.available_leaves) || 0;
+    if (requestedLeaves > 0) {
+      await pool.query(
+      `UPDATE students SET leaves_used = $1 WHERE roll_no = $2`,
+      [(totalLeaves - availableLeaves + requestedLeaves), data.rollNo]
+      );
+    }
 
   } catch (error) {
     console.error('Error inserting stipend details:', error.message);
@@ -195,7 +224,6 @@ const fetchAllStipends = async (role, month, course, year, roll_no) => {
     throw err;
   }
 };
-
 
 const stipendApprovalStatus = async (id, status, role, userInfo) => {
   try {
@@ -294,24 +322,19 @@ const studentLeaveService = async(data) => {
   try {
     // 1. Check if student exists
     const studentRes = await pool.query(
-      "SELECT * FROM stipend_data WHERE roll_no = $1",
+      "SELECT * FROM students WHERE roll_no = $1",
       [roll_no]
     );
 
     if (studentRes.rows.length > 0) {
       // 2a. Update existing student
       await pool.query(
-        "UPDATE stipend_data SET name = $1, course = $2, leaves = $3 WHERE roll_no = $4",
-        [name, course, total_leaves, roll_no]
+        "UPDATE students SET leaves = $1 available_leaves = $2 WHERE roll_no = $3",
+        [total_leaves, total_leaves, roll_no]
       );
       return { message: "Student details updated successfully" };
     } else {
-      // 2b. Insert new student
-      await pool.query(
-        "INSERT INTO stipend_data (roll_no, name, course, leaves) VALUES ($1, $2, $3, $4)",
-        [roll_no, name, course, total_leaves]
-      );
-      return { message: "Student added successfully" };
+        return { message: "Student Not Found" };
     }
   } catch (err) {
     console.error("Error adding/updating student leaves:", err.message);
@@ -327,9 +350,9 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
     // 1️⃣ Get students
     const studentQuery =
       course === "All"
-        ? `SELECT * FROM stipend_data 
+        ? `SELECT * FROM students 
           WHERE CAST(year AS INTEGER) <= 4`
-        : `SELECT * FROM stipend_data 
+        : `SELECT * FROM students 
           WHERE course = $1 
           AND CAST(year AS INTEGER) <= 4`;
     const studentsRes = await pool.query(studentQuery, course === "All" ? [] : [course]);
@@ -440,58 +463,65 @@ const deleteStipendData = async (course, month) => {
   }
 };
 
-const promoteStudentsService = async (course, batchYear, currentYear) => {
-    // Next year calculation for VARCHAR
-    const nextYear = String(Number(currentYear) + 1);
-
-    const query = ` UPDATE stipend_data SET year = $1
-        WHERE course = $2  AND batch_year = $3 AND year = $4 `;
-
-    const result = await pool.query(query, [
-        nextYear, course,  batchYear,  currentYear 
-    ]);
-    return result.rowCount;
-};
-
+// services/student.service.js
 const addStudentService = async (data) => {
-  try{
-    const {
-        roll_no, course, name, batch_year, studentYear, account_no,
-        doj, ifsc_code, leaves } = data;
+  try {
+    const { roll_no } = data;
 
-    // Check duplicate roll number
-    const existing = await pool.query(
-        `SELECT roll_no FROM stipend_data WHERE roll_no = $1`, [roll_no] );
-
-    if (existing.rows.length > 0) {
-        const error = new Error("Duplicate roll_no");
-        error.code = "ROLL_EXISTS";
-        throw error;
+    // Check duplicate roll_no
+    const exists = await pool.query(
+      `SELECT 1 FROM students WHERE roll_no = $1`,
+      [roll_no]
+    );
+    if (exists.rowCount > 0) {
+      throw { code: "ROLL_EXISTS", message: "Roll number already exists" };
     }
 
-    // Insert student
+    // Auto-build insert query
+    const fields = Object.keys(data);
+    const values = Object.values(data);
+    const placeholders = fields.map((_, i) => `$${i + 1}`).join(", ");
+
     const insertQuery = `
-        INSERT INTO stipend_data 
-        (roll_no, course, name, batch_year, year, account_no, doj, ifsc_code, leaves)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id
+      INSERT INTO students (${fields.join(", ")})
+      VALUES (${placeholders})
+      RETURNING id
     `;
 
-    const values = [
-        roll_no, course, name, batch_year, studentYear,  account_no, doj,
-        ifsc_code, leaves
-    ];
-
     const result = await pool.query(insertQuery, values);
-
     return result.rows[0].id;
+
+  } catch (err) {
+    console.error("Add Student Error:", err);
+    throw err;
   }
-  catch (error) {
-    console.error("Error adding student:", error);
-    throw error;
-  }
+};
+
+
+
+const fetchStudentsByFilter = async (course, batchYear, currentYear) => {
+  const query = `
+    SELECT id, roll_no, name, course, batch_year AS "batchYear", year
+    FROM students
+    WHERE course = $1 AND batch_year = $2 AND year = $3
+    ORDER BY roll_no ASC;
+  `;
+  const { rows } = await pool.query(query, [course, batchYear, currentYear]);
+  return rows;
+};
+
+const promoteStudentsService = async (studentIds, nextYear, newDOJ) => {
+  const query = `
+    UPDATE students
+    SET year = $1, doj = $2
+    WHERE id = ANY($3::int[])
+    RETURNING id;
+  `;
+  
+  const { rows } = await pool.query(query, [nextYear, newDOJ, studentIds]);
+  return rows.length;
 };
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData,
-  promoteStudentsService, addStudentService};
+  promoteStudentsService, addStudentService, fetchStudentsByFilter};

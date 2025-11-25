@@ -136,48 +136,50 @@ const CertificateDashboard = ({user}) => {
   return (
     <Box className="dashboard_main">
         <Box className="header_main"><Typography className="page_title">Certificates Dashboard</Typography> </Box>
-        <Grid container   className="grid_header"  sx={{ backgroundColor: "#4b1d77", color: "white", p: 2 }}>
+        <Grid container className="grid_header"  sx={{ backgroundColor: "#4b1d77", color: "white", p: 2 }}>
             <Grid item size={2}> <Typography>Roll No</Typography> </Grid>
             <Grid item size={3}> <Typography>Name</Typography> </Grid>
             <Grid item size={2}><Typography>Course</Typography></Grid>
             <Grid item size={2}> <Typography>Certificate Type</Typography> </Grid>
             <Grid item size={1}><Typography>View</Typography>  </Grid>
-            <Grid item size={1}><Typography>status</Typography>  </Grid>
-            <Grid item size={1}><Typography>Download</Typography>  </Grid>
+            {user?.role?.toLowerCase() !== "maker" && (<Grid item size={1}><Typography>status</Typography>  </Grid>)}
+            <Grid item size={user?.role?.toLowerCase() === "maker" ? 2 : 1}><Typography>Download</Typography>  </Grid>
         </Grid>
 
       {certificatesData.length > 0 ? (
             certificatesData.map((item, index) => (
-                <Grid container key={index}  sx={{ p: 1, borderBottom: "1px solid #ddd", alignItems: "center" }}>
-                    <Grid item size={2}><Typography>{item.roll_no}</Typography> </Grid>
-                    <Grid item size={3}><Typography>{item.name}</Typography> </Grid>
-                    <Grid item size={2}><Typography>{item.course_name}</Typography></Grid>
-                    <Grid item size={2}><Typography>{item.certificate_type}</Typography></Grid>
-                    <Grid item size={1} sx={{ display: "flex", gap: 1 }}>
+                <Grid container key={index} className="grid_row">
+                    <Grid item size={2} data-label="Roll No"><Typography>{item.roll_no}</Typography> </Grid>
+                    <Grid item size={3} data-label="Name"><Typography>{item.name}</Typography> </Grid>
+                    <Grid item size={2} data-label="Course"><Typography>{item.course_name}</Typography></Grid>
+                    <Grid item size={2} data-label="Certificate Type"><Typography>{item.certificate_type}</Typography></Grid>
+                    <Grid item size={1} data-label="View">
                         <VisibilityIcon sx={{ cursor: "pointer", color: "#4b1d77" }} onClick={() => handleOpenView(item)} />
                     </Grid>
-                    <Grid item size={1} sx={{ display: "flex", gap: 1 }}>
-                      {(() => {
-                        const role = user.role?.toLowerCase(); // "checker" | "approver" | "verifier"
-                        const statusKey = `${role}_status`;    // dynamic key: checker_status etc.
-                        const status = item[statusKey];
+                    {user?.role?.toLowerCase() !== "maker" && (
+                      <Grid item size={1} data-label="Status">
+                        {(() => {
+                          const role = user.role?.toLowerCase(); // "checker" | "approver" | "verifier"
+                          const statusKey = `${role}_status`;    // dynamic key: checker_status etc.
+                          const status = item[statusKey];
 
-                        const statusIcons = {
-                          pending: (
-                            <HourglassEmptyIcon
-                              sx={{ color: "#FFA500", cursor: "pointer" }}
-                              onClick={() => handleOpenStatusDialog(item)}
-                            />
-                          ),
-                          approved: <CheckCircleIcon sx={{ color: "#4CAF50" }} onClick={() => handleOpenStatusDialog(item)}/>,
-                          rejected: <CancelIcon sx={{ color: "#F44336" }} onClick={() => handleOpenStatusDialog(item)}/>,
-                        };
+                          const statusIcons = {
+                            pending: (
+                              <HourglassEmptyIcon
+                                sx={{ color: "#FFA500", cursor: "pointer" }}
+                                onClick={() => handleOpenStatusDialog(item)}
+                              />
+                            ),
+                            approved: <CheckCircleIcon sx={{ color: "#4CAF50" }} onClick={() => handleOpenStatusDialog(item)}/>,
+                            rejected: <CancelIcon sx={{ color: "#F44336" }} onClick={() => handleOpenStatusDialog(item)}/>,
+                          };
 
-                        return statusIcons[status] || null;
-                      })()}
-                    </Grid>
+                          return statusIcons[status] || null;
+                        })()}
+                      </Grid>
+                    )}
                     {/* Download */}
-                    <Grid item size={1} sx={{ display: "flex",  gap: 1 }}>
+                    <Grid item size={user?.role?.toLowerCase() === "maker" ? 2 : 1} data-label="Download">
                         <DownloadIcon sx={{ cursor: "pointer", color: "#4b1d77" }} />
                     </Grid>
                 </Grid>

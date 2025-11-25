@@ -29,11 +29,17 @@ const CertificateService = async (data) => {
 // Fetch certificates based on role
 const getAllCertificates = async (userData) => {
     try {
-        const role = userData.role?.toLowerCase(); // checker | approver | verifier
+        const role = userData.role?.toLowerCase(); // checker | approver | verifier | maker
+        
         let query = `SELECT * FROM certificates`;
         let values = [];
 
-        if (role === "approver") {
+        if(role === "maker") {
+            query += ` WHERE roll_no = $1`;
+            values.push(userData.userId);
+        }
+
+        else if (role === "approver") {
             query += ` WHERE verifier_status IN ('approved', 'rejected')`;
         } 
         else if (role === "verifier") {

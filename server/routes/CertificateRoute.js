@@ -21,7 +21,6 @@ router.post("/upload/:responseId",
   uploadRequiredDocuments
 );
 
-router.get('/files', fetchUploadedFiles);
 router.get('/file_id/:id', getFileById);
 
 module.exports = router;

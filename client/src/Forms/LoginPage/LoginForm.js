@@ -34,25 +34,6 @@ const LoginForm = ({ setUser}) => {
       setUser(res.data.user);
       const resRole = res?.data?.user?.role;
       navigate("/");  // Redirect to welcome page after login
-      // if(resRole === "Maker") {
-      //   navigate("/selectcertificate");
-      // } else if(resRole === "Checker") {
-      //   navigate("/stipendform");
-      // } else if(resRole === "Approver") {
-      //   navigate("/stipendform");
-      // }
-      // else if(resRole === "Verifier") {
-      //   navigate("/stipendform");
-      // }
-      // else if(resRole === "FA") {
-      //   navigate("/stipendform");
-      // }
-      // else if(resRole === "FC") {
-      //   navigate("/stipendform");
-      // }
-      // else if(resRole === "Dean") {
-      //   navigate("/roleassignment");
-      // }
     } catch (err) {
       console.error("Login failed:", err.response?.data || err);
       setError(err.response?.data?.error || "Login failed");

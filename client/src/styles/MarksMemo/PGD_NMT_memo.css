@@ -1,0 +1,109 @@
+.marks-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.marks-container .form-group select,
+.marks-container input,
+.marks-container select,
+.marks-container textarea {
+  width: 100%;
+  padding: 7px;
+  margin-top: 5px;
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  background: #fff;
+  color: #111;
+  box-sizing: border-box;
+}
+
+/* Make sure inputs inside table cells are compact */
+.marks-table td input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.marks-table,
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.marks-table th,
+.preview-table th,
+.marks-table td,
+.preview-table td {
+  border: 1px solid #999;
+  padding: 8px;
+  text-align: center;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.preview-btn,
+.submit-btn,
+.back-btn {
+  padding: 10px 18px;
+  background: #0056b3;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.preview-btn:hover,
+.submit-btn:hover,
+.back-btn:hover {
+  background: #003f80;
+}
+
+.preview {
+  border: 1px solid #ccc;
+  padding: 20px;
+}
+
+.memo-header {
+  text-align: center;
+  font-size: 20px;
+}
+
+.memo-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .marks-container {
+    padding: 10px;
+  }
+
+  .marks-table td input {
+    width: 80px;
+  }
+
+    .btn-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

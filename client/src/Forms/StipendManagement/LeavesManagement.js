@@ -86,7 +86,7 @@ const StudentLeaveForm = ({ user }) => {
 
     return (
         <form style={styles.study_main} onSubmit={handleSubmit}>
-        <div style={styles.sub_study_main}>Student Leave Form</div>
+        <div style={styles.sub_study_main}>Stipend Leave Management</div>
 
         <div style={styles.form_group}>
             <label style={styles.form_label}>Roll No</label>

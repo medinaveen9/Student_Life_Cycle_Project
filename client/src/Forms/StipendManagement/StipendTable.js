@@ -256,7 +256,7 @@ const StipendTable = ({ setEditableData, user }) => {
           <InputLabel>Course</InputLabel>
           <Select value={course}  label="Course" onChange={(e) => setCourse(e.target.value)} >
             <MenuItem value="All">All</MenuItem>
-            <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+            <MenuItem value="Bachelor of Science Nursing">Bachelor of Science Nursing</MenuItem>
             <MenuItem value="A.H.S">A.H.S</MenuItem>
           </Select>
         </FormControl>

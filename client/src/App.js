@@ -114,6 +114,13 @@ const ResetPassword = lazy(() => import("./Forms/LoginPage/ResetPassword"));
 const CertificateSelection = lazy(() => import('./Forms/CertificateForms/SelectCertificate'));
 const CertificatesDashboard = lazy(() => import('./Forms/CertificateForms/CertificatesDashboard'));
 
+{/* Course Application Report Components */ }
+const CourseApplicationSelection = lazy(() => import('./Forms/CourseApplication/CourseSelection'));
+
+{/* Semester Configuration for Marks Memo */}
+const MHM_MarksMemo = lazy(() => import('./Forms/MarksMemos/MHM_Marks_Memo'));
+const PGD_NMT_MarksMemo = lazy(() => import('./Forms/MarksMemos/PGD_NMT_Memo'));
+
 
 const App = () => {
   const location = useLocation();
@@ -124,6 +131,9 @@ const App = () => {
   const [user, setUser] = useState(null);
 
   const [editableData, setEditableData] = useState(null);
+
+  // course application report state
+  const [selectedCourse, setSelectedCourse] = useState("");
 
   // Axios instance to verify user
   const verifyUser = async () => {
@@ -159,7 +169,7 @@ const App = () => {
           <CssBaseline />
           <AppBar user = {user}/>
           <Box sx={{ display: 'flex', marginTop: '90px' }}>
-            <Sidebar user = {user}/>
+            <Sidebar user = {user} selectedCourse = {selectedCourse}/>
             <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                 <Routes location={location}>
                   <Route path="/tc" element={<TransferCertificate />} />
@@ -196,27 +206,13 @@ const App = () => {
                   <Route path="/nmt1" element={<NMTFirstYear />} />
                   <Route path="/nmt2" element={<NMTSecondYear />} />
                   <Route path="/genetic" element={<GeneticCounsellingCourse />} />
-
                   <Route path="/preadmission" element={<PreAdmission />} />
                   <Route path="/onboard" element={<OnBoardingPhase />} />
                   <Route path="/exam" element={<ExaminationAssessment />} />
-
-                  <Route path="/administrative" element={<AdministrativeInformation />} />
-
-                  <Route path="/inter" element={<IntermediateDetails />} />
-                  <Route path="/academicrecord" element={<AcademicRecord />} />
-                  <Route path="/contact" element={<ContactDetails />} />
-                  <Route path="/upload" element={<DocumentsUpload />} />
-
-                  <Route path="/appfee" element={<FeePaymentDetails />} />
-                  <Route path="/personalinfo" element={<PersonalInformation />} />
-                  <Route path="/identityverify" element={<IdentityVerification />} />
-                  <Route path="/course" element={<CourseSelection />} />
-
                   <Route path="/academicinfo" element={<PersonalAcademicInfo />} />
                   <Route path="/coursedetails" element={<CourseDetails />} />
                   <Route path="/uploads" element={<Uploads />} />
-                  <Route path="/report" element={<ApplicationReport />} />
+                  
 
                   {/* Welcome Page */}
                   <Route path="/" element={<WelcomePage user={user} />} />
@@ -277,6 +273,24 @@ const App = () => {
                   <Route path="/change-password" element={<PasswordManager user={user} />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+
+                  {/* Course Application Report */}
+                  <Route path="/course-selection" element={<CourseApplicationSelection user={user}
+                    onSelectCourse={(c) => setSelectedCourse(c)} />} />
+                  <Route path="/administrative-information" element={<AdministrativeInformation />}/>
+                  <Route path="/fee-payment-details" element={<FeePaymentDetails />} />
+                  <Route path="/personal-information" element={<PersonalInformation />} />
+                  <Route path="/identity-verification" element={<IdentityVerification />} />
+                  <Route path="/contact-details" element={<ContactDetails />} />
+                  <Route path="/educational-background" element={<IntermediateDetails />} />
+                  <Route path="/course-selection" element={<CourseSelection />} />
+                  <Route path="/academic-record" element={<AcademicRecord />} />
+                  <Route path="/documents-upload" element={<DocumentsUpload />} />
+                  <Route path="/application-report" element={<ApplicationReport />} />
+
+                  {/* Marks Memo Configuration */}
+                  <Route path="/mhm_memo" element={<MHM_MarksMemo />} />
+                  <Route path="/pgd_nmt_memo" element={<PGD_NMT_MarksMemo />} />
                 </Routes>
             </Box>
           </Box>

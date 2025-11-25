@@ -26,3 +26,24 @@
 .listitem_hover:hover {
     background-color: #ececf3;
 }
+
+/* Medium screens (tablets) */
+@media (max-width: 992px) {
+  .custom-drawer .MuiDrawer-paper {
+    width: 280px;
+  }
+}
+
+/* Small screens (large phones) */
+@media (max-width: 768px) {
+  .custom-drawer .MuiDrawer-paper {
+    width: 240px;
+  }
+}
+
+/* Extra small screens (phones) */
+@media (max-width: 480px) {
+  .custom-drawer .MuiDrawer-paper {
+    width: 200px;
+  }
+}

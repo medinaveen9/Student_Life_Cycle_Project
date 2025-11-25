@@ -188,7 +188,7 @@ const RoleAssignment = () => {
         />
       </div>
 
-      <button type="submit" style={styles.button_style} disabled = {loading}>Submit </button>
+      <button type="submit" style={styles.button_style} disabled={loading}>Submit</button>
     </form>
   );
 };

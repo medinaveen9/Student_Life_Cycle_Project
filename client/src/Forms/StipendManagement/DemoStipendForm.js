@@ -6,6 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import "../../styles/StipendManagement/StipendForm.css";
 
 const StipendForm = ({ editableData, user, setEditableData }) => {
   const [formData, setFormData] = useState({
@@ -84,58 +85,105 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     }
   }, [editableData]);
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
 
-    // allow only after student fetched
-    if (!studentData && name !== "rollNo") 
-      return;
+    // allow only after student fetched except rollNo
+    if (!studentData && name !== "rollNo") return;
 
-
+    // ------------------------------
+    // 1️⃣ REQUESTED LEAVES
+    // ------------------------------
     if (name === "requested_leaves") {
-      if(isEdit && !isModified) {
+      if (isEdit && !isModified) {
         studentData.leaves = Number(studentData.leaves) + Number(formData.requested_leaves);
         setIsModified(true);
       }
-      if (studentData.leaves >= value) {
-        setFormData((prev) => ({ ...prev, [name]: value, available_leaves : studentData.leaves}));
-      } else {
-        alert(`You only have ${studentData.leaves} available leave(s). Requested leaves cannot exceed this.`);
+
+      if ((studentData.leaves - studentData.leaves_used) >= Number(value)) {
+        return setFormData((prev) => ({
+          ...prev,
+          requested_leaves: value,
+          available_leaves: (studentData.leaves - studentData.leaves_used),
+        }));
+      }
+
+      alert(`You only have ${(studentData.leaves - studentData.leaves_used)} available leave(s).`);
+      return;
+    }
+
+    // ------------------------------
+    // 2️⃣ CURRENT MONTH CHANGE
+    // ------------------------------
+    if (name === "cur_month") {
+      try {
+        const res = await axiosInstance.get(`/api/stipend/student`, {
+          params: { application_no: formData.rollNo, selectedMonth : value },
+        });
+
+        if (res.status === 200 && res.data) {
+          const data = res.data.data;
+
+          return setFormData((prev) => ({
+            ...prev,
+            cur_month: value,
+            available_leaves: data.leaves - data.leaves_used,
+            leavesBalance: "",
+            presentAndHolidays: "",
+            stipend: "",
+            actualStipend: "",
+            requested_leaves : 0,
+          }));
+        }
+      } catch (err) {
+        console.error(err);
       }
       return;
     }
 
-    if(name === "cur_month") {
-      setFormData((prev) => ({ ...prev, [name]: value,
-          leavesBalance: '', presentAndHolidays: '', stipend: '', actualStipend: ''
-       }));
+  // ------------------------------
+  // 3️⃣ LEAVES BALANCE
+  // ------------------------------
+  if (name === "leavesBalance") {
+    if (!value) {
+      return setFormData((prev) => ({
+        ...prev,
+        leavesBalance: "",
+        presentAndHolidays: "",
+        stipend: "",
+        actualStipend: "",
+      }));
+    }
+
+    if (!formData.cur_month) {
+      alert("Please select the month first");
       return;
     }
-    if(name === 'leavesBalance') {
-      if (value === '') {
-        setFormData((prev) => ({ ...prev, leavesBalance: '', presentAndHolidays: '', stipend: '', actualStipend: '' }));
-        return;
-      }
-      if (formData.cur_month === '') {
-        alert('Please select the month first');
-        return;
-      }
 
-      const daysInMonth = new Date(new Date().getFullYear(), formData.cur_month, 0).getDate();
-      const stipendPerDay = studentData.actualStipend / daysInMonth;
-      const presentDays = daysInMonth - Number(value);
-      const calStipend = presentDays * stipendPerDay;
-      // Round down if below .5, else round up
-      const roundedStipend = calStipend % 1 < 0.5 ? Math.floor(calStipend) : Math.ceil(calStipend);
+    const year = new Date().getFullYear();
+    const daysInMonth = new Date(year, formData.cur_month, 0).getDate();
 
-      setFormData((prev) => ({ ...prev, stipend: roundedStipend, 
-          presentAndHolidays : presentDays, actualStipend : studentData.actualStipend,
-        [name]: value }));
-    }
-    else{
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+    const stipendPerDay = studentData.actualStipend / daysInMonth;
+    const presentDays = daysInMonth - Number(value);
+
+    const calStipend = presentDays * stipendPerDay;
+    const roundedStipend = calStipend % 1 < 0.5 ? Math.floor(calStipend) : Math.ceil(calStipend);
+
+    return setFormData((prev) => ({
+      ...prev,
+      leavesBalance: value,
+      presentAndHolidays: presentDays,
+      stipend: roundedStipend,
+      actualStipend: studentData.actualStipend,
+    }));
+  }
+
+  // ------------------------------
+  // 4️⃣ DEFAULT INPUT HANDLING
+  // ------------------------------
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
+
 
   // Handle Delete Stipend Records
   const handleDeleteStipend = async () => {
@@ -195,7 +243,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       setLoading(true); // disable inputs
       try {
         const res = await axiosInstance.get(`/api/stipend/student`, {
-          params: { application_no: formData.rollNo },
+          params: { application_no: formData.rollNo, selectedMonth : formData.cur_month  },
         });
 
         if (res.status === 200 && res.data) {
@@ -208,7 +256,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
             joiningDate: data.doj   ?new Date(data.doj).toISOString().split('T')[0] : '',
             ifsc_code : data.ifsc_code,
             year : data.year,
-            available_leaves : data.leaves
+            available_leaves : data.leaves - data.leaves_used
           }));
           setStudentData(data);
         } else {
@@ -255,8 +303,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
 
   return (
     <React.Fragment>
-        <Box sx = {{display : "flex", justifyContent : "space-between"}}>
-            <Box sx = {{display : "flex", gap : "20px"}}>
+        <Box className="top-controls">
+            <Box className="left-options">
                 <FormControl className="m-4" style={{ minWidth: 200 }}>
                     <InputLabel>Month</InputLabel>
                     <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
@@ -271,30 +319,21 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                     <InputLabel>Course</InputLabel>
                     <Select value={selectedCourse}  label="Course" onChange={(e) => setSelectedCourse(e.target.value)} >
                         <MenuItem value="All">All</MenuItem>
-                        <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+                        <MenuItem value="Bachelor of Science Nursing">Bachelor of Science Nursing</MenuItem>
                         <MenuItem value="A.H.S">A.H.S</MenuItem>
                     </Select>
                 </FormControl>
             </Box>
-            <Box sx = {{display : "flex", gap : "20px",}}>
-              <Button variant="contained" sx={{ textTransform : "initial", backgroundColor: "#2563eb", "&:hover": 
-                { backgroundColor: "#1d4ed8" }, "&:disabled": { backgroundColor: "#9ca3af", 
-                    cursor: "not-allowed" }, color: "#fff", fontWeight: 600, py: 1.5, px: 4, 
-                        borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
-                            transition: "all 0.3s ease" }}
-                                onClick={handleAutoFill} disabled={autoFillLoading}>
-                                    {autoFillLoading ? (
-                                            <CircularProgress size={24} sx={{ color: "white" }} />
-                                        ) : (
-                                            "Auto Fill Stipends"
-                                        )}
-                                </Button>
-              <Button variant="contained" sx={{ textTransform: "initial", backgroundColor: "#dc2626",
-                    "&:hover": { backgroundColor: "#b91c1c" },
-                    "&:disabled": { backgroundColor: "#9ca3af", cursor: "not-allowed" },
-                    color: "#fff", fontWeight: 600, py: 1.5, px: 4, borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                    transition: "all 0.3s ease",
-                  }}
+            <Box className="right-options">
+              <Button variant="contained" className="auto-btn"
+                  onClick={handleAutoFill} disabled={autoFillLoading}>
+                      {autoFillLoading ? (
+                              <CircularProgress size={24} sx={{ color: "white" }} />
+                          ) : (
+                              "Auto Fill Stipends"
+                          )}
+                  </Button>
+              <Button variant="contained" className="delete-btn"
                   onClick={handleDeleteStipend} disabled={deleteLoading} >
                   {deleteLoading ? (
                     <CircularProgress size={24} sx={{ color: "white" }} />
@@ -305,15 +344,12 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
             </Box>
             
         </Box>
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-4xl mx-auto mt-20 p-8 bg-white shadow-lg rounded-3xl border border-gray-200"
+      <form onSubmit={handleSubmit}
+        className="stipend-form-container"
       >
-        <h2 className="text-3xl font-bold text-center mb-8 text-blue-700">
-          Enter Stipend Data
-        </h2>
+        <h2 className="page-header">Stipend Form</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="form-grid">
           {[
             
             { label: 'Roll No', name: 'rollNo', type: 'text', onKeyDown: handleRollNoKeyDown, required : true },
@@ -334,12 +370,12 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
             },
           ].map((field) => (
             <div key={field.name}>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">{field.label}</label>
+              <label className="form-label">{field.label}</label>
               {field.type === 'select' ? (
                   <select required={field.required} disabled={isFormDisabled || loading || submitting}
                     name={field.name} value={formData[field.name]}
                     onChange={handleChange}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                     className="stipend-input"
                   >
                     <option value="">Select Month</option>
                     {field.options.map((opt) => (
@@ -354,7 +390,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                         value={formData[field.name]}
                         onChange={handleChange}
                         onKeyDown={field.onKeyDown}
-                        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        className="stipend-input"
                       />
                 )}
                     </div>
@@ -362,17 +398,17 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
               
                 <React.Fragment>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">No of Available Leaves</label>
+                    <label className="form-label">No of Available Leaves</label>
                     <input required={true} disabled  name = "availbale_leaves" type= "text"
                       value={formData["available_leaves"]} onChange={handleChange} 
-                        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        className="stipend-input"
                           />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">No of Requested Leaves</label>
+                    <label className="form-label">No of Requested Leaves</label>
                     <input required={true}  name = "requested_leaves" type= "text"
                       value={formData["requested_leaves"]} onChange={handleChange} 
-                        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      className="stipend-input"
                           />
                   </div>
                 </React.Fragment>
@@ -383,24 +419,21 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
               { label: 'Stipend to Pay', name: 'stipend', type: 'text', required : true },
             ].map((field) => (
               <div key={field.name}>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="form-label">
                   {field.label + ((formData.course === "A.H.S" && field.name === "presentAndHolidays") ? " + Requested Leaves" : "")}
                 </label>
                 <input required={field.required}  disabled={(isFormDisabled && field.name !== "rollNo") 
                     || loading || submitting || field.name !== "leavesBalance" } 
                   name={field.name}  type={field.type} value={formData[field.name]}
                   onChange={handleChange} onKeyDown={field.onKeyDown}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                 className="stipend-input"
                 />
               </div>
             ))}
             </div>
 
         <div className="text-center mt-8">
-          <button disabled={submitting || loading} type="submit"
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-8 rounded-xl shadow-lg transition"
-          > Submit
-          </button>
+          <button disabled={submitting || loading} type="submit" className="submit-btn" > Submit </button>
         </div>
       </form>
     </React.Fragment>

@@ -36,7 +36,7 @@ app.use(express.json()); // to parse JSON bodies
 
 app.use("/media", express.static(path.join(__dirname, "media")));
 
-
+//
 app.use('/api/stipend', stipendRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/pgmedical', pgmedicalRoutes);

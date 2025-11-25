@@ -49,7 +49,7 @@ const AdministrativeInformation= () => {
         <Select
            value={adDetails.course_name} label="Course Name" onChange={(e) => handleAdDetailsChange('course_name', e.target.value)}>
             <MenuItem value="BPT">BPT</MenuItem>
-            <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+            <MenuItem value="Bachelor of Science Nursing">Bachelor of Science Nursing</MenuItem>
             <MenuItem value="MPT">MPT</MenuItem>
             <MenuItem value="Post Basic B.Sc Nursing">Post Basic B.Sc Nursing</MenuItem>
    

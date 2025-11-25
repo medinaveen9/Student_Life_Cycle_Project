@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { FaEdit, FaCheck } from "react-icons/fa";
 import axiosInstance from "../../components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
+import "../../styles/StipendManagement/StipendTable.css";
 
 // ✅ MUI Components (all individually)
 import Dialog from "@mui/material/Dialog";
@@ -282,7 +283,7 @@ const StipendTable = ({ setEditableData, user }) => {
 
   return (
     <React.Fragment>
-      <div style = {{display : "flex", gap : "20px"}}>
+      <div className="filter-container">
         <TextField className="m-4" style={{ minWidth: 200 }} label="Roll No" value={rollNo}
           onChange={(e) => setRollNo(e.target.value)} 
           onKeyDown={(e) => {
@@ -305,7 +306,7 @@ const StipendTable = ({ setEditableData, user }) => {
           <InputLabel>Course</InputLabel>
           <Select value={course}  label="Course" onChange={(e) => setCourse(e.target.value)} >
             <MenuItem value="All">All</MenuItem>
-            <MenuItem value="B.Sc Nursing">B.Sc Nursing</MenuItem>
+            <MenuItem value="Bachelor of Science Nursing">Bachelor of Science Nursing</MenuItem>
             <MenuItem value="A.H.S">A.H.S</MenuItem>
           </Select>
         </FormControl>
@@ -320,10 +321,22 @@ const StipendTable = ({ setEditableData, user }) => {
         </FormControl>
       </div>
       <div className="mt-16 overflow-x-auto p-4">
-        <h2 className="text-xl font-bold mb-4 text-center">
-          NIZAM’S INSTITUTE OF MEDICAL SCIENCES, COLLEGE OF ALLIED HEALTH SCIENCES<br />
-          STIPEND FOR THE MONTH OF JUNE 2025 FOR B.Sc INTERNS (2024-25)
-        </h2>
+        {/* Dynamic heading */}
+        {(() => {
+          const now = new Date();
+          const displayYear = now.getFullYear();
+          const batch = `${displayYear - 1}-${displayYear}`;
+          const monthObj = months.find((m) => Number(m.number) === Number(currentMonth));
+          const monthLabel = currentMonth === "All" ? "ALL MONTHS" : (monthObj ? monthObj.name.toUpperCase() : String(currentMonth).toUpperCase());
+          const courseLabel = course === "All" ? "ALL COURSES" : course.toUpperCase();
+          const yearLabel = year === "All" ? "" : `YEAR ${year}`;
+          const stipendWord = currentMonth === "All" ? "STIPENDS" : "STIPEND";
+          return (
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Verification and Approval
+            </h2>
+          );
+        })()}
 
         <div className="mb-4 flex justify-end gap-4">
           <button
