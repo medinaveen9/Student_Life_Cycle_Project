@@ -1,0 +1,167 @@
+/* Full page – ensures certificate stays centered on A4 */
+.page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20mm; /* Equal margin around */
+  box-sizing: border-box;
+}
+
+/* A4 size fixed */
+.paper-container {
+  width: 210mm;
+  height: 297mm;
+  background: white;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Outer border */
+.outer-border {
+  width: 100%;
+  height: 100%;
+  border: 4px solid black;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Inner lines */
+.inner-lines {
+  position: absolute;
+  inset: 0;
+}
+
+.top-line, .bottom-line, .left-line, .right-line {
+  position: absolute;
+  background: black;
+}
+
+.top-line {
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.bottom-line {
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.left-line {
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+.right-line {
+  right: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+/* Content */
+.content {
+  position: relative;
+  z-index: 5;
+  padding: 60px;
+  text-align: center;
+  font-family: "Times New Roman", serif;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: bold;
+  font-style: italic;
+  margin: 0;
+}
+
+.header p {
+  margin: 4px 0;
+  font-style: italic;
+  font-size: 18px;
+}
+.para_bold{
+  font-weight: bold;
+  margin: 4px 0;
+  font-style: italic;
+  font-size: 18px;
+}
+
+.roll-row {
+  margin-top: 30px;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.certificate-title {
+  margin: 30px 0;
+}
+
+.certificate-title h2 {
+  font-size: 28px;
+  text-decoration: underline;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.body-text {
+  margin-top: 40px;
+  font-size: 22px;
+}
+
+.name {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.parent-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.course {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.footer {
+  margin-top: 80px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.registrar {
+  font-style: italic;
+  font-size: 26px;
+}
+
+/* Print perfect A4 */
+@media print {
+  .page-wrapper {
+    padding: 0;
+    background: white;
+  }
+
+  .paper-container {
+    margin: 0 auto;
+    box-shadow: none;
+    page-break-after: always;
+  }
+}

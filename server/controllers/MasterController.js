@@ -45,22 +45,22 @@ const fetchAdministration = async (req, res) => {
 // Controller for fetching combined student information
 const fetchStudentInfo = async (req, res) => {
   try {
-    const { application_no } = req.query;
+    const { roll_no } = req.query;
 
-    if (!application_no) {
-      return res.status(400).json({ success: false, message: "Application number is required" });
+    if (!roll_no) {
+      return res.status(400).json({ success: false, message: "Roll number is required" });
     }
 
-    const result = await getStudentInfo(application_no);
+    const result = await getStudentInfo(roll_no);
 
     if (result.success) {
-      return res.status(200).json(result);
+      return res.status(200).json(result.data);
     } else {
       return res.status(404).json(result);
     }
   } catch (err) {
     console.error("Error in fetchStudentInfo:", err.message);
-    return res.status(500).json({ success: false, message: "Server Error" });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 

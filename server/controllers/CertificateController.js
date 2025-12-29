@@ -1,5 +1,9 @@
-const { CertificateService, getAllCertificates, updateVerificationStatus} = require('../services/CertificateService');
+const { CertificateService, getAllCertificates, updateVerificationStatus, 
+    getStudentsByRollNo, getDegreeNameByCourseCode, createPCCertificateRequest,
+checkCertificateIssued, generatePDF } = require('../services/CertificateService');
 const { MongoClient, GridFSBucket, ObjectId  } = require('mongodb');
+const { v4: uuidv4 } = require("uuid");
+
 
 // Create certificate request
 const createCertificateRequest = async (req, res) => {
@@ -169,6 +173,78 @@ const updateStatus = async (req, res) => {
     }
 };
 
+//Fetch student details by roll number
+const getStudents = async (req, res) => {
+    try {
+        const rollNo = req.query.roll_no;
+        if (!rollNo) {
+            return res.status(400).json({ error: "Roll number is required" });
+        }
+        const students = await getStudentsByRollNo(rollNo);
+        res.status(200).json(students);
+    } catch (err) {
+        console.error("Error fetching students:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const getDegreeName = async (req, res) => {
+    try {
+        const courseCode = req.query.dds_code;   
+        if (!courseCode) {
+            return res.status(400).json({ error: "Course code is required" });
+        }
+        const degree = await getDegreeNameByCourseCode(courseCode);
+        res.status(200).json(degree);
+    } catch (err) {
+        console.error("Error fetching degree name:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const PC_Certificate_Form = async (req, res) => {
+    try {
+        const responseId = uuidv4();
+        const formData = req.body;
+        const files = req.files || {};
+
+        const studentImage = files.studentImage?.[0] || null;
+
+        const result = await createPCCertificateRequest(
+            responseId, formData, req.files );
+
+        result.gender = formData.gender;
+
+        const pdfBuffer = await generatePDF(result);
+
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename=certificate_${responseId}.pdf`,
+        });
+
+        return res.send(pdfBuffer);
+    } catch (err) {
+        console.error("PC certificate upload failure", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+// Check if certificate already issued
+const checkCertificateIssuedController = async (req, res) => {
+    try {
+        const { roll_no } = req.query;
+        const allTypes = ['Degree', 'Marks Memo', 'Provisional Certificate', 'Final Certificate'];
+        const { issuedCertificates, notIssuedCertificates } = await checkCertificateIssued(roll_no, allTypes);
+
+        res.status(200).json({
+            issuedCertificates, notIssuedCertificates });
+    } catch (err) {
+        console.error("Error checking issued certificates:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
 
 module.exports = { createCertificateRequest, uploadRequiredDocuments, fetchUploadedFiles, 
-    getFileById, getCertificatesDashboard, updateStatus };
+    getFileById, getCertificatesDashboard, updateStatus, getStudents, getDegreeName, 
+    PC_Certificate_Form, checkCertificateIssuedController };

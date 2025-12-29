@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../../styles/Certificates/SelectCertficateForm.css";
 import axiosInstance from "../../components/AxiosInstance";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
@@ -45,15 +45,17 @@ export default function CertificateSelection({ user }) {
     const [loading, setLoading] = useState(true);
     const [filePreviews, setFilePreviews] = useState({});
 
+    const fetchOnce  = useRef(false);
+
     // Fetch student info
     useEffect(() => {
         if (!user?.userId) return;
-            const fetchUser = async () => {
+        const fetchUser = async () => {
             try {
                 const res = await axiosInstance.get("/api/master/student_info", {
-                    params: { application_no: user.userId },
+                    params: { roll_no: user.userId },
                 });
-                if (res.data.success) setData(res.data.data);
+                setData(res.data);
             } catch (err) {
                 console.error("Error fetching user:", err);
                 alert("Failed to fetch student data.");
@@ -61,7 +63,10 @@ export default function CertificateSelection({ user }) {
                 setLoading(false);
             }
         };
-        fetchUser();
+        if (!fetchOnce.current) {
+            fetchOnce.current = true;
+            fetchUser();
+        }
     }, [user]);
 
     // Handle form input changes
@@ -172,13 +177,9 @@ export default function CertificateSelection({ user }) {
                 <div className="student-info">
                     <h3>Student Information</h3>
                     <div className="info-grid">
-                        <p><strong>Application No:</strong> {data.application_no}</p>
-                        <p><strong>Department:</strong> {data.department}</p>
-                        <p><strong>Course:</strong> {data.course_name}</p>
+                        <p><strong>Roll No:</strong> {data.roll_no}</p>
                         <p><strong>Name:</strong> {data.name}</p>
-                        <p><strong>Father's Name:</strong> {data.father_name}</p>
-                        <p><strong>Date of Birth:</strong> {data.dob}</p>
-                        <p><strong>Age:</strong> {data.age}</p>
+                        <p><strong>Course:</strong> {data.course}</p>
                     </div>
                 </div>
 

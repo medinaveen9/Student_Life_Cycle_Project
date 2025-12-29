@@ -126,4 +126,45 @@ const resetPasswordService = async (token, newPassword) => {
   return true;
 };
 
- module.exports = { userAuthentication, changePasswordService, forgotPasswordService, resetPasswordService};
+// Helper function to find user by ID in users_details table
+async function findUserById(userId) {
+    const sql = `SELECT * FROM users_details WHERE user_id=$1`;
+    const res = await pool.query(sql, [userId]);
+    return res.rows.length ? res.rows[0] : null;
+}
+
+// Helper function to find student by roll number in students table
+async function findStudentByRoll(roll_no) {
+    const sql = `SELECT roll_no, name, email FROM students WHERE roll_no=$1`;
+    const res = await pool.query(sql, [roll_no]);
+    return res.rows.length ? res.rows[0] : null;
+}
+
+// Function to register a new user
+const registerUserService = async ({ userId, password }) => {
+    try {
+        // Check if user already exists
+        const existingUser = await findStudentByRoll(userId);
+        if (!existingUser) {
+            return { success: false, message: "User is not exists" };
+        }
+        const existingLogin = await findUserById(userId);
+        if (existingLogin) {
+            return { success: false, message: "User already registered" };
+        }
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert new user into users_details table
+        const sql = `INSERT INTO users_details (user_id, password, role, user_name, email) VALUES ($1,$2,$3,$4,$5)`;
+        await pool.query(sql, [userId, hashedPassword, "Maker", existingUser.name, existingUser.email]);
+        return { success: true, message: "Registered successfully" };
+    } catch (err) {
+        console.error("Registration error:", err);
+        return { success: false, message: "Database error" };
+    }
+};
+
+
+ module.exports = { userAuthentication, changePasswordService, forgotPasswordService, 
+  resetPasswordService, registerUserService};

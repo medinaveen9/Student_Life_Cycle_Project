@@ -80,22 +80,31 @@ export const commonMenu = [
     {
         id: 'Certificates',
         label: 'Certificates',
-        hasSubMenu: true,
-        role: ["Maker"],
+        hasSubMenu: false,
+        role: ["Maker", "Checker", "Verifier", "Approver"],  
         subItems: [
-            { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
-            { id: 'CertificatesDashboard' ,label:'Certificates Dashboard', path:'/certificates/dashboard'},
+            { id: 'Certificates', label: 'Certificates', path: '/certificate_master' },
         ]
     },
-    {
-        id: 'Certificates',
-        label: 'Certificates',
-        hasSubMenu: true,
-        role: ["Checker", "Verifier", "Approver"],
-        subItems: [
-            { id: 'CertificatesDashboard' ,label:'Certificates Dashboard', path:'/certificates/dashboard'},
-        ]
-    },
+    // {
+    //     id: 'Certificates',
+    //     label: 'Certificates',
+    //     hasSubMenu: true,
+    //     role: ["Maker"],
+    //     subItems: [
+    //         { id: 'Certificates', label: 'Certificates', path: '/selectcertificate' },
+    //         { id: 'CertificatesDashboard' ,label:'Certificates Dashboard', path:'/certificates/dashboard'},
+    //     ]
+    // },
+    // {
+    //     id: 'Certificates',
+    //     label: 'Certificates',
+    //     hasSubMenu: true,
+    //     role: ["Checker", "Verifier", "Approver"],
+    //     subItems: [
+    //         { id: 'CertificatesDashboard' ,label:'Certificates Dashboard', path:'/certificates/dashboard'},
+    //     ]
+    // },
     {
         id: 'Course Application',
         label: 'Course Application',

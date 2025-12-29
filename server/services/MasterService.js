@@ -356,19 +356,17 @@ const employeeRoleService = async (data) => {
 };
 
 // Service function for combined student data
-const getStudentInfo = async (application_no) => {
+const getStudentInfo = async (roll_no) => {
   try {
+    // Query to fetch student info from students table
     const query = `
-      SELECT a.application_no, a.department, a.course_name, p.name, p.father_name, p.dob,
-        p.age FROM administrative_information a JOIN personal_information p
-        ON a.application_no = p.application_no
-        WHERE a.application_no = $1
-      `;
+      SELECT s.roll_no, s.name, s.course
+        FROM students s where s.roll_no = $1`;
 
-    const result = await pool.query(query, [application_no]);
+    const result = await pool.query(query, [roll_no]);
 
     if (result.rows.length === 0) {
-      return { success: false, message: "No student found with this application number" };
+      return { success: false, message: "No student found with this roll number" };
     }
 
     return { success: true, data: result.rows[0] };

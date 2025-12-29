@@ -1,4 +1,6 @@
-const { userAuthentication, changePasswordService, forgotPasswordService , resetPasswordService   } = require("../services/LoginService");
+const { userAuthentication, changePasswordService, forgotPasswordService , resetPasswordService,
+  registerUserService
+   } = require("../services/LoginService");
 const { createToken } = require("../config/VerifyToken");
 
 // Controller for user login
@@ -17,7 +19,7 @@ const userLogin = async (req, res) => {
 
   } catch (err) {
     console.error("User Login failed:", err);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -90,6 +92,25 @@ const resetPasswordController = async (req, res) => {
   }
 };
 
-module.exports = { userLogin ,verifyUser, userLogout, changePassword, forgotPasswordController,
-  resetPasswordController
+const registerController = async (req, res) => {
+  try {
+    const { userId, password, conformPassword } = req.body;
+    if (password !== conformPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+    const result = await registerUserService({ userId, password });
+    if (result.success) {
+      res.status(200).json({ message: result.message });
+    } else {
+      res.status(400).json({ message: result.message });
+    }
+  }
+  catch (err) {
+    console.error("Registration Error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
+module.exports = { userLogin ,verifyUser, userLogout, changePassword, forgotPasswordController,
+  resetPasswordController, registerController }
+

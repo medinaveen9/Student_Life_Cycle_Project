@@ -121,6 +121,10 @@ const CourseApplicationSelection = lazy(() => import('./Forms/CourseApplication/
 const MHM_MarksMemo = lazy(() => import('./Forms/MarksMemos/MHM_Marks_Memo'));
 const PGD_NMT_MarksMemo = lazy(() => import('./Forms/MarksMemos/PGD_NMT_Memo'));
 
+{/* Master Certificate for provisional */}
+const CertficateMaster = lazy(() => import('./Forms/CertificateForms/CertficateMaster'));
+const DemoCertificateTemplate = lazy(() => import('./Forms/CertificateForms/DemoCertificateTemplate'));
+
 
 const App = () => {
   const location = useLocation();
@@ -291,6 +295,10 @@ const App = () => {
                   {/* Marks Memo Configuration */}
                   <Route path="/mhm_memo" element={<MHM_MarksMemo />} />
                   <Route path="/pgd_nmt_memo" element={<PGD_NMT_MarksMemo />} />
+
+                  {/* Master Certificate for Provisional */}
+                  <Route path="/certificate_master" element={<CertficateMaster />} />
+                  <Route path="/certificate_template" element={<DemoCertificateTemplate />} />
                 </Routes>
             </Box>
           </Box>

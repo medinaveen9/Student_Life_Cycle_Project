@@ -1,0 +1,279 @@
+.certificate-paper {
+  overflow: visible;
+  width : 70%;
+}
+
+.certificate-wrapper {
+  padding: 20px 22px;
+}
+
+.heading {
+  margin-bottom: 12px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.image-preview {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.form-grid {
+  margin-top: 8px;
+}
+
+/* Ensure MUI Grid items stack visually with spacing when single-column */
+.form-grid .MuiGrid-item {
+  margin-bottom: 12px;
+}
+
+.actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Larger screens: make the paper a bit roomier */
+@media (min-width: 900px) {
+  .certificate-wrapper {
+    padding: 28px 32px;
+  }
+  .image-preview {
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* Mobile: tighten spacing and ensure inputs are full width */
+@media (max-width: 600px) {
+  .certificate-wrapper {
+    padding: 14px;
+  }
+  .image-preview {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* Focus and accessibility helpers */
+input[type="file"]:focus + .file-label,
+.file-label:focus {
+  outline: 2px solid rgba(25, 118, 210, 0.4);
+  outline-offset: 2px;
+}
+
+/* Main checkbox group wrapper */
+.checkbox-group {
+  margin: 20px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.check_button {
+  font-size: 12px;
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+/* Title */
+.checkbox-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* Checkbox container layout */
+.checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.issued-certificates {
+  margin-top: 10px;
+  font-size: 14px;
+  color: green;
+  &.not-issued {
+    color: red;
+  }
+}
+
+/* Checkbox item */
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: 0.2s ease-in-out;
+}
+
+/* Hover effect */
+.checkbox-item:hover {
+  background: #f1f1f1;
+}
+
+/* Checkbox size */
+.checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* -------------------------------------------------- */
+/* RESPONSIVE DESIGN */
+/* -------------------------------------------------- */
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .checkbox-title {
+    font-size: 15px;
+  }
+
+  .checkbox-row {
+    gap: 15px;
+  }
+
+  .checkbox-item {
+    font-size: 14px;
+    padding: 5px 8px;
+  }
+
+  .checkbox-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Mobile (600px and below) */
+@media (max-width: 600px) {
+  .checkbox-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .checkbox-item {
+    font-size: 14px;
+    padding: 8px 12px;
+    width: 100%;
+    border: 1px solid #ddd;
+  }
+
+  .checkbox-item:hover {
+    background: #fafafa;
+  }
+}
+
+/* Very small screens (400px and below) */
+@media (max-width: 400px) {
+  .checkbox-title {
+    font-size: 14px;
+  }
+
+  .checkbox-item {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .checkbox-item input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+
+/* Wrapper */
+.file-upload-group {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+}
+
+/* Label */
+.file-label {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* File Input */
+.file-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-size: 14px;
+}
+
+/* Hover */
+.file-input:hover {
+  background: #f1f1f1;
+}
+
+/* Focus */
+.file-input:focus {
+  outline: none;
+  border-color: #3f51b5;
+  box-shadow: 0 0 3px rgba(63, 81, 181, 0.5);
+}
+
+/* -------------------------------------------------- */
+/* Responsive: Tablet */
+/* -------------------------------------------------- */
+@media (max-width: 768px) {
+  .file-label {
+    font-size: 14px;
+  }
+
+  .file-input {
+    padding: 9px;
+    font-size: 13px;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Responsive: Mobile */
+/* -------------------------------------------------- */
+@media (max-width: 600px) {
+  .file-upload-group {
+    margin: 12px 0;
+  }
+
+  .file-input {
+    padding: 10px;
+    width: 100%;
+  }
+}
+
+/* Smaller phones */
+@media (max-width: 400px) {
+  .file-label {
+    font-size: 13px;
+  }
+
+  .file-input {
+    font-size: 12.5px;
+  }
+}
