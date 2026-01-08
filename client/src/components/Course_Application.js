@@ -81,7 +81,7 @@ export const commonMenu = [
         id: 'Certificates',
         label: 'Certificates',
         hasSubMenu: false,
-        role: ["Maker", "Checker", "Verifier", "Approver"],  
+        role: [ "Checker", "Verifier", "Approver"],  
         subItems: [
             { id: 'Certificates', label: 'Certificates', path: '/certificate_master' },
         ]

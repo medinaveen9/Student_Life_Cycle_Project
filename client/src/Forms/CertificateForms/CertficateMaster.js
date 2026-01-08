@@ -184,7 +184,6 @@ export default function CertificateForm({}) {
         const requiredFields = [
             "rollNo", "icrNumber", "certificateName", "fatherName", "courseBatch",
             "ddsCode", "degreeName", "passDate", "typeIssued", "regularSupply",
-            "division",
             "staff1", "staff2", "staff3", "staff4",
             "certificateIssueStatus", 
         ];
@@ -445,7 +444,7 @@ export default function CertificateForm({}) {
                     )}
 
                     {[
-                        { label: "Regular / Supply", name: "regularSupply", type: "select", options: ["Regular", "Supply"], required: true },
+                        { label: "Regular / Supply", name: "regularSupply", type: "select", options: ["Regular", "Supply", "N/A"], required: true },
                         { label: "Total Marks", name: "totalMarks", required: true },
                         { label: "Marks Obtained", name: "obtainedMarks", required: true },
                         { label: "Percentage", name: "percentage", disabled: true, required: true },
@@ -457,8 +456,10 @@ export default function CertificateForm({}) {
                     ].map(({ label, name, type = "text", options = [], disabled, onKeyDown }) => {
 
                     const hideField =
-                        form.regularSupply === "Supply" &&
-                        ["totalMarks", "obtainedMarks", "percentage"].includes(name);
+                        (form.regularSupply === "Supply" &&
+                            ["totalMarks", "obtainedMarks", "percentage"].includes(name)) ||
+                        (form.regularSupply === "N/A" &&
+                            ["totalMarks", "obtainedMarks", "percentage", "division"].includes(name));
 
                     if (hideField) return null;
 

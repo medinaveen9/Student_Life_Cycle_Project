@@ -95,7 +95,8 @@ const getStudentsByRollNo = async (rollNo) => {
         const values = [rollNo];
         const result = await pool.query(query, values);
         if (result.rows.length === 0) {
-            throw new Error("No student found with the given roll number");
+            // throw new Error("No student found with the given roll number");
+            return null;
         }
         return result.rows;
     } catch (err) {
@@ -118,7 +119,8 @@ const getDegreeNameByCourseCode = async (courseCode) => {
         const result = await pool.query(query, values);
 
         if (result.rows.length === 0) {
-            throw new Error("No data found for given course code");
+            // throw new Error("No data found for given course code");
+            return null;
         }
 
         return result.rows[0];  // { degree_name, emp1, emp2 }
@@ -200,7 +202,7 @@ async function generatePDF(data) {
 
 
 //Add certificate form into the database
-const createPCCertificateRequest = async (responseId, formData, files) => {
+const createPCCertificateRequest = async (responseId, formData, files, userData) => {
     const mongo = new MongoClient(process.env.MONGO_URI);
     let db, bucket;
     let studentImageId = null;
@@ -248,13 +250,13 @@ const createPCCertificateRequest = async (responseId, formData, files) => {
             provisional_receipt_date, certificate_issue_status,
             od_final_date, provisional_final_date,
             student_image_id,
-            provisional_fee_paid, od_fee_paid, draft_date, od_receipt_date
+            provisional_fee_paid, od_fee_paid, draft_date, od_receipt_date, checker_id, checker_name
         )
         VALUES (
             $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
             $11,$12,$13,$14,$15,$16,$17,$18,$19,
             $20,$21,$22,$23,$24,$25,$26,$27,
-            $28,$29,$30,$31, $32
+            $28,$29,$30,$31, $32, $33, $34
         )
         RETURNING *;
         `;
@@ -291,7 +293,9 @@ const createPCCertificateRequest = async (responseId, formData, files) => {
             formData.provisionalFeePaid === 'true' || formData.provisionalFeePaid === true, // boolean
             formData.odFeePaid === 'true' || formData.odFeePaid === true,   // boolean
             formData.draftDate ? new Date(formData.draftDate) : null,       // date
-            formData.odReceiptDate ? new Date(formData.odReceiptDate) : null // date
+            formData.odReceiptDate ? new Date(formData.odReceiptDate) : null, // date
+            userData.userId,                               // checker_id
+            userData.user_name                             // checker_name
         ];
 
         const pgResult = await pool.query(insertQuery, params);

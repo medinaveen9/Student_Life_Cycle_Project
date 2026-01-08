@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require("fs");
+const { courseContentMap, contentPatterns } = require('../CertificatesConfig/pcCourseMap');
 
 const imagePath = 'file://' + path.join(
     __dirname,       // current folder: config/Certificates
@@ -11,6 +12,7 @@ const imagePath = 'file://' + path.join(
 const logoFile = path.join(__dirname, '../../media/nims_logo.png');
 const logoBase64 = fs.readFileSync(logoFile, { encoding: 'base64' });
 const logoDataURL = `data:image/jpeg;base64,${logoBase64}`;
+
 
 function generateCertificateHTML(data, designationMap) {
 
@@ -26,6 +28,9 @@ function generateCertificateHTML(data, designationMap) {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   };
+
+  const contentType = courseContentMap[data.degree_name] || "TYPE_A";
+  const pattern = contentPatterns[contentType];
 
   const formatToDDMMYYYY = (dateStr) => {
     const date = new Date(dateStr);
@@ -65,7 +70,7 @@ body{font-family:Arial,sans-serif;background:white;}
 
 .paper-container{
   width:80%;
-  height:88%;
+  height:98%;
   border:4px solid black;
   position:relative;
   padding:18px;
@@ -81,6 +86,12 @@ body{font-family:Arial,sans-serif;background:white;}
   width:100%;
   text-align:center;
   margin-top:40px;
+}
+.certificate-footer {
+  position: absolute;
+  bottom: 30px;      /* controls distance from bottom border */
+  left: 0;
+  width: 100%;
 }
 
 /* ===== PAGE 2 BORDERS FIXED ===== */
@@ -218,21 +229,52 @@ body{font-family:Arial,sans-serif;background:white;}
           PROVISIONAL CERTIFICATE
         </h2>
 
-        <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
           <p>This is to certify that</p>
-          <div style="font-weight:bold; font-size : 18px;">${data.certificate_name || ""}</div>
-          <p style="font-weight:bold;">${data.gender === 'Female' ? 'D/O ' : 'S/O '}${data.father_name || ""}</p>
-          <p>has been duly admitted to the</p>
-          <div style="font-weight:bold;">${data.degree_name || ""}</div>
-          <p>having passed in the Final Examinations</p>
-          <p>held in ${formattedPassDate}</p>
+
+          <div style="font-weight:bold;font-size:20px;">
+            ${data.certificate_name}
+          </div>
+
+          <p style="font-weight:bold;">
+            ${data.gender === "Female" ? "D/O" : "S/O"} ${data.father_name}
+          </p>
+
+          <p>${pattern.main}</p>
+
+          <div style="font-weight:bold;font-size:20px;">
+            ${data.degree_name}
+          </div>
+
+          <p>${pattern.examLine}</p>
+
+          <p>
+            Final Examinations held in <strong>${formattedPassDate}</strong>
+          </p>
+
+          ${pattern.division ? `<p>${pattern.divisionText}<strong> ${data.division}</strong></p>` : ""}
+
+          ${
+            pattern.internship
+              ? `
+                <p>${pattern.internshipText1}</p>
+                <p>${pattern.internshipText2}</p>
+                `
+              : ""
+          }
+          
         </div>
 
-        <div style = "margin-top : 50px;">
-          <p style="font-family:'Monotype Corsiva';font-size:24px; text-align : end; margin-right : 70px; font-weight : 600">Executive Registrar</p>
-          <div style="display:flex; font-weight:bold; text-align:start; margin-left:50px;">
+
+        <div class="certificate-footer">
+          <p style="font-family:'Monotype Corsiva';font-size:24px;
+                    text-align:end;margin-right:70px;font-weight:600;">
+            Executive Registrar
+          </p>
+
+          <div style="font-weight:bold;margin-left:50px;text-align:left;">
             Place: Hyderabad<br/>
-            Date: ${ finalIssuedDate }
+            Date: ${finalIssuedDate}
           </div>
         </div>
       </div>
@@ -265,11 +307,11 @@ body{font-family:Arial,sans-serif;background:white;}
     <div class="prepared-by section_3" style="margin-top : 20px;">
       <div class="employees_info">
         <div class = "employee_main">
-          <p class = "employee_details">${designationMap[data.staff1] || ""}</p>
+          <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff1] || ""}</p>
           <p class = "employee_details employee_id">EmpID: ${data.staff1 || ""}</p>
         </div>
         <div class = "employee_main">
-          <p class = "employee_details">${designationMap[data.staff2] || ""}</p>
+          <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff2] || ""}</p>
           <p class = "employee_details employee_id">EmpID: ${data.staff2 || ""}</p>
         </div>
       </div>
@@ -281,11 +323,11 @@ body{font-family:Arial,sans-serif;background:white;}
 
     <div class="employees_info" style="margin-top : 20px;">
       <div class = "employee_main">
-        <p class = "employee_details">${designationMap[data.staff3] || ""}</p>
+        <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff3] || ""}</p>
         <p class = "employee_details employee_id">EmpID: ${data.staff3 || ""}</p>
       </div>
       <div class = "employee_main">
-        <p class = "employee_details">${designationMap[data.staff4] || ""}</p>
+        <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff4] || ""}</p>
         <p class = "employee_details employee_id">EmpID: ${data.staff4 || ""}</p>
       </div>
     </div>

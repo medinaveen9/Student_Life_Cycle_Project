@@ -181,6 +181,9 @@ const getStudents = async (req, res) => {
             return res.status(400).json({ error: "Roll number is required" });
         }
         const students = await getStudentsByRollNo(rollNo);
+        if(!students) {
+            return res.status(404).json({ message: "No student found with the given roll number" });
+        }
         res.status(200).json(students);
     } catch (err) {
         console.error("Error fetching students:", err);
@@ -192,13 +195,16 @@ const getDegreeName = async (req, res) => {
     try {
         const courseCode = req.query.dds_code;   
         if (!courseCode) {
-            return res.status(400).json({ error: "Course code is required" });
+            return res.status(400).json({ message: "Course code is required" });
         }
         const degree = await getDegreeNameByCourseCode(courseCode);
+        if(!degree) {
+            return res.status(404).json({ message: "No data found for given course code" });
+        }
         res.status(200).json(degree);
     } catch (err) {
         console.error("Error fetching degree name:", err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -207,11 +213,12 @@ const PC_Certificate_Form = async (req, res) => {
         const responseId = uuidv4();
         const formData = req.body;
         const files = req.files || {};
+        const userData = req.user;
 
         const studentImage = files.studentImage?.[0] || null;
 
         const result = await createPCCertificateRequest(
-            responseId, formData, req.files );
+            responseId, formData, req.files, userData );
 
         result.gender = formData.gender;
 

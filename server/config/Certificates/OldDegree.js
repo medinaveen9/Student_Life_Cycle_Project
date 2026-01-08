@@ -77,7 +77,7 @@ body{font-family:Arial,sans-serif;background:white;}
   width:90%;
   height:88%;
   position:relative;
-  padding:18px;
+  padding:12px;
 }
 
 .inner-line{position:absolute;background:black;}
@@ -89,7 +89,7 @@ body{font-family:Arial,sans-serif;background:white;}
 .content{
   width:100%;
   text-align:center;
-  margin-top:40px;
+  margin-top:30px;
 }
 
 /* ===== PAGE 2 BORDERS FIXED ===== */
@@ -192,20 +192,20 @@ body{font-family:Arial,sans-serif;background:white;}
         <div class="content">
           <div style="display:flex;flex-direction:column;gap:16px;">
             <div>
-              <h1 style="font-family:'Monotype Corsiva'; font-size:41px; font-style:italic; line-height:1.2;">
+              <h1 style="font-family:'Monotype Corsiva'; font-size:61px; font-style:italic; line-height:1.2;">
                 Nizam's Institute of Medical Sciences
               </h1>
 
-              <p style="font-family:'Monotype Corsiva'; font-size:19px; font-style:italic;">
+              <p style="font-family:'Monotype Corsiva'; font-size:28px; font-style:italic;">
                 (A University established under the State Act, 1989)
               </p>
-              <p style="font-family:'Monotype Corsiva'; font-size:21px; font-style:italic;">
+              <p style="font-family:'Monotype Corsiva'; font-size:34px; font-style:italic;">
                 Punjagutta, Hyderabad-500082, Telangana, India.
               </p>
             </div>
 
             <div style="margin:25px 0 20px;display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-family:Arial;font-weight:bold;font-size:15px;margin-left : 10px;">
+              <div style="font-family:Arial;font-weight:bold;font-size:19px;margin-left : 10px;">
                 Roll No. ${data.roll_no || ""}
               </div>
 
@@ -213,19 +213,25 @@ body{font-family:Arial,sans-serif;background:white;}
                 <img src="${logoDataURL}" style="height:70px;">
               </div>
 
-              <div style="font-family:Arial;font-weight:bold;font-size:15px;margin-right : 50px;">
+              <div style="font-family:Arial;font-weight:bold;font-size:19px;margin-right : 50px;">
                 ${data.dds_code || ""} - ${data.icr_number || ""}
               </div>
             </div>
 
-            <div style="display:flex;flex-direction:column;gap:15px;">
+            <div style="font-size : 19px; display:flex;flex-direction:column;gap:15px;">
               <p>This is to certify that</p>
-              <div style="font-weight:bold;">${data.certificate_name || ""}</div>
+              <div style="font-weight:bold;font-size:21px;">${data.certificate_name || ""}</div>
               <p style="font-weight:bold;">${data.gender === 'Female' ? 'D/O ' : 'S/O '}${data.father_name || ""}</p>
               <p>has been admitted to the degree of</p>
-              <div style="font-weight:bold;">${data.degree_name || ""}</div>
-              <p>of this University having been declared to have passed the examination held in ${formattedPassDate}</p>
-              <p>and placed in ${data.division}</p>
+              <div style="font-weight:bold;font-size:21px;">${data.degree_name || ""}</div>
+              <p>
+                of this University having been declared to have passed the examination held in <strong>${formattedPassDate}</strong>
+              </p>
+              ${
+                data.degree_name !== "Master in Hospital Management"
+                  ? `<p>and placed in <strong>${data.division}</strong></p>`
+                  : ""
+              }
               <p style="font-family: "PalatinoLinotype"; font-weight:normal; font-size:20px; line-height:1.2;">
                   Given above the Seal of the University 
                 </p>
@@ -234,7 +240,7 @@ body{font-family:Arial,sans-serif;background:white;}
             <div>
               <div style="margin-top:50px;display:flex; gap : 40px;">
                 <div style = "width : 20%;"></div>
-                <div style = "display : flex; justify-content: space-between; width : 70%; font-weight : 600;">
+                <div style = "display : flex; justify-content: space-between; width : 70%; font-weight : 600;font-size : 19px;">
                   <div style="font-family:'Monotype Corsiva';font-size:24px;font-style:italic;">
                     Executive Registrar
                   </div>

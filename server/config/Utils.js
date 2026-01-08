@@ -22,11 +22,12 @@ function numberToWords(num) {
 }
 
 function formatYear(year) {
-  if (year === "All") return year; // Return "All" as is
+    if (year === "All") return year; // Return "All" as is
 
-  const suffixes = ["th", "st", "nd", "rd", ""];
-  const v = year % 100;
-  return year + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+    const suffixes = ["th", "st", "nd", "rd", ""];
+    const v = year % 100;
+    return year + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 }
+
 
 module.exports = {numberToWords, formatYear}
