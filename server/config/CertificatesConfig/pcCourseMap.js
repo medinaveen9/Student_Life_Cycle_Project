@@ -64,3 +64,5 @@ export const contentPatterns = {
         divisionText: "and placed in "
     }
 };
+
+module.exports = {contentPatterns, courseContentMap}

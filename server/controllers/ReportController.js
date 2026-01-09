@@ -90,7 +90,7 @@ const generateReport = async (req, res) => {
       <head>
         <meta charset="UTF-8">
         <title>Stipend Report</title>
-        <style>
+         <style>
           body {
             font-family: 'Times New Roman', serif;
             margin: 0;
@@ -99,37 +99,51 @@ const generateReport = async (req, res) => {
             font-size: 11pt;
             line-height: 1.5;
           }
+
+          /* ✅ Every page gets spacing via Puppeteer margins */
+          @page {
+            margin: 35mm 15mm 30mm 15mm; /* top | right | bottom | left */
+          }
+
+          /* ✅ Page wrapper (no forced margin repetition) */
           .page {
-            min-height: 297mm; /* A4 height */
-            padding: 25mm 20mm;
-            margin: 0 auto;
-            box-sizing: border-box;
             page-break-after: always;
-            width :100%;
           }
           .page:last-child {
             page-break-after: avoid;
           }
 
-          /* Page 1 */
+          /* ✅ Header only on first page */
+          .header {
+            page-break-after: avoid;
+            break-after: avoid;
+            break-inside: avoid;
+          }
+
+          /* ✅ Prevent repeating table header */
+          thead { 
+            display: table-row-group !important;
+          }
+
+          /* ✅ Keep each table row together (no splitting rows across pages) */
+          tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* ✅ Your existing styles continue … */
           .nursing-title { font-family: 'Georgia', serif; font-size: 24pt; text-align: right; margin: 0 0 20px 0; color: #333; }
-          .header { display: flex; margin-bottom: 20px; width : 100%; }
           .header-left { display: flex; }
           .logo { width: 50px; height: 50px; margin-right: 15px; }
-          .university-details { font-size: 10pt;  text-align: center; width : 100%;}
+          .university-details { font-size: 10pt; text-align: center; width: 100%; }
           .university-details div:first-child { font-weight: bold; text-align: center; }
           .rc-date { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 10pt; }
           .sanction-order-title { text-align: center; font-size: 14pt; font-weight: bold; margin-bottom: 20px; text-decoration: underline; }
           .section-heading { margin-bottom: 5px; font-size: 10pt; }
           .content-block { margin-bottom: 15px; font-size: 10pt; }
-          ul { list-style-type: decimal; padding-left: 20px; font-size: 10pt; margin : 0px }
+          ul { list-style-type: decimal; padding-left: 20px; font-size: 10pt; margin: 0px; }
           .signature-block { text-align: right; margin-top: 50px; font-size: 10pt; }
           .footer-block { margin-top: 30px; font-size: 10pt; }
-
-          /* Page 2 */
-          .note-section { font-size: 9pt; margin-bottom: 20px; }
-          .note-title { font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
-          .main-heading { text-align: center; font-weight: bold; font-size: 11pt; margin-bottom: 15px; }
           table { width: 100%; border-collapse: collapse; font-size: 9pt; }
           th, td { border: 1px solid black; padding: 4px; text-align: center; }
           th { background-color: #f0f0f0; }
@@ -244,24 +258,30 @@ const generateReport = async (req, res) => {
 
      // ---- Puppeteer ----
     const browser = await puppeteer.launch({
-      headless: "new",
-      executablePath: "C:\\Users\\Tullimilli\\.cache\\puppeteer\\chrome\\win64-142.0.7444.59\\chrome-win64\\chrome.exe", // 👈 local offline Chromium
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+          headless: "new",
+          args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
 
-    const page = await browser.newPage();
+        const page = await browser.newPage();
 
-    await page.setContent(combinedHtml, { waitUntil: "domcontentloaded" });
+        await page.setContent(combinedHtml, { waitUntil: "domcontentloaded" });
 
-    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
-    await browser.close();
+        const pdfBuffer = await page.pdf({ format: "A4", printBackground: true, 
+          margin: {
+            top: "35mm",
+            bottom: "30mm",
+            left: "15mm",
+            right: "15mm"
+          }
+        });
+        await browser.close();
 
-    // ✅ Send response
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": "attachment; filename=stipend-report.pdf",
-    });
-    res.send(pdfBuffer);
+        // ✅ Send response
+        res.set({
+          "Content-Type": "application/pdf",
+          "Content-Disposition": "attachment; filename=stipend-report.pdf",
+        });
+        res.send(pdfBuffer);
   } catch (error) {
     console.error("❌ Error generating PDF:", error);
     res.status(500).send("Error generating PDF");
