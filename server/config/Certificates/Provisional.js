@@ -52,7 +52,7 @@ function generateCertificateHTML(data, designationMap) {
 <head>
 <meta charset="UTF-8">
 <title>Certificate PDF</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Italianno&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:Arial,sans-serif;background:white;}
@@ -199,14 +199,14 @@ body{font-family:Arial,sans-serif;background:white;}
     <div class="content">
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div>
-          <h1 style="font-family:'Monotype Corsiva'; font-size:41px; font-style:italic; line-height:1.2;">
+          <h1 style="font-family:'Times new roman'; font-size:33px; font-style:italic; line-height:1.2;">
             Nizam's Institute of Medical Sciences
           </h1>
 
-          <p style="font-family:'Monotype Corsiva'; font-size:19px; font-style:italic;">
+          <p style="font-family:'Times new roman'; font-size:19px; font-style:italic;">
             (A University established under the State Act, 1989)
           </p>
-          <p style="font-family:'Monotype Corsiva'; font-size:19px; font-style:italic;">
+          <p style="font-family:'Times new roman'; font-size:19px; font-style:italic;">
             Punjagutta, Hyderabad-500082, Telangana, India.
           </p>
         </div>
@@ -267,7 +267,7 @@ body{font-family:Arial,sans-serif;background:white;}
 
 
         <div class="certificate-footer">
-          <p style="font-family:'Monotype Corsiva';font-size:24px;
+          <p style="font-family:'Times new roman'; font-style:italic; font-size:24px;
                     text-align:end;margin-right:70px;font-weight:600;">
             Executive Registrar
           </p>

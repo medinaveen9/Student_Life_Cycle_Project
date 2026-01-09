@@ -192,14 +192,14 @@ body{font-family:Arial,sans-serif;background:white;}
         <div class="content">
           <div style="display:flex;flex-direction:column;gap:16px;">
             <div>
-              <h1 style="font-family:'Monotype Corsiva'; font-size:61px; font-style:italic; line-height:1.2;">
+              <h1 style="font-family:'Times new roman'; font-size:61px; font-style:italic; line-height:1.2;">
                 Nizam's Institute of Medical Sciences
               </h1>
 
-              <p style="font-family:'Monotype Corsiva'; font-size:28px; font-style:italic;">
+              <p style="font-family:'Times new roman'; font-size:28px; font-style:italic;">
                 (A University established under the State Act, 1989)
               </p>
-              <p style="font-family:'Monotype Corsiva'; font-size:34px; font-style:italic;">
+              <p style="font-family:'Times new roman'; font-size:34px; font-style:italic;">
                 Punjagutta, Hyderabad-500082, Telangana, India.
               </p>
             </div>
@@ -241,13 +241,13 @@ body{font-family:Arial,sans-serif;background:white;}
               <div style="margin-top:50px;display:flex; gap : 40px;">
                 <div style = "width : 20%;"></div>
                 <div style = "display : flex; justify-content: space-between; width : 70%; font-weight : 600;font-size : 19px;">
-                  <div style="font-family:'Monotype Corsiva';font-size:24px;font-style:italic;">
+                  <div style="font-family:'Times new roman';font-size:24px;font-style:italic;">
                     Executive Registrar
                   </div>
-                  <div style="font-family:'Monotype Corsiva';font-size:24px;font-style:italic;">
+                  <div style="font-family:'Times new roman';font-size:24px;font-style:italic;">
                     Dean
                   </div>
-                  <div style="font-family:'Monotype Corsiva';font-size:24px;font-style:italic;">
+                  <div style="font-family:'Times new roman';font-size:24px;font-style:italic;">
                     Director
                   </div>
                 </div>

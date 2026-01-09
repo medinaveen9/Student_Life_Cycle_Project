@@ -109,7 +109,7 @@ export const commonMenu = [
         id: 'Course Application',
         label: 'Course Application',
         hasSubMenu: false,
-        role: ["Maker", "Checker"], 
+        role: [], 
         subItems: [
             {id: 'CourseSelection', label: 'Course Selection', path: '/course-selection' },     
         ]   
@@ -143,7 +143,7 @@ export const commonMenu = [
     id:'Genetic Counselling Course Application ',
     label:'MPT & M.SC GC Application',
     hasSubMenu:true,
-    role: ["Maker", "Checker"],
+    role: [],
     subItems: [
       {id: 'AdministrativeInformation', label: 'Administrative Information', path: '/gcadministration' },
       {id:'FeePaymentDetails' ,label:'Fee Payment Details', path:'/gcappfee' },
@@ -159,7 +159,7 @@ export const commonMenu = [
       id: 'ApplicationFormBPT',
       label: 'Bachelor of Physiotherapy Application',
       hasSubMenu: true,
-       role: ["Maker", "Checker"],
+       role: [],
       subItems: [
        
         {id:'AdministrativeInformation' ,label:'Administrative Information', path:'/administrative' },
