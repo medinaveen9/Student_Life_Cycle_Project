@@ -1,5 +1,5 @@
 // Map course names to certificate types
-export const courseContentMap = {
+const courseContentMap = {
     "B.Sc. (Nursing)": "TYPE_E",
     "Bachelor of Physiotherapy": "TYPE_B",
     "Master in Hospital Management": "TYPE_B",
@@ -25,7 +25,7 @@ export const courseContentMap = {
 };
 
 // Define content patterns for different certificate types
-export const contentPatterns = {
+const contentPatterns = {
     TYPE_A: {
         main: "has qualified for",
         examLine: "having passed the said Degree",
