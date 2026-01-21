@@ -497,6 +497,64 @@ const addStudentService = async (data) => {
   }
 };
 
+// Add or Update student
+const addOrUpdateStudentService = async (data) => {
+  try {
+    const { roll_no } = data;
+
+    // Check if student exists
+    const exists = await pool.query(`SELECT id FROM students WHERE roll_no = $1`, [roll_no]);
+
+    if (exists.rowCount > 0) {
+      // 🔄 Student exists → update
+      const fields = Object.keys(data);
+      const values = Object.values(data);
+
+      // Build update query dynamically
+      const setQuery = fields.map((f, i) => `${f} = $${i + 1}`).join(", ");
+      const updateQuery = `UPDATE students SET ${setQuery} WHERE roll_no = $${fields.length + 1} RETURNING id`;
+
+      const result = await pool.query(updateQuery, [...values, roll_no]);
+      return { id: result.rows[0].id, updated: true };
+
+    } else {
+      // ➕ Student does not exist → insert
+      const fields = Object.keys(data);
+      const values = Object.values(data);
+      const placeholders = fields.map((_, i) => `$${i + 1}`).join(", ");
+
+      const insertQuery = `
+        INSERT INTO students (${fields.join(", ")})
+        VALUES (${placeholders})
+        RETURNING id
+      `;
+
+      const result = await pool.query(insertQuery, values);
+      return { id: result.rows[0].id, updated: false };
+    }
+
+  } catch (err) {
+    console.error("Add/Update Student Error:", err);
+    throw err;
+  }
+};
+
+// Delete student by roll_no
+const deleteStudent = async (roll_no) => {
+    const result = await pool.query(
+      "DELETE FROM students WHERE roll_no = $1 RETURNING *",
+      [roll_no]
+    );
+
+    if (result.rowCount === 0) {
+      throw new Error("Student not found");
+    }
+
+    return result.rows[0];
+};
+
+
+
 
 
 const fetchStudentsByFilter = async (course, batchYear, currentYear) => {
@@ -524,4 +582,4 @@ const promoteStudentsService = async (studentIds, nextYear, newDOJ) => {
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData,
-  promoteStudentsService, addStudentService, fetchStudentsByFilter};
+  promoteStudentsService, addStudentService, fetchStudentsByFilter, deleteStudent, addOrUpdateStudentService};

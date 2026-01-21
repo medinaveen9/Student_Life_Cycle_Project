@@ -104,6 +104,7 @@ const DemoStipendForm = lazy(() => import('./Forms/StipendManagement/DemoStipend
 const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/DemoStipendTable'));
 const YearPromotion = lazy(() => import('./Forms/StipendManagement/YearPromotion'));
 const AddStudent = lazy(() => import('./Forms/StipendManagement/AddStudent'));
+const DeleteStudent = lazy(() => import('./Forms/StipendManagement/DeleteStudent'));
 
 {/* Password Management Components */}
 const PasswordManager = lazy(() => import("./components/ChangePassword"));
@@ -242,6 +243,9 @@ const App = () => {
                     user = {user} />} />
 
                   <Route path="/student" element={<AddStudent setEditableData = {setEditableData} 
+                    user = {user} />} />
+
+                  <Route path="/delete-student" element={<DeleteStudent setEditableData = {setEditableData} 
                     user = {user} />} />
 
 

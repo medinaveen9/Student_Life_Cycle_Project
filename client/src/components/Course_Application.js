@@ -75,6 +75,7 @@ export const commonMenu = [
             {id:'Leaves Management', label:'Leaves Management', path:'/leavesmanagement'},
             {id:'Year Promotion', label:'Year Promotion', path:'/promotion'},
             {id:'Add Student', label:'Add Student', path:'/student'},
+            {id:'Delete Student', label:'Delete Student', path:'/delete-student'},
         ]
     },
     {

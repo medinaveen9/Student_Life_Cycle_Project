@@ -43,3 +43,24 @@
     border-radius: 6px;
     margin-top: 10px;
 }
+
+/* Two column form layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* Required field star */
+.required {
+    color: red;
+    margin-left: 4px;
+}
+
+/* Mobile – single column */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

@@ -16,7 +16,7 @@ const  {MongoClient} = require('mongodb');
 
 const pool = new Pool({
     user: "postgres",          // default user
-    host: "localhost",         // local db
+    host: "172.25.4.79",         // local db
     database: "Student_LifeCycle",  // database you created
     password: "postgres", // the password you set
     port: 5432

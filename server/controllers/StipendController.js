@@ -2,7 +2,7 @@
 
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
-  promoteStudentsService , addStudentService, fetchStudentsByFilter } = require('../services/StipendService');
+  promoteStudentsService , addStudentService, fetchStudentsByFilter, deleteStudent, addOrUpdateStudentService } = require('../services/StipendService');
 
   // Get student info by application number
 const getStudentInfo = async (req, res) => {
@@ -200,6 +200,30 @@ const addStudentController = async (req, res) => {
   }
 };
 
+// DELETE student
+const deleteStudentController = async (req, res) => {
+  try {
+    const deletedStudent =  await deleteStudent(req.params.roll_no);
+    res.json({ message: "Student deleted successfully", student: deletedStudent });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+// add or update student
+const addOrUpdateStudentController = async (req, res) => {
+  try {
+    const { id, updated } = await addOrUpdateStudentService(req.body);
+    return res.status(200).json({
+      success: true,
+      message: updated ? "Student updated successfully" : "Student added successfully",
+      id,
+    });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 // Filtered student retrieval
 const getFilteredStudents = async (req, res) => {
@@ -238,4 +262,5 @@ const promoteSelectedStudents = async (req, res) => {
 
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
    stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
-  deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents};
+  deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents, deleteStudentController,
+addOrUpdateStudentController};

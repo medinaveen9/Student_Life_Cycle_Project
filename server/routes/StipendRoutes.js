@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { getStudentInfo, submitStipend ,getAllStipends,  addCourseStipendController, addOrUpdateStudentLeave,
     stipendApprovalController, stipendBulkApprovalController, autoFillStipends, deleteStipends,
- addStudentController, getFilteredStudents, promoteSelectedStudents } = require('../controllers/StipendController');
+ addStudentController, getFilteredStudents, promoteSelectedStudents, deleteStudentController,
+addOrUpdateStudentController } = require('../controllers/StipendController');
 
 const { verifyToken } = require('../config/VerifyToken');
  
@@ -18,6 +19,8 @@ router.post("/delete", deleteStipends);
 router.post("/add-student", addStudentController);
 router.get("/filter-students", getFilteredStudents);
 router.put("/promote-students", promoteSelectedStudents);
+router.delete("/delete-student/:roll_no", deleteStudentController);
+router.post("/add-or-update-student", addOrUpdateStudentController);
 
 module.exports = router;
 
