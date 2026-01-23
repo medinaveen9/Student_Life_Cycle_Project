@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaEdit, FaCheck } from "react-icons/fa";
+import { FaEdit, FaCheck, FaTrash } from "react-icons/fa";
 import axiosInstance from "../../components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../../styles/StipendManagement/StipendTable.css";
@@ -115,6 +115,32 @@ const StipendTable = ({ setEditableData, user }) => {
     setEditableData(row);
     navigate("/stipendform");
   };
+
+  // Handle Delete
+    const handleDelete = async (row) => {
+      if (!window.confirm(`Are you sure you want to delete stipend record for ${row.name} (Roll No: ${row.roll_no})?`)) { 
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await axiosInstance.delete("/api/stipend/delete_student_stipend", {
+          params: { id: row.id, userInfo : user },
+        });
+        const result = response.data;
+        if (result.success) {
+          alert("Stipend record deleted successfully");
+          setData((prevData) => prevData.filter((item) => item.id !== row.id));
+        } else {
+          alert("Failed to delete stipend record: " + result.error);
+        }
+      } catch (err) {
+        console.error("Error deleting stipend record:", err);
+        alert("Error deleting stipend record");
+      }
+      finally {
+        setLoading(false);
+      }
+    };
 
   // Handle Approval
   const handleApproval = (row) => {
@@ -376,6 +402,7 @@ const StipendTable = ({ setEditableData, user }) => {
               <th className="border px-2 py-1">Days Present</th>
               <th className="border px-2 py-1">Stipend</th>
               <th className="border px-2 py-1">Edit</th>
+              <th className="border px-2 py-1">Delete</th>
               <th className="border px-2 py-1">Approval</th>
             </tr>
           </thead>
@@ -414,6 +441,11 @@ const StipendTable = ({ setEditableData, user }) => {
                     <td className="border px-2 py-1">
                       <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(row)}>
                         <FaEdit />
+                      </button>
+                    </td>
+                    <td className="border px-2 py-1">
+                      <button className="text-red-600 hover:text-blue-800" onClick={() => handleDelete(row)}>
+                        <FaTrash />
                       </button>
                     </td>
                     {user.role === "Verifier" ? (

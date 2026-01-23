@@ -2,7 +2,8 @@
 
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
-  promoteStudentsService , addStudentService, fetchStudentsByFilter, deleteStudent, addOrUpdateStudentService } = require('../services/StipendService');
+  promoteStudentsService , addStudentService, fetchStudentsByFilter, deleteStudent, 
+  addOrUpdateStudentService, deleteStudentStipendById } = require('../services/StipendService');
 
   // Get student info by application number
 const getStudentInfo = async (req, res) => {
@@ -260,7 +261,30 @@ const promoteSelectedStudents = async (req, res) => {
   }
 };
 
+//Delete student stipend record from stipend details table
+const deleteStudentStipend = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const { userInfo } = req.query; // optional (audit/logging)
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Stipend ID is required", });
+    }
+
+    const result = await deleteStudentStipendById(id);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Record not found", });
+    }
+
+    res.status(200).json({ success: true, message: "Stipend record deleted successfully", });
+  } catch (error) {
+    console.error("Delete stipend error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", });
+  }
+};
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
    stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
   deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents, deleteStudentController,
-addOrUpdateStudentController};
+addOrUpdateStudentController, deleteStudentStipend};

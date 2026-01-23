@@ -349,12 +349,16 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
 
     // 1️⃣ Get students
     const studentQuery =
-      course === "All"
-        ? `SELECT * FROM students 
-          WHERE CAST(year AS INTEGER) <= 4`
-        : `SELECT * FROM students 
-          WHERE course = $1 
-          AND CAST(year AS INTEGER) <= 4`;
+        course === "All"
+          ? `SELECT * FROM students
+            WHERE CAST(year AS INTEGER) <= 4
+              AND account_no IS NOT NULL
+              AND TRIM(account_no) <> ''`
+          : `SELECT * FROM students
+            WHERE course = $1
+              AND CAST(year AS INTEGER) <= 4
+              AND account_no IS NOT NULL
+              AND TRIM(account_no) <> ''`;
     const studentsRes = await pool.query(studentQuery, course === "All" ? [] : [course]);
     const students = studentsRes.rows;
     if (students.length === 0) return 0;
@@ -568,6 +572,7 @@ const fetchStudentsByFilter = async (course, batchYear, currentYear) => {
   return rows;
 };
 
+// Promote selected students
 const promoteStudentsService = async (studentIds, nextYear, newDOJ) => {
   const query = `
     UPDATE students
@@ -580,6 +585,20 @@ const promoteStudentsService = async (studentIds, nextYear, newDOJ) => {
   return rows.length;
 };
 
+// Delete student stipend record from stipend details table
+const deleteStudentStipendById = async (id) => {
+  try {
+    const query = `DELETE FROM stipend_details WHERE id = $1`;
+    const result = await pool.query(query, [id]);
+    return result;
+  } catch (error) {
+    console.error("Service Error: deleteStudentStipendById", error);
+    throw error; // important: propagate to controller
+  }
+};
+
+
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData,
-  promoteStudentsService, addStudentService, fetchStudentsByFilter, deleteStudent, addOrUpdateStudentService};
+  promoteStudentsService, addStudentService, fetchStudentsByFilter, deleteStudent, 
+  addOrUpdateStudentService, deleteStudentStipendById};

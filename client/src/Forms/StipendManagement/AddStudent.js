@@ -21,7 +21,9 @@ const FIELDS = [
 
 const REQUIRED_FIELDS = [
   "name", "roll_no", "course",
-  "account_no","ifsc_code","doj","year","leaves","batch_year"
+  // "account_no","ifsc_code",
+  "doj",
+  "year","leaves","batch_year"
 ];
 
 const SPECIAL = {
@@ -46,6 +48,7 @@ const StudentAddStipend = () => {
 
   // 🔍 Check student by Roll No
   const handleSearch = async () => {
+    setData({ ...initialData, roll_no: data.roll_no });
     if (!data.roll_no.trim()) return alert("Please enter Roll No");
 
     try {
