@@ -3,7 +3,7 @@
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
   promoteStudentsService , addStudentService, fetchStudentsByFilter, deleteStudent, 
-  addOrUpdateStudentService, deleteStudentStipendById } = require('../services/StipendService');
+  addOrUpdateStudentService, deleteStudentStipendById, updateLeavesAndPresent } = require('../services/StipendService');
 
   // Get student info by application number
 const getStudentInfo = async (req, res) => {
@@ -284,7 +284,30 @@ const deleteStudentStipend = async (req, res) => {
   }
 };
 
+//Update leaves and present days for a student stipend details table
+const updateLeavesController = async (req, res) => {
+  try {
+    const { id, leaves, present } = req.body;
+    const userInfo = req.user;
+
+    if (!id || leaves === undefined || present === undefined) {
+      return res.status(400).json({message: "Required fields missing",});
+    }
+
+    const updatedRow = await updateLeavesAndPresent({
+      id, leaves, present, userInfo, });
+
+    return res.status(200).json({
+      message: "Updated successfully", data: updatedRow, });
+
+  } catch (error) {
+    console.error("Update Error:", error);
+    return res.status(500).json({ message: error.message || "Internal Server Error", });
+  }
+};
+
+
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
    stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
   deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents, deleteStudentController,
-addOrUpdateStudentController, deleteStudentStipend};
+addOrUpdateStudentController, deleteStudentStipend, updateLeavesController};

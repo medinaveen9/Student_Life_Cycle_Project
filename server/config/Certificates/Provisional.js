@@ -58,7 +58,7 @@ function generateCertificateHTML(data, designationMap) {
 body{font-family:Arial,sans-serif;background:white;}
 
 .page{
-  height:250mm;
+  height:260mm;
   position:relative;
   page-break-after:always;
   overflow:hidden;
@@ -212,7 +212,7 @@ body{font-family:Arial,sans-serif;background:white;}
         </div>
 
         <div style="margin:25px 0 30px;display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-family:Arial;font-weight:bold;font-size:15px;margin-left : 10px;">
+          <div style="font-family:Arial;font-weight:bold;font-size:17px;margin-left : 10px;">
             Roll No. ${data.roll_no || ""}
           </div>
 
@@ -220,7 +220,7 @@ body{font-family:Arial,sans-serif;background:white;}
             <img src="${logoDataURL}" style="height:70px;">
           </div>
 
-          <div style="font-family:Arial;font-weight:bold;font-size:15px;margin-right : 50px;">
+          <div style="font-family:Arial;font-weight:bold;font-size:17px;margin-right : 50px;">
             ${data.dds_code || ""} - ${data.icr_number || ""}
           </div>
         </div>
@@ -229,7 +229,7 @@ body{font-family:Arial,sans-serif;background:white;}
           PROVISIONAL CERTIFICATE
         </h2>
 
-        <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:16px; font-size : 18px;">
           <p>This is to certify that</p>
 
           <div style="font-weight:bold;font-size:20px;">
@@ -267,7 +267,7 @@ body{font-family:Arial,sans-serif;background:white;}
 
 
         <div class="certificate-footer">
-          <p style="font-family:'Times new roman'; font-style:italic; font-size:24px;
+          <p style="font-family:'Times new roman'; font-style:italic; font-size:20px;
                     text-align:end;margin-right:70px;font-weight:600;">
             Executive Registrar
           </p>

@@ -43,6 +43,11 @@ const StipendTable = ({ setEditableData, user }) => {
   const [year, setYear] = useState("All");
   const [rollNo, setRollNo] = useState("");
 
+  // Edit leaves and present days
+ 
+  const [leaves, setLeaves] = useState(null);
+  const [editRowId, setEditRowId] = useState(null);
+
   const months = [
     { number: 1, name: "January" }, { number: 2, name: "February" },
     { number: 3, name: "March" }, { number: 4, name: "April" },
@@ -92,6 +97,13 @@ const StipendTable = ({ setEditableData, user }) => {
     }
   };
 
+  // Handle change of leaves input (single row edit)
+  const handleChangeLeaves = (e) => {
+
+    setLeaves(Number(e.target.value));
+  };
+
+
   // Handle row checkbox toggle
   const handleRowSelect = (id) => {
     let updatedSelected = [];
@@ -114,6 +126,49 @@ const StipendTable = ({ setEditableData, user }) => {
   const handleEdit = (row) => {
     setEditableData(row);
     navigate("/stipendform");
+  };
+
+  const handleRowEdit = (row) => {
+    setEditRowId(row.id);
+  }
+
+  //Handle Leaves Edit
+  const handleLeavesUpdate = async(row) => {
+    //Ask for confirmation do you want to update leaves and present days
+    const confirmUpdate = window.confirm(
+      `Do you want to update leaves and present days for Roll No ${row.roll_no}?`
+    );
+
+    if (!confirmUpdate) return; // ⛔ stop if user cancels
+
+    
+    const totalDays = parseInt(row.present) + parseInt(row.leaves);
+    const newLeaves = leaves !== null ? parseInt(leaves) : parseInt(row.leaves);
+    const newPresent = totalDays - newLeaves;
+    try{
+      setLoading(true);
+      const res = await axiosInstance.put("/api/stipend/update_leaves_present", {
+        id: row.id,
+        leaves: parseInt(newLeaves),
+        present: parseInt(newPresent),
+        userInfo : user,
+      });
+      alert(res.data.message); // updated
+      // Update local data state
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === row.id
+            ? { ...item, leaves: newLeaves, present: newPresent }
+            : item
+        )
+      );
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+      setLeaves(null); // reset leaves input
+      setEditRowId(null); // exit edit mode
+    }
   };
 
   // Handle Delete
@@ -139,6 +194,7 @@ const StipendTable = ({ setEditableData, user }) => {
       }
       finally {
         setLoading(false);
+        setEditRowId(null);
       }
     };
 
@@ -402,6 +458,7 @@ const StipendTable = ({ setEditableData, user }) => {
               <th className="border px-2 py-1">Days Present</th>
               <th className="border px-2 py-1">Stipend</th>
               <th className="border px-2 py-1">Edit</th>
+              <th className="border px-2 py-1">Update</th>
               <th className="border px-2 py-1">Delete</th>
               <th className="border px-2 py-1">Approval</th>
             </tr>
@@ -435,12 +492,22 @@ const StipendTable = ({ setEditableData, user }) => {
                         <VisibilityIcon style={{ color: "#4b1d77" }}/>
                       </button>
                     </td>
-                    <td className="border px-2 py-1">{row.leaves}</td>
+                    <td className="border px-2 py-1">
+                      {editRowId === row.id 
+                        ? <input min="0" value={leaves ?? row.leaves} 
+                            onChange={handleChangeLeaves} className="w-16 border px-1.5 py-1.5" /> 
+                        : row.leaves}
+                    </td>
                     <td className="border px-2 py-1">{row.present}</td>
                     <td className="border px-2 py-1">{row.stipend}</td>
                     <td className="border px-2 py-1">
-                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(row)}>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleRowEdit(row)}>
                         <FaEdit />
+                      </button>
+                    </td>
+                    <td className="border px-2 py-1">
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleLeavesUpdate(row)}>
+                        Update
                       </button>
                     </td>
                     <td className="border px-2 py-1">

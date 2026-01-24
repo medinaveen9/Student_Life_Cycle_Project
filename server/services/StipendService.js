@@ -557,10 +557,6 @@ const deleteStudent = async (roll_no) => {
     return result.rows[0];
 };
 
-
-
-
-
 const fetchStudentsByFilter = async (course, batchYear, currentYear) => {
   const query = `
     SELECT id, roll_no, name, course, batch_year AS "batchYear", year
@@ -597,8 +593,29 @@ const deleteStudentStipendById = async (id) => {
   }
 };
 
+// Update leaves and present days in stipend_details
+const updateLeavesAndPresent = async ({ id, leaves, present, userInfo }) => {
+
+  // 1. Fetch existing row
+  const existing = await pool.query(
+    "SELECT leaves, present FROM stipend_details WHERE id = $1", [id] );
+
+  if (existing.rowCount === 0) {
+    throw new Error("Record not found");
+  }
+
+  // 2. Update DB
+  const updateResult = await pool.query(
+    "UPDATE stipend_details SET leaves=$1, present=$2, checker_id=$3, checker_name=$4 WHERE id=$5 RETURNING *",
+    [leaves, present, userInfo?.userId || null, userInfo?.user_name || null, id]
+  );
+
+  return updateResult.rows[0];
+};
+
+
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 
   stipendApprovalStatus, stipendBulkApproval, addCourseStipend, studentLeaveService , deleteStipendData,
   promoteStudentsService, addStudentService, fetchStudentsByFilter, deleteStudent, 
-  addOrUpdateStudentService, deleteStudentStipendById};
+  addOrUpdateStudentService, deleteStudentStipendById, updateLeavesAndPresent};
