@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SideMenu.css";
 import { commonMenu, courseMenus } from '../components/Course_Application';
 
-const Sidebar = ({user, selectedCourse}) => {
+const Sidebar = ({user, selectedCourse, open, onClose}) => {
   const [expandedMenu, setExpandedMenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,7 +34,8 @@ const Sidebar = ({user, selectedCourse}) => {
   };
 
   return (
-    <Drawer variant="permanent" className = "custom-drawer">
+    <Drawer variant="temporary" // temporary for mobile
+      open={open} onClose={onClose} ModalProps={{ keepMounted: true }} className = "custom-drawer">
       <Box sx={{ overflow: 'auto' }}>
         <List>
           {menuItems.map((item) => (

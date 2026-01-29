@@ -594,23 +594,40 @@ const deleteStudentStipendById = async (id) => {
 };
 
 // Update leaves and present days in stipend_details
-const updateLeavesAndPresent = async ({ id, leaves, present, userInfo }) => {
+const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, stipend }) => {
+  try {
+    // 1. Check record exists
+    const { rowCount } = await pool.query(
+      "SELECT 1 FROM stipend_details WHERE id = $1", [id] );
 
-  // 1. Fetch existing row
-  const existing = await pool.query(
-    "SELECT leaves, present FROM stipend_details WHERE id = $1", [id] );
+    if (!rowCount) {
+      throw new Error("Record not found");
+    }
 
-  if (existing.rowCount === 0) {
-    throw new Error("Record not found");
+    // 2. Update record
+    const { rows } = await pool.query(
+      `
+      UPDATE stipend_details
+      SET 
+        leaves = COALESCE($1, leaves),
+        present = COALESCE($2, present),
+        checker_id = $3,
+        checker_name = $4,
+        student_status = COALESCE($5, student_status),
+        stipend = COALESCE($6, stipend)
+      WHERE id = $7
+      RETURNING *
+      `,
+      [
+        leaves, present, userInfo?.userId ?? null, userInfo?.user_name ?? null, status, stipend, id
+      ]
+    );
+
+    return rows[0];
+  } catch (error) {
+      console.error("Error updating leaves and present:", error);
+      throw error; // let controller handle response
   }
-
-  // 2. Update DB
-  const updateResult = await pool.query(
-    "UPDATE stipend_details SET leaves=$1, present=$2, checker_id=$3, checker_name=$4 WHERE id=$5 RETURNING *",
-    [leaves, present, userInfo?.userId || null, userInfo?.user_name || null, id]
-  );
-
-  return updateResult.rows[0];
 };
 
 

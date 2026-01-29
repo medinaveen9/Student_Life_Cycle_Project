@@ -287,7 +287,7 @@ const deleteStudentStipend = async (req, res) => {
 //Update leaves and present days for a student stipend details table
 const updateLeavesController = async (req, res) => {
   try {
-    const { id, leaves, present } = req.body;
+    const { id, leaves, present, status, stipend } = req.body;
     const userInfo = req.user;
 
     if (!id || leaves === undefined || present === undefined) {
@@ -295,7 +295,7 @@ const updateLeavesController = async (req, res) => {
     }
 
     const updatedRow = await updateLeavesAndPresent({
-      id, leaves, present, userInfo, });
+      id, leaves, present, userInfo, status, stipend });
 
     return res.status(200).json({
       message: "Updated successfully", data: updatedRow, });

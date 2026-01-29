@@ -93,16 +93,18 @@ const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplication
 
 const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
 const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
-const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
-const StipendTable = lazy(() => import('./Forms/StipendManagement/StipendTable'));
+
 const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
 
 {/*Welcome Page Component */}
 const WelcomePage = lazy(() => import('./components/Welcome'));
 
 {/* Demo Components for Stipend Management */}
-const DemoStipendForm = lazy(() => import('./Forms/StipendManagement/DemoStipendForm'));
-const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/DemoStipendTable'));
+const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
+// const StipendTable = lazy(() => import('./Forms/StipendManagement/StpendTable'));
+const StipendTable = lazy(() => import('./Forms/StipendManagement/MainStipendTable/StipendTable'));
+
+// const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/MainStipendTable/StipendTable'));
 const YearPromotion = lazy(() => import('./Forms/StipendManagement/YearPromotion'));
 const AddStudent = lazy(() => import('./Forms/StipendManagement/AddStudent'));
 const DeleteStudent = lazy(() => import('./Forms/StipendManagement/DeleteStudent'));
@@ -139,6 +141,7 @@ const App = () => {
   const [user, setUser] = useState(null);
 
   const [editableData, setEditableData] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // course application report state
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -176,9 +179,10 @@ const App = () => {
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <CssBaseline />
-            <AppBar user = {user}/>
+            <AppBar user = {user} onHamburgerClick={() => setSidebarOpen(true)}/>
             <Box sx={{ display: 'flex', marginTop: '90px' }}>
-              <Sidebar user = {user} selectedCourse = {selectedCourse}/>
+              <Sidebar user = {user} selectedCourse = {selectedCourse} open={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}/>
               <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                   <Routes location={location}>
                     <Route path="/tc" element={<TransferCertificate />} />
@@ -238,9 +242,9 @@ const App = () => {
                     <Route path="/observpermisson" element={<ObserverPermission />} />
                     <Route path="/proadmission" element={<ProvisionalAdmission />} />
 
-                    <Route path="/stipendform" element={<DemoStipendForm editableData = {editableData} 
+                    <Route path="/stipendform" element={<StipendForm editableData = {editableData} 
                       user = {user} setEditableData = {setEditableData}/>} />
-                    <Route path="/stipendtable" element={<DemoStipendTable setEditableData = {setEditableData} 
+                    <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
                       user = {user} />} />
 
                     <Route path="/promotion" element={<YearPromotion setEditableData = {setEditableData} 

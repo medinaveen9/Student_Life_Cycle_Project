@@ -78,9 +78,17 @@ const generateReport = async (req, res) => {
         ${user.role !== "Checker"
           ? `<td>${row.account_no}</td><td>${row.ifsc_code}</td>`
           : ""}
-        <td>${row.present}</td>
-        <td>${row.leaves}</td>
-        <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>
+        ${
+          row.student_status !== "Regular"
+            ? `<td colspan="3" style="text-align:center;font-weight:600;">
+                ${row.student_status}
+              </td>`
+            : `
+                <td>${row.present}</td>
+                <td>${row.leaves}</td>
+                <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>
+              `
+        }
       </tr>
     `).join("");
 

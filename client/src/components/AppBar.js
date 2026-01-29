@@ -2,8 +2,10 @@ import React, {useState} from 'react';
 import { AppBar, Toolbar, Typography, Stack, Box, Avatar, Menu, MenuItem, IconButton, } from '@mui/material';
 import axiosInstance from "./AxiosInstance";
 import { useNavigate } from 'react-router-dom';
+import MenuIcon from '@mui/icons-material/Menu';
 
-const Header = ({user}) => {
+
+const Header = ({user, onHamburgerClick}) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -48,6 +50,15 @@ const Header = ({user}) => {
         zIndex: 1100, display: 'flex', justifyContent: 'center', }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        {/* Hamburger for mobile */}
+        <IconButton
+            color="inherit"
+            edge="start"
+            onClick={onHamburgerClick}
+            sx={{ mr: 2, display: { xs: 'inline-flex' } }}
+          >
+            <MenuIcon sx={{ color: '#4b1d77' }} />
+          </IconButton>
         {/* Title */}
         <Typography variant="h6" component="div" sx={{
             color: '#4b1d77', fontWeight: 600, flexGrow: 1, textAlign: 'center', }} >

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaEdit, FaCheck, FaTrash  } from "react-icons/fa";
+import { FaEdit, FaCheck, FaTrash } from "react-icons/fa";
 import axiosInstance from "../../components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
+import "../../styles/StipendManagement/StipendTable.css";
 
 // ✅ MUI Components (all individually)
 import Dialog from "@mui/material/Dialog";
@@ -41,6 +42,11 @@ const StipendTable = ({ setEditableData, user }) => {
   const [course, setCourse] = useState("All");
   const [year, setYear] = useState("All");
   const [rollNo, setRollNo] = useState("");
+
+  // Edit leaves and present days
+ 
+  const [leaves, setLeaves] = useState(null);
+  const [editRowId, setEditRowId] = useState(null);
 
   const months = [
     { number: 1, name: "January" }, { number: 2, name: "February" },
@@ -91,6 +97,13 @@ const StipendTable = ({ setEditableData, user }) => {
     }
   };
 
+  // Handle change of leaves input (single row edit)
+  const handleChangeLeaves = (e) => {
+
+    setLeaves(Number(e.target.value));
+  };
+
+
   // Handle row checkbox toggle
   const handleRowSelect = (id) => {
     let updatedSelected = [];
@@ -115,31 +128,80 @@ const StipendTable = ({ setEditableData, user }) => {
     navigate("/stipendform");
   };
 
-  // Handle Delete
-  const handleDelete = async (row) => {
-    if (!window.confirm(`Are you sure you want to delete stipend record for ${row.name} (Roll No: ${row.roll_no})?`)) { 
+  const handleRowEdit = (row) => {
+    setEditRowId(row.id);
+  }
+
+  //Handle Leaves Edit
+  const handleLeavesUpdate = async(row) => {
+    //check if leaves are edited or not
+    if (leaves === null || leaves === row.leaves) {
+      alert("No changes made to leaves");
       return;
     }
-    try {
+    //Ask for confirmation do you want to update leaves and present days
+    const confirmUpdate = window.confirm(
+      `Do you want to update leaves and present days for Roll No ${row.roll_no}?`
+    );
+
+    if (!confirmUpdate) return; // ⛔ stop if user cancels
+
+    
+    const totalDays = parseInt(row.present) + parseInt(row.leaves);
+    const newLeaves = leaves !== null ? parseInt(leaves) : parseInt(row.leaves);
+    const newPresent = totalDays - newLeaves;
+    try{
       setLoading(true);
-      const response = await axiosInstance.delete("/api/stipend/delete_student_stipend", {
-        params: { id: row.id, userInfo : user },
+      const res = await axiosInstance.put("/api/stipend/update_leaves_present", {
+        id: row.id,
+        leaves: parseInt(newLeaves),
+        present: parseInt(newPresent),
+        userInfo : user,
       });
-      const result = response.data;
-      if (result.success) {
-        alert("Stipend record deleted successfully");
-        setData((prevData) => prevData.filter((item) => item.id !== row.id));
-      } else {
-        alert("Failed to delete stipend record: " + result.error);
-      }
+      alert(res.data.message); // updated
+      // Update local data state
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === row.id
+            ? { ...item, leaves: newLeaves, present: newPresent }
+            : item
+        )
+      );
     } catch (err) {
-      console.error("Error deleting stipend record:", err);
-      alert("Error deleting stipend record");
-    }
-    finally {
+      alert(err.response?.data?.message || "Something went wrong");
+    } finally {
       setLoading(false);
+      setLeaves(null); // reset leaves input
+      setEditRowId(null); // exit edit mode
     }
   };
+
+  // Handle Delete
+    const handleDelete = async (row) => {
+      if (!window.confirm(`Are you sure you want to delete stipend record for ${row.name} (Roll No: ${row.roll_no})?`)) { 
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await axiosInstance.delete("/api/stipend/delete_student_stipend", {
+          params: { id: row.id, userInfo : user },
+        });
+        const result = response.data;
+        if (result.success) {
+          alert("Stipend record deleted successfully");
+          setData((prevData) => prevData.filter((item) => item.id !== row.id));
+        } else {
+          alert("Failed to delete stipend record: " + result.error);
+        }
+      } catch (err) {
+        console.error("Error deleting stipend record:", err);
+        alert("Error deleting stipend record");
+      }
+      finally {
+        setLoading(false);
+        setEditRowId(null);
+      }
+    };
 
   // Handle Approval
   const handleApproval = (row) => {
@@ -220,6 +282,7 @@ const StipendTable = ({ setEditableData, user }) => {
     }
   };
 
+  // Download PDF Report
   const downloadReport = async (data) => {
     try {
       // 🔹 Dynamically get month, year, and batch
@@ -231,10 +294,11 @@ const StipendTable = ({ setEditableData, user }) => {
       setLoading(true);
       const response = await axiosInstance.post(
         "api/report/stipend_report",
-        { data, currentMonth, year, batch, course, user }, // send to backend
+        { currentMonth, year, batch, course, user }, // send to backend
         {
           headers: { "Content-Type": "application/json" },
           responseType: "blob", // important for PDF
+          params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
         }
       );
 
@@ -257,9 +321,56 @@ const StipendTable = ({ setEditableData, user }) => {
     }
   };
 
+  //Download Excel Report
+  const downloadExcelReport = async (data) => {
+    try {
+      // 🔹 Dynamically get month, year, and batch
+      const now = new Date();
+      const month = now.toLocaleString("en-US", { month: "long" }); // e.g. "October"
+      const Present_year = now.getFullYear(); // e.g. 2025
+      const batch = `${Present_year - 1}-${Present_year}`; // auto: "2024-2025"
+
+      setLoading(true);
+
+      const response = await axiosInstance.post(
+        "api/report/stipend_excel", // backend endpoint for Excel
+        {  currentMonth, year, batch, course, user },
+        {
+          headers: { "Content-Type": "application/json" },
+          responseType: "blob", // important for Excel
+          params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
+        }
+      );
+
+      // Create Excel blob
+      const fileBlob = new Blob(
+        [response.data],
+        { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+      );
+
+      // Create a link for download
+      const url = window.URL.createObjectURL(fileBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `Stipend_Report_${month}_${year}.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading Excel stipend report:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <React.Fragment>
-      <div style = {{display : "flex", gap : "20px"}}>
+      <div className="filter-container">
         <TextField className="m-4" style={{ minWidth: 200 }} label="Roll No" value={rollNo}
           onChange={(e) => setRollNo(e.target.value)} 
           onKeyDown={(e) => {
@@ -297,10 +408,22 @@ const StipendTable = ({ setEditableData, user }) => {
         </FormControl>
       </div>
       <div className="mt-16 overflow-x-auto p-4">
-        <h2 className="text-xl font-bold mb-4 text-center">
-          NIZAM’S INSTITUTE OF MEDICAL SCIENCES, COLLEGE OF ALLIED HEALTH SCIENCES<br />
-          STIPEND FOR THE MONTH OF JUNE 2025 FOR B.Sc INTERNS (2024-25)
-        </h2>
+        {/* Dynamic heading */}
+        {(() => {
+          const now = new Date();
+          const displayYear = now.getFullYear();
+          const batch = `${displayYear - 1}-${displayYear}`;
+          const monthObj = months.find((m) => Number(m.number) === Number(currentMonth));
+          const monthLabel = currentMonth === "All" ? "ALL MONTHS" : (monthObj ? monthObj.name.toUpperCase() : String(currentMonth).toUpperCase());
+          const courseLabel = course === "All" ? "ALL COURSES" : course.toUpperCase();
+          const yearLabel = year === "All" ? "" : `YEAR ${year}`;
+          const stipendWord = currentMonth === "All" ? "STIPENDS" : "STIPEND";
+          return (
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Verification and Approval
+            </h2>
+          );
+        })()}
 
         <div className="mb-4 flex justify-end gap-4">
           <button
@@ -315,6 +438,11 @@ const StipendTable = ({ setEditableData, user }) => {
           >
             Download PDF Report
           </button>
+          {(user.role === "FA" || user.role === "FC") && (
+            <button onClick={() => downloadExcelReport(data)} disabled={loading}
+              className="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            > Download Excel Report </button>
+          )}
         </div>
         <table className="min-w-full border border-gray-400 text-sm text-center">
           <thead>
@@ -335,6 +463,7 @@ const StipendTable = ({ setEditableData, user }) => {
               <th className="border px-2 py-1">Days Present</th>
               <th className="border px-2 py-1">Stipend</th>
               <th className="border px-2 py-1">Edit</th>
+              <th className="border px-2 py-1">Update</th>
               <th className="border px-2 py-1">Delete</th>
               <th className="border px-2 py-1">Approval</th>
             </tr>
@@ -368,16 +497,26 @@ const StipendTable = ({ setEditableData, user }) => {
                         <VisibilityIcon style={{ color: "#4b1d77" }}/>
                       </button>
                     </td>
-                    <td className="border px-2 py-1">{row.leaves}</td>
+                    <td className="border px-2 py-1">
+                      {editRowId === row.id 
+                        ? <input min="0" value={leaves ?? row.leaves} 
+                            onChange={handleChangeLeaves} className="w-16 border px-1.5 py-1.5" /> 
+                        : row.leaves}
+                    </td>
                     <td className="border px-2 py-1">{row.present}</td>
                     <td className="border px-2 py-1">{row.stipend}</td>
                     <td className="border px-2 py-1">
-                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(row)}>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleRowEdit(row)}>
                         <FaEdit />
                       </button>
                     </td>
                     <td className="border px-2 py-1">
-                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleDelete(row)}>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => handleLeavesUpdate(row)}>
+                        Update
+                      </button>
+                    </td>
+                    <td className="border px-2 py-1">
+                      <button className="text-red-600 hover:text-blue-800" onClick={() => handleDelete(row)}>
                         <FaTrash />
                       </button>
                     </td>
