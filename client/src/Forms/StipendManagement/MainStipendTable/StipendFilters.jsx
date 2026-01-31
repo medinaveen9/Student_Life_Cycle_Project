@@ -7,7 +7,8 @@ const StipendFilters = ({
     currentMonth, setCurrentMonth,
     course, setCourse,
     year, setYear,
-    fetchStipends, months
+    fetchStipends, months,
+    selectStipendYear, setSelectStipendYear, years
 }) => {
     return (
         <div className="filter-container">
@@ -18,6 +19,15 @@ const StipendFilters = ({
                     fetchStipends(); // uses current rollNo from state
                 }
             }} />
+            <FormControl className="m-4" style={{ minWidth: 200 }}>
+                <InputLabel>Stipend Year</InputLabel>
+                <Select value={selectStipendYear} label="Stipend Year"
+                    onChange={(e) => setSelectStipendYear(e.target.value)}>
+                    {years.map((year) => (
+                        <MenuItem key={year} value={year}>{year} </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
             <FormControl className="m-4" style={{ minWidth: 200 }}>
                 <InputLabel>Month</InputLabel>
                 <Select value={currentMonth} label="Month" onChange={(e) => setCurrentMonth(e.target.value)}>

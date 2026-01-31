@@ -27,7 +27,7 @@ const getStudentInfo = async (req, res) => {
 const submitStipend = async (req, res) => {
   try {
     const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, requested_leaves,  
-      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves, available_leaves} = req.body;
+      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves, available_leaves, stipend_year} = req.body;
     const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
 
     if (!rollNo || !name || !course || !accountNo || !joiningDate) {
@@ -36,7 +36,7 @@ const submitStipend = async (req, res) => {
 
     await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year, requested_leaves,
       rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, 
-      actualStipend, total_leaves, available_leaves, isModified});
+      actualStipend, total_leaves, available_leaves, isModified, stipend_year});
     return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
   } catch (err) {
     console.error('Error submitting stipend:', err.message);
@@ -48,8 +48,8 @@ const getAllStipends = async (req, res) => {
   try {
     const role = req.query.role; // e.g., 'Checker', 'Verifier', 'Approver'
     const month = req.query.month; // e.g., '2023-09'
-    const {course, year, roll_no} = req.query;
-    const data = await fetchAllStipends(role, month, course, year, roll_no); // call service
+    const {course, year, roll_no, stipend_year} = req.query;
+    const data = await fetchAllStipends(role, month, course, year, roll_no, stipend_year); // call service
     res.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching stipends in controller:', err.message);
@@ -122,13 +122,13 @@ const addOrUpdateStudentLeave = async (req, res) => {
 
 const autoFillStipends = async (req, res) => {
   try {
-    const { course, month, userId, user_name } = req.query;
+    const { course, month, userId, user_name, stipend_year } = req.query;
 
     if (!course) {
       return res.status(400).json({ success: false, error: "Course is required" });
     }
 
-    const insertedCount = await autoFillStipendData(course, month, userId, user_name);
+    const insertedCount = await autoFillStipendData(course, month, userId, user_name, stipend_year);
     res.status(200).json({
       success: true,
       message: `${insertedCount} stipend records auto-filled successfully`
@@ -142,12 +142,12 @@ const autoFillStipends = async (req, res) => {
 
 const deleteStipends = async (req, res) => {
   try {
-    const { course, month } = req.query;
+    const { course, month, stipend_year } = req.query;
     if (!course || month === undefined) {
       return res.status(400).json({ success: false, error: "Course and month are required" });
     }
 
-    const deletedCount = await deleteStipendData(course, month);
+    const deletedCount = await deleteStipendData(course, month, stipend_year);
     res.status(200).json({
       success: true,
       message: `${deletedCount} stipend records deleted successfully`

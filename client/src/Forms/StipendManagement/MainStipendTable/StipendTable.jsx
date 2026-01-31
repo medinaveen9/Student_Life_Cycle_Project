@@ -26,6 +26,12 @@ const StipendTable = ({ setEditableData, user }) => {
     const [year, setYear] = useState("All");
     const [rollNo, setRollNo] = useState("");
 
+    const currentYear = new Date().getFullYear();
+    const startYear = 2015; // or any year you want
+    const endYear = currentYear + 30; // optional future years
+    const [selectStipendYear, setSelectStipendYear] = useState(currentYear);
+    const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
+
     // Edit leaves and present days
     const [leaves, setLeaves] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
@@ -48,17 +54,18 @@ const StipendTable = ({ setEditableData, user }) => {
 
     const fetchStipends = async () => {
         try {
-        setDataLoaded(true);
-        const response = await axiosInstance.get("/api/stipend/stipend_details", {
-            params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
-        });
-        const result = response.data;
+            setDataLoaded(true);
+            const response = await axiosInstance.get("/api/stipend/stipend_details", {
+                params: { role: user.role, month: currentMonth, course : course, 
+                    year : year, roll_no : rollNo || "", stipend_year : selectStipendYear  },
+            });
+            const result = response.data;
 
-        if (result.success) {
-            setData(result.data);
-        } else {
-            console.error("Failed to fetch stipends:", result.error);
-        }
+            if (result.success) {
+                setData(result.data);
+            } else {
+                console.error("Failed to fetch stipends:", result.error);
+            }
         } catch (err) {
         console.error("Error fetching stipend data:", err);
         } finally {
@@ -72,7 +79,7 @@ const StipendTable = ({ setEditableData, user }) => {
         if (!fetchOnce.current) {
         fetchStipends();
         }
-    }, [currentMonth, course, year]);
+    }, [currentMonth, course, year, selectStipendYear]);
 
     //Handle row edit
     const handleSelectedRowEdit = (row) => {
@@ -245,7 +252,7 @@ const StipendTable = ({ setEditableData, user }) => {
         setLoading(true);
         const response = await axiosInstance.post(
             "api/report/stipend_report",
-            { currentMonth, year, batch, course, user }, // send to backend
+            { currentMonth, year, batch, course, user, selectStipendYear }, // send to backend
             {
             headers: { "Content-Type": "application/json" },
             responseType: "blob", // important for PDF
@@ -285,11 +292,12 @@ const StipendTable = ({ setEditableData, user }) => {
 
         const response = await axiosInstance.post(
             "api/report/stipend_excel", // backend endpoint for Excel
-            {  currentMonth, year, batch, course, user },
+            {  currentMonth, year, batch, course, user, selectStipendYear },
             {
             headers: { "Content-Type": "application/json" },
             responseType: "blob", // important for Excel
-            params: { role: user.role, month: currentMonth, course : course, year : year, roll_no : rollNo || "" },
+            params: { role: user.role, month: currentMonth, course : course, 
+                year : year, roll_no : rollNo || "" , stipend_year : selectStipendYear  },
             }
         );
 
@@ -332,6 +340,9 @@ const StipendTable = ({ setEditableData, user }) => {
                 setYear={setYear}
                 fetchStipends={fetchStipends}
                 months ={months}
+                selectStipendYear ={selectStipendYear}
+                setSelectStipendYear ={setSelectStipendYear}
+                years ={years}
             />
         
         <div className="mt-16 overflow-x-auto p-4">

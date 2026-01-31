@@ -85,13 +85,13 @@ const insertStipendDetails = async (data) => {
       const query = `
         UPDATE stipend_details SET roll_no=$1, name=$2, course=$3, account_no=$4, doj=$5,
         leaves=$6, present=$7, stipend=$8, actual_stipend=$9, cur_month=$10, requested_leaves=$11,
-        ${column_id}=$12, ${column_name}=$13, ifsc_code=$14, year=$15 WHERE id=$16
+        ${column_id}=$12, ${column_name}=$13, ifsc_code=$14, year=$15, stipend_year = $16 WHERE id=$17
       `;
       await pool.query(query, [
         data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
         data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
         data.cur_month || null, data.requested_leaves || 0, data.userId || null, data.user_name || null,
-        data.ifsc_code || null, data.year || null, data.id
+        data.ifsc_code || null, data.year || null, data.stipend_year, data.id
       ]);
       return;
     }
@@ -107,13 +107,13 @@ const insertStipendDetails = async (data) => {
         `UPDATE stipend_details SET 
           name = $1, course = $2, account_no = $3, doj = $4, leaves = $5, 
           present = $6, stipend = $7, actual_stipend = $8, requested_leaves = $9,
-          ${column_id} = $10, ${column_name} = $11, ifsc_code = $12, year = $13
-        WHERE roll_no = $14 AND cur_month = $15`,
+          ${column_id} = $10, ${column_name} = $11, ifsc_code = $12, year = $13, stipend_year = $14
+        WHERE roll_no = $15 AND cur_month = $16`,
         [
           data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
           data.presentAndHolidays, data.stipend, data.actualStipend, data.requested_leaves || 0,
           data.userId || null, data.user_name || null,
-          data.ifsc_code, data.year, data.rollNo, data.cur_month
+          data.ifsc_code, data.year, data.stipend_year, data.rollNo, data.cur_month
         ]
       );
 
@@ -135,8 +135,8 @@ const insertStipendDetails = async (data) => {
     const query = `
       INSERT INTO stipend_details 
         (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend, 
-        cur_month, requested_leaves, ${column_id}, ${column_name}, ifsc_code, year)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        cur_month, requested_leaves, ${column_id}, ${column_name}, ifsc_code, year, stipend_year)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       `;
 
     await pool.query(query, [
@@ -144,7 +144,7 @@ const insertStipendDetails = async (data) => {
       data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
       data.cur_month || null, data.requested_leaves || 0,
       data.userId || null, data.user_name || null,
-      data.ifsc_code, data.year
+      data.ifsc_code, data.year, data.stipend_year,
     ]);
 
     // Update students.leaves_used by requested_leaves for this roll_no
@@ -165,7 +165,7 @@ const insertStipendDetails = async (data) => {
 };
 
 // Fetch all stipends
-const fetchAllStipends = async (role, month, course, year, roll_no) => {
+const fetchAllStipends = async (role, month, course, year, roll_no, stipend_year) => {
   try {
     let params = [];
     let conditions = [];
@@ -193,6 +193,9 @@ const fetchAllStipends = async (role, month, course, year, roll_no) => {
       conditions.push(`sd.roll_no = $${params.length + 1}`);
       params.push(roll_no);
     }
+
+    conditions.push(`stipend_year = $${params.length + 1}`);
+    params.push(stipend_year );
 
     // Base query (role-based)
     let query = `
@@ -342,7 +345,7 @@ const studentLeaveService = async(data) => {
   }
 };
 
-const autoFillStipendData = async (course, month, userId, user_name) => {
+const autoFillStipendData = async (course, month, userId, user_name, stipend_year) => {
   try {
     const year = new Date().getFullYear();
     const totalDays = new Date(year, month, 0).getDate();
@@ -366,8 +369,8 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
     // 2️⃣ Get existing stipend records for this month/year
     const rollNos = students.map(s => s.roll_no);
     const existingRes = await pool.query(
-      `SELECT roll_no FROM stipend_details WHERE cur_month=$1 AND roll_no = ANY($2)`,
-      [month, rollNos]
+      `SELECT roll_no FROM stipend_details WHERE cur_month=$1 AND roll_no = ANY($2) AND stipend_year=$3`,
+      [month, rollNos, stipend_year]
     );
     const existingRolls = new Set(existingRes.rows.map(r => r.roll_no));
 
@@ -399,7 +402,10 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
       if (existingRolls.has(s.roll_no)) return; // skip existing
 
       insertValues.push(
-        `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`
+        `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
+            $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
+              $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
+                $${paramIndex++}, $${paramIndex++})`
       );
 
       const stipendVal = stipendMap[`${s.course}_${s.year}`] || 0;
@@ -418,6 +424,7 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
         0,               // requested_leaves
         s.ifsc_code,
         s.year,
+        stipend_year,
         userId,
         user_name
       );
@@ -429,7 +436,7 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
     const insertQuery = `
       INSERT INTO stipend_details 
         (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend,
-         cur_month, requested_leaves, ifsc_code, year, checker_id, checker_name)
+         cur_month, requested_leaves, ifsc_code, year, stipend_year, checker_id, checker_name)
       VALUES ${insertValues.join(", ")}
     `;
     await pool.query(insertQuery, params);
@@ -443,21 +450,23 @@ const autoFillStipendData = async (course, month, userId, user_name) => {
 };
 
 // Delete stipend data
-const deleteStipendData = async (course, month) => {
+const deleteStipendData = async (course, month, stipend_year) => {
   try {
     const year = new Date().getFullYear();
 
     const deleteQuery =
       course === "All"
         ? `DELETE FROM stipend_details 
-          WHERE cur_month = $1 
+          WHERE cur_month = $1  
+          AND stipend_year = $2
           AND CAST(year AS INTEGER) <= 4`
         : `DELETE FROM stipend_details 
           WHERE cur_month = $1 
           AND course = $2 
+          AND stipend_year = $3
           AND CAST(year AS INTEGER) <= 4`;
 
-        const params = course === "All" ? [month] : [month, course];
+        const params = course === "All" ? [month, stipend_year] : [month, course, stipend_year];
 
     const result = await pool.query(deleteQuery, params);
     return result.rowCount;

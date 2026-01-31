@@ -21,18 +21,25 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     actualStipend: '',
     cur_month : new Date().getMonth() + 1, // current month by default
     ifsc_code : "",
-    year : ""
+    year : "",
+    stipend_year : new Date().getFullYear(),
   });
   const [studentData, setStudentData] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   const [uniqueID, setUniqueID] = useState(null);
   const [isModified, setIsModified] = useState(false);
-    const [selectedCourse, setSelectedCourse] = useState("All");
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedCourse, setSelectedCourse] = useState("All");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
-    const [deleteLoading, setDeleteLoading] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const startYear = 2015; // or any year you want
+  const endYear = currentYear + 30; // optional future years
+  const [selectStipendYear, setSelectStipendYear] = useState(currentYear);
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
 
-    const fetchOnce = useRef(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const fetchOnce = useRef(false);
 
     const months = [
         { number: 1, name: "January" }, { number: 2, name: "February" },
@@ -191,7 +198,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       setDeleteLoading(true);
 
       const res = await axiosInstance.post(`/api/stipend/delete`, null, {
-        params: { course: selectedCourse, month: selectedMonth },
+        params: { course: selectedCourse, month: selectedMonth, stipend_year : selectStipendYear },
       });
 
       if (res.data.success) {
@@ -215,7 +222,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
         // Example API call (GET request with course in query)
         const res = await axiosInstance.post(`/api/stipend/auto-fill`, null, {
             params: { course: selectedCourse, month: selectedMonth, userId : user.userId,
-                 userRole : user.role, user_name : user.user_name,
+                 userRole : user.role, user_name : user.user_name, stipend_year : selectStipendYear
             },
         });
 
@@ -290,7 +297,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       alert(res.data.message || "Stipend submitted successfully");
       setFormData({
         name: '',   course: '', accountNo: '', joiningDate: '', leavesBalance: '', ifsc_code : "", year : "",
-        presentAndHolidays: '', stipend: '', actualStipend: '', cur_month : new Date().getMonth() + 1,});
+        presentAndHolidays: '', stipend: '', actualStipend: '', cur_month : new Date().getMonth() + 1,
+        stipend_year : new Date().getFullYear(),});
       setStudentData(null);
       setIsFormDisabled(true);
     } catch (error) {
@@ -305,6 +313,21 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     <React.Fragment>
         <Box className="top-controls">
             <Box className="left-options">
+              {/* Year */}
+              <FormControl className="m-4" style={{ minWidth: 200 }}>
+                <InputLabel>Stipend Year</InputLabel>
+                <Select
+                  value={selectStipendYear}
+                  label="Stipend Year"
+                  onChange={(e) => setSelectStipendYear(e.target.value)}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
                 <FormControl className="m-4" style={{ minWidth: 200 }}>
                     <InputLabel>Month</InputLabel>
                     <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
@@ -323,7 +346,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                         <MenuItem value="A.H.S">A.H.S</MenuItem>
                     </Select>
                 </FormControl>
-            </Box>
+              </Box>
             <Box className="right-options">
               <Button variant="contained" className="auto-btn"
                   onClick={handleAutoFill} disabled={autoFillLoading}>
@@ -384,7 +407,7 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
                   </select>
                 ) : (   
                       <input required={field.required} disabled={(isFormDisabled && field.name !== "rollNo") || loading || submitting || 
-                            field.name !== "rollNo" || field.name !== "rollNo"} 
+                            field.name !== "rollNo" } 
                         name={field.name} 
                         type={field.type}
                         value={formData[field.name]}
@@ -397,6 +420,13 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
               ))}
               
                 <React.Fragment>
+                  <div>
+                    <label className="form-label">Stipend Year</label>
+                    <input required={true}  name = "stipend_year" type= "text"
+                      value={formData["stipend_year"]} onChange={handleChange} 
+                        className="stipend-input"
+                          />
+                  </div>
                   <div>
                     <label className="form-label">No of Available Leaves</label>
                     <input required={true} disabled  name = "availbale_leaves" type= "text"

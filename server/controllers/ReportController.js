@@ -8,12 +8,11 @@ const {fetchAllStipends} = require("../services/StipendService");
 
 const generateReport = async (req, res) => {
   try {
-    const { currentMonth, year, batch, course, user } = req.body;
+    const { currentMonth, year, batch, course, user, selectStipendYear } = req.body;
     const { role, month, roll_no} = req.query;
     const selectedCourse = req.query.course;
     const studentYear = req.query.year;
-    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no); // call service
-
+    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no, selectStipendYear); // call service
 
     const monthsData = {1:"January",2:"February",3:"March",4:"April",5:"May",6:"June",
       7:"July",8:"August",9:"September",10:"October",11:"November",12:"December"};
@@ -39,13 +38,11 @@ const generateReport = async (req, res) => {
     const formattedStipend = course_stipend.toLocaleString("en-IN");
     const formattedStipendWords = numberToWords(course_stipend);
     
-
-
     // ✅ Fallbacks if values are not passed
     const now = new Date();
     const reportMonth = currentMonth || now.toLocaleString("en-US", { month: "long" });
     const reportstudentYear = year !== "All" ? year : now.getFullYear() || now.getFullYear();
-    const reportYear = now.getFullYear();
+    const reportYear = selectStipendYear || now.getFullYear();
     const reportDate = now.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "2-digit",
@@ -64,33 +61,48 @@ const generateReport = async (req, res) => {
 
     
 
-    const extraHeaderColumns = user.role !== "Checker"
-      ? `<th rowSpan="2" style="width:15%;">BANK A/C NO.</th>
-        <th rowSpan="2" style="width:10%;">IFSC CODE</th>`
-      : "";
+    const extraHeaderColumns =
+      user.role !== "Checker"
+        ? `
+          <th rowspan="2" style="width:15%;">BANK A/C NO.</th>
+          <th rowspan="2" style="width:10%;">IFSC CODE</th>
+        `
+        : "";
 
-    const rowsHtml = data.map((row, idx) => `
-      <tr>
-        <td>${idx + 1}</td>
-        <td>${row.roll_no}</td>
-        <td style="text-align:left;">${row.name}</td>
-        <td style="text-align:left;">${monthsData[row?.cur_month] + " " + reportYear}</td>
-        ${user.role !== "Checker"
-          ? `<td>${row.account_no}</td><td>${row.ifsc_code}</td>`
-          : ""}
-        ${
-          row.student_status !== "Regular"
-            ? `<td colspan="3" style="text-align:center;font-weight:600;">
-                ${row.student_status}
-              </td>`
-            : `
+    const rowsHtml = data
+      .map(
+        (row, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${row.roll_no}</td>
+          <td style="text-align:left;">${row.name}</td>
+          <!-- <td style="text-align:left;">
+            ${monthsData[row?.cur_month]} ${reportYear}
+          </td> -->
+
+          ${
+            user.role !== "Checker"
+              ? `<td>${row.account_no}</td>
+                <td>${row.ifsc_code}</td>`
+              : ""
+          }
+
+          ${
+            row.student_status !== "Regular"
+              ? `<td colspan="3" style="text-align:center;font-weight:600;">
+                  ${row.student_status}
+                </td>`
+              : `
                 <td>${row.present}</td>
                 <td>${row.leaves}</td>
                 <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>
               `
-        }
-      </tr>
-    `).join("");
+          }
+        </tr>
+      `
+      )
+      .join("");
+
 
     // ✅ Prepare Combined HTML (Page 1 + Page 2)
     const combinedHtml = `
@@ -233,28 +245,30 @@ const generateReport = async (req, res) => {
           </div>
           -->
 
-          <div class="main-heading">ATTENDANCE DETAILS FOR ${formattedYear} YEAR ${monthsData[reportMonth]}, ${reportYear}</div>
+          <div style="text-align:center; font-size:18px; font-weight:600; padding-bottom:20px;">
+            ATTENDANCE DETAILS FOR ${formattedYear} YEAR ${monthsData[reportMonth]}, ${reportYear}
+          </div>
 
           <table>
             <thead>
-              <tr>
-                <th rowspan="2" style="width:5%;">S.No.</th>
-                <th rowspan="2" style="width:8%;">ROLL No.</th>
-                <th rowspan="2" style="width:25%;">NAME OF THE STUDENT</th>
-                <th rowspan="2" style="width:25%;">Month</th>
-                ${extraHeaderColumns}
-                <th colspan="2" style="width:17%;">ATTENDANCE</th>
-                <th rowspan="2" style="width:10%;">AMOUNT</th>
-              </tr>
-              <tr>
-                <th>PRESENT</th>
-                <th>ABSENT</th>
-              </tr>
-            </thead>
+                <tr>
+                  <th rowspan="2" style="width:5%;">S.No.</th>
+                  <th rowspan="2" style="width:8%;">ROLL No.</th>
+                  <th rowspan="2" style="width:25%;">NAME OF THE STUDENT</th>
+                  <!-- <th rowspan="2" style="width:25%;">Month</th> -->
+                  ${extraHeaderColumns}
+                  <th colspan="2" style="width:17%;">ATTENDANCE</th>
+                  <th rowspan="2" style="width:10%;">AMOUNT</th>
+                </tr>
+                <tr>
+                  <th>PRESENT</th>
+                  <th>ABSENT</th>
+                </tr>
+              </thead>
             <tbody>
               ${rowsHtml}
               <tr class="total-amount-row">
-                <td colspan="${user.role !== 'Checker' ? 8 : 6}">Total:</td>
+                <td colspan="${user.role !== 'Checker' ? 7 : 5}">Total:</td>
                 <td>${formattedTotal}</td>
               </tr>
             </tbody>
@@ -298,10 +312,10 @@ const generateReport = async (req, res) => {
 
 const downloadExcel = async (req, res) => {
   try {
-    const { role, month, roll_no} = req.query;
+    const { role, month, roll_no, stipend_year} = req.query;
     const selectedCourse = req.query.course;
     const studentYear = req.query.year;
-    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no); // call service
+    const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no, stipend_year); // call service
     req.body.data = data;
     
     const excelBuffer = await generateExcel(req.body);
