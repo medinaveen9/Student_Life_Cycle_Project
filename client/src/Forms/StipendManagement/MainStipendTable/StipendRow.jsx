@@ -32,7 +32,6 @@ const StipendRow = (
                 <th className="border px-2 py-1">Days Present</th>
                 <th className="border px-2 py-1">Stipend</th>
                 <th className="border px-2 py-1">Edit</th>
-                <th className="border px-2 py-1">Update</th>
                 <th className="border px-2 py-1">Delete</th>
                 <th className="border px-2 py-1">Approval</th>
             </tr>
@@ -77,11 +76,6 @@ const StipendRow = (
                         <td className="border px-2 py-1">
                             <button className="text-blue-600 hover:text-blue-800" onClick={() => handleSelectedRowEdit(row)}>
                             <FaEdit />
-                            </button>
-                        </td>
-                        <td className="border px-2 py-1">
-                            <button className="text-blue-600 hover:text-blue-800" onClick={() => handleLeavesUpdate(row)}>
-                            Update
                             </button>
                         </td>
                         <td className="border px-2 py-1">
