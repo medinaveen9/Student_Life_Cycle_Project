@@ -65,16 +65,28 @@ const StipendRow = (
                             <VisibilityIcon style={{ color: "#4b1d77" }}/>
                             </button>
                         </td>
-                        <td className="border px-2 py-1">
-                            {editRowId === row.id 
-                            ? <input min="0" value={leaves ?? row.leaves} 
-                                onChange={handleChangeLeaves} className="w-16 border px-1.5 py-1.5" /> 
-                            : row.leaves}
-                        </td>
-                        <td className="border px-2 py-1">{row.present}</td>
+                        {(row.student_status === "Regular" || row.student_status === "Re-admission")  ? (
+                            <>
+                                <td className="border px-2 py-1">
+                                    {editRowId === row.id 
+                                    ? <input min="0" value={leaves ?? row.leaves} 
+                                        onChange={handleChangeLeaves} className="w-16 border px-1.5 py-1.5" /> 
+                                    : row.leaves}
+                                </td>
+                                <td className="border px-2 py-1">{row.present}</td>
+                            </> 
+                        ) : (
+                            <td className="border px-2 py-1 text-center" colSpan={2}>
+                                {row.student_status}
+                            </td>
+                            )
+                        }
                         <td className="border px-2 py-1">{row.stipend}</td>
                         <td className="border px-2 py-1">
-                            <button className="text-blue-600 hover:text-blue-800" onClick={() => handleSelectedRowEdit(row)}>
+                            <button
+                                className={`${ "text-blue-600 hover:text-blue-800" }`}
+                                    onClick={() => handleSelectedRowEdit(row) }
+                            >
                             <FaEdit />
                             </button>
                         </td>

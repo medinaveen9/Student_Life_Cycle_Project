@@ -15,6 +15,7 @@ export default function CertificateForm({}) {
         courseBatch: '',
 
         ddsCode: '',
+        academic_section: '',
         degreeName: '',
         passDate: '',
         typeIssued: [],
@@ -61,7 +62,7 @@ export default function CertificateForm({}) {
 
 
     const certificateOptions = useMemo(
-        () => ['Degree', 'Marks Memo', 'Provisional Certificate', 'Final Certificate'],
+        () => ['Degree', 'Provisional Certificate'],
         []
     );
 
@@ -263,7 +264,7 @@ export default function CertificateForm({}) {
                 // Reset form including checkboxes and image
                 // setForm({
                 //     rollNo: '', icrNumber: '', certificateName: '', fatherName: '',
-                //     courseBatch: '', ddsCode: '', degreeName: '', passDate: '',
+                //     courseBatch: '', ddsCode: '', academic_section : '', degreeName: '', passDate: '',
                 //     typeIssued: [], regularSupply: '', totalMarks: '', obtainedMarks: '',
                 //     percentage: '', division: '', staff1: '', staff2: '', staff3: '',
                 //     staff4: '', provisionalFeePaid: false, provisionalFee: '', provisionalReceipt: '',
@@ -317,6 +318,7 @@ export default function CertificateForm({}) {
                     setForm((prev) => ({
                         ...prev,
                         degreeName: data.degree_name,
+                        academic_section : data.academic_section,
                         staff1: data.emp_code1,
                         staff2: data.emp_code2,
                         staff3: data.emp_code3,

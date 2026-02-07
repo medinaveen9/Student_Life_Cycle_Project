@@ -16,7 +16,7 @@ const FIELDS = [
   "address", "district", "state", "country", "mobile", "email",
   "marks", "percentage", "emcet", "educationtype",
   "account_no", "ifsc_code",
-  "doj", "year", "leaves", "batch_year"
+  "doj", "year", "leaves", "batch_year", "student_status"
 ];
 
 const REQUIRED_FIELDS = [
@@ -32,7 +32,8 @@ const SPECIAL = {
   address: { type: "textarea", placeholder: "Enter address" },
   gender: { type: "select", options: ["", "Male", "Female"] },
   phstatus: { type: "select", options: ["", "Yes", "No"] },
-  course: { type: "select", options: ["", "Bachelor of Science Nursing", "B.A"] }
+  course: { type: "select", options: ["", "Bachelor of Science Nursing", "B.A"] },
+  student_status: { type: "select", options: ["Regular", "Long Absent", "Discontinue", "Re-admission", ] }
 };
 
 const initialData = Object.fromEntries(FIELDS.map((f) => [f, ""]));

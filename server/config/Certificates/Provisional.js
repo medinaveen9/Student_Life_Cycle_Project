@@ -58,7 +58,7 @@ function generateCertificateHTML(data, designationMap) {
 body{font-family:Arial,sans-serif;background:white;}
 
 .page{
-  height:260mm;
+  height:275mm;
   position:relative;
   page-break-after:always;
   overflow:hidden;
@@ -69,8 +69,8 @@ body{font-family:Arial,sans-serif;background:white;}
 }
 
 .paper-container{
-  width:80%;
-  height:98%;
+  width:86%;
+  height:83%;
   border:4px solid black;
   position:relative;
   padding:18px;
@@ -199,14 +199,14 @@ body{font-family:Arial,sans-serif;background:white;}
     <div class="content">
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div>
-          <h1 style="font-family:'Times new roman'; font-size:33px; font-style:italic; line-height:1.2;">
+          <h1 style="font-family:'Times new roman'; font-size:35px; font-style:italic; line-height:1.2; font-weight : bold;">
             Nizam's Institute of Medical Sciences
           </h1>
 
-          <p style="font-family:'Times new roman'; font-size:19px; font-style:italic;">
+          <p style="font-family:'Times new roman'; font-size:21px; font-style:italic; font-weight : bold;"">
             (A University established under the State Act, 1989)
           </p>
-          <p style="font-family:'Times new roman'; font-size:19px; font-style:italic;">
+          <p style="font-family:'Times new roman'; font-size:21px; font-style:italic; font-weight : bold;"">
             Punjagutta, Hyderabad-500082, Telangana, India.
           </p>
         </div>
@@ -217,7 +217,7 @@ body{font-family:Arial,sans-serif;background:white;}
           </div>
 
           <div style="border:0.5px dashed gray;background-color:white;padding:10px;">
-            <img src="${logoDataURL}" style="height:70px;">
+            <img src="${logoDataURL}" style="height:73px; width : 70px">
           </div>
 
           <div style="font-family:Arial;font-weight:bold;font-size:17px;margin-right : 50px;">
@@ -225,34 +225,35 @@ body{font-family:Arial,sans-serif;background:white;}
           </div>
         </div>
 
-        <h2 style="font-family:Arial;font-weight:bold;font-size:22px;text-decoration:underline;margin-bottom : 20px;">
+        <h2 style="font-family:Arial;font-weight:bold;font-size:23px;text-decoration:underline;margin-bottom : 14px;">
           PROVISIONAL CERTIFICATE
         </h2>
 
-        <div style="display:flex;flex-direction:column;gap:16px; font-size : 18px;">
-          <p>This is to certify that</p>
+        <div style="display:flex;flex-direction:column;justify-content: space-between; 
+          font-size : 19px; font-weight:bold; height: 280px; ">
+          <p> This is to certify that</p>
 
-          <div style="font-weight:bold;font-size:20px;">
+          <div font-size:21px;">
             ${data.certificate_name}
           </div>
 
-          <p style="font-weight:bold;">
-            ${data.gender === "Female" ? "D/O" : "S/O"} ${data.father_name}
+          <p>
+            ${data.gender === "Female" ? "D/o" : "S/o"} ${data.father_name}
           </p>
 
           <p>${pattern.main}</p>
 
-          <div style="font-weight:bold;font-size:20px;">
+          <div style="font-size:21px;">
             ${data.degree_name}
           </div>
 
           <p>${pattern.examLine}</p>
 
           <p>
-            Final Examinations held in <strong>${formattedPassDate}</strong>
+            Final Examinations held in <span style="font-size:20px;">${formattedPassDate}</span>
           </p>
 
-          ${pattern.division ? `<p>${pattern.divisionText}<strong> ${data.division}</strong></p>` : ""}
+          ${pattern.division ? `<p>${pattern.divisionText}<span style="font-size:20px;"> ${data.division}</span></p>` : ""}
 
           ${
             pattern.internship
@@ -299,17 +300,19 @@ body{font-family:Arial,sans-serif;background:white;}
     <div class="candidate-info section_1">
       <div style = "font-size : 14px; font-family : Arial;">Candidate's ID. <strong>${data.icr_number || ""}</strong></div>
       <div style ="font-size : 12px; font-family : Arial; font-weight : 700;">
-        ISSUED AFTER VERIFICATION BY AC2 SECTION
+        ISSUED AFTER VERIFICATION BY ${data.academic_section} SECTION
       </div>
       <div style = "font-size : 14px; font-family : Arial;">Prepared and Verified by:</div>
     </div>
 
     <div class="prepared-by section_3" style="margin-top : 20px;">
       <div class="employees_info">
-        <div class = "employee_main">
-          <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff1] || ""}</p>
-          <p class = "employee_details employee_id">EmpID: ${data.staff1 || ""}</p>
-        </div>
+        <!-- 
+          <div class = "employee_main">
+            <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff1] || ""}</p>
+            <p class = "employee_details employee_id">EmpID: ${data.staff1 || ""}</p>
+          </div>
+        -->
         <div class = "employee_main">
           <p class = "employee_details" style="margin-top : 20px;">${designationMap[data.staff2] || ""}</p>
           <p class = "employee_details employee_id">EmpID: ${data.staff2 || ""}</p>

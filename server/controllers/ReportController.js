@@ -69,6 +69,29 @@ const generateReport = async (req, res) => {
         `
         : "";
 
+    // Roll nos of students who are re admission 
+    const reAdmittedStudents = [];
+    data.forEach((student) => {
+      if (student.student_status === "Re-admission") {
+        reAdmittedStudents.push(student.roll_no);
+      }
+    });
+
+    let reAdmittedSectionHtml = "";
+    if (reAdmittedStudents.length > 0) {
+      reAdmittedSectionHtml = `
+        <div style="margin-top:30px;">
+          <div style="font-weight:bold; margin-bottom:8px;">
+            Re-admitted Students (Roll Numbers)
+          </div>
+          <div style="padding-left:20px;">
+            ${reAdmittedStudents.join(", ")}
+          </div>
+        </div>
+      `;
+    }
+
+    // ✅ Generate table rows HTML    
     const rowsHtml = data
       .map(
         (row, idx) => `
@@ -88,10 +111,11 @@ const generateReport = async (req, res) => {
           }
 
           ${
-            row.student_status !== "Regular"
-              ? `<td colspan="3" style="text-align:center;font-weight:600;">
+            (row.student_status !== "Regular" && row.student_status !== "Re-admission")
+              ? `<td colspan="2" style="text-align:center;font-weight:600;">
                   ${row.student_status}
-                </td>`
+                </td>
+                <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>`
               : `
                 <td>${row.present}</td>
                 <td>${row.leaves}</td>
@@ -102,7 +126,6 @@ const generateReport = async (req, res) => {
       `
       )
       .join("");
-
 
     // ✅ Prepare Combined HTML (Page 1 + Page 2)
     const combinedHtml = `
@@ -271,8 +294,10 @@ const generateReport = async (req, res) => {
                 <td colspan="${user.role !== 'Checker' ? 7 : 5}">Total:</td>
                 <td>${formattedTotal}</td>
               </tr>
+              
             </tbody>
           </table>
+          ${reAdmittedSectionHtml}
         </div>
       </body>
       </html>

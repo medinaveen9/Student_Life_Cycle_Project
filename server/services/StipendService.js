@@ -405,10 +405,20 @@ const autoFillStipendData = async (course, month, userId, user_name, stipend_yea
         `($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
             $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
               $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, 
-                $${paramIndex++}, $${paramIndex++})`
+                $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`
       );
 
       const stipendVal = stipendMap[`${s.course}_${s.year}`] || 0;
+
+      // Determine leaves, present, stipend_amount based on student_status
+      let leaves = 0;
+      let present = totalDays;
+      let stipend_amount = stipendVal;
+      if (s.student_status !== 'Regular' || s.student_status !== 'Re-admission') {
+        leaves = totalDays;
+        present = 0;
+        stipend_amount = 0;
+      }
 
       params.push(
         s.roll_no,
@@ -416,9 +426,9 @@ const autoFillStipendData = async (course, month, userId, user_name, stipend_yea
         s.course,
         s.account_no,
         s.doj,
-        0,               // leaves
-        totalDays,       // present
-        stipendVal,
+        leaves,               // leaves
+        present,       // present
+        stipend_amount,
         stipendVal,
         month,
         0,               // requested_leaves
@@ -426,7 +436,8 @@ const autoFillStipendData = async (course, month, userId, user_name, stipend_yea
         s.year,
         stipend_year,
         userId,
-        user_name
+        user_name,
+        s.student_status
       );
     });
 
@@ -436,7 +447,7 @@ const autoFillStipendData = async (course, month, userId, user_name, stipend_yea
     const insertQuery = `
       INSERT INTO stipend_details 
         (roll_no, name, course, account_no, doj, leaves, present, stipend, actual_stipend,
-         cur_month, requested_leaves, ifsc_code, year, stipend_year, checker_id, checker_name)
+         cur_month, requested_leaves, ifsc_code, year, stipend_year, checker_id, checker_name, student_status)
       VALUES ${insertValues.join(", ")}
     `;
     await pool.query(insertQuery, params);
@@ -603,7 +614,7 @@ const deleteStudentStipendById = async (id) => {
 };
 
 // Update leaves and present days in stipend_details
-const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, stipend }) => {
+const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, stipend, is_status_changed }) => {
   try {
     // 1. Check record exists
     const { rowCount } = await pool.query(
@@ -632,6 +643,14 @@ const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, s
       ]
     );
 
+    if(is_status_changed && rows.length > 0) {
+      const roll_no = rows[0].roll_no;
+      // Fetch current leaves_used and total leaves from students table
+      const studentRes = await pool.query(
+        `update students set student_status = $1 where roll_no = $2`,
+        [status, roll_no]
+      );
+    }
     return rows[0];
   } catch (error) {
       console.error("Error updating leaves and present:", error);

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import "../../styles/RegistrationForm.css";
 import axiosInstance from '../../components/AxiosInstance';
 
-const LoginForm = ({ setUser}) => {
+const LoginForm = ({ setUser, setSidebarOpen}) => {
 
   const [formData, setFormData] = useState({ userId: '', password: '', conformPassword : "",  role: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -57,6 +57,7 @@ const LoginForm = ({ setUser}) => {
 
       // Login success
       setUser(res.data.user);
+      setSidebarOpen(true);
       navigate("/");
     } catch (err) {
       console.error("Auth Error:", err.response?.data?.message || err);

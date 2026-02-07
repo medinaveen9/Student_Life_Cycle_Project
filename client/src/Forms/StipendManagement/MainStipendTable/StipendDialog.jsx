@@ -17,15 +17,19 @@ const StipendDialogs = ({
             : 0;
 
     const presentDays =
-        editStatus === "Regular"
+        (editStatus === "Regular" || editStatus === "Re-admission")
             ? totalDays - Number(editLeaves || 0)
             : 0;
 
     // Handle status change
     const handleStatus = (e) => {
         const value = e.target.value;
+        if(value === "Re-admission" && editRowData.student_status !== "Long Absent") {
+            alert("Status can be changed to Re-admission only when student is Long Absent.");
+            return;
+        }
         // Reset leaves if status is not Regular
-        if (value !== "Regular") {
+        if (value !== "Regular" || value !== "Re-admission") {
             setEditLeaves(totalDays);
         }
         else {
@@ -41,14 +45,14 @@ const StipendDialogs = ({
             const totalDaysNum = Number(totalDays);
             const actualStipendNum = Number(editRowData?.actual_stipend || 0);
 
-            if (Number(editRowData.leaves) === leavesNum) {
+            if (Number(editRowData.leaves) === leavesNum && editStatus === editRowData.student_status) {
                 alert("No changes made to leaves.");
                 return;
             }
 
             let calculatedStipend = 0;
 
-            if (editStatus === "Regular" && totalDaysNum > 0) {
+            if ((editStatus === "Regular" || editStatus === "Re-admission" ) && totalDaysNum > 0) {
                 const perDayStipend = actualStipendNum / totalDaysNum;
                 const calStipend = perDayStipend * presentNum;
 
@@ -70,7 +74,8 @@ const StipendDialogs = ({
                     leaves: leavesNum,
                     present: presentNum,
                     status: editStatus,
-                    stipend: calculatedStipend
+                    stipend: calculatedStipend,
+                    is_status_changed: editRowData.student_status !== editStatus
                 }
                 );
 
@@ -155,14 +160,14 @@ const StipendDialogs = ({
                 </TableRow>
                 <TableRow>
                     <TableCell><b>Present Days</b></TableCell>
-                    <TableCell><TextField size="small" fullWidth disabled value={presentDays} /></TableCell>
+                    <TableCell><TextField size="small" fullWidth value={presentDays} /></TableCell>
                 </TableRow>
                 <TableRow>
                     <TableCell><b>Status</b></TableCell>
                     <TableCell>
                     <FormControl size="small" fullWidth>
                         <Select value={editStatus} onChange={handleStatus}>
-                        {["Regular", "Long Absent", "Discontinued", "Started Again"].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                        {["Regular", "Long Absent", "Discontinue", "Re-admission"].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
                         </Select>
                     </FormControl>
                     </TableCell>

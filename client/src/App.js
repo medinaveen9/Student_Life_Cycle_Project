@@ -173,7 +173,7 @@ const App = () => {
         </Box>}>
         {isRegistration ? (
           <Routes>
-            <Route path="/login" element={<LoginForm setUser = {setUser} />} />
+            <Route path="/login" element={<LoginForm setUser = {setUser} setSidebarOpen = {setSidebarOpen} />} />
             
           </Routes>
         ) : (

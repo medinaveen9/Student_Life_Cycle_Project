@@ -109,7 +109,7 @@ const getStudentsByRollNo = async (rollNo) => {
 const getDegreeNameByCourseCode = async (courseCode) => {
     try {
         const query = `
-            SELECT  a.degree_name, b.emp_code1, b.emp_code2, b.emp_code3, b.emp_code4 FROM ddscode_degree_master a
+            SELECT  a.degree_name, a.academic_section, b.emp_code1, b.emp_code2, b.emp_code3, b.emp_code4 FROM ddscode_degree_master a
                 JOIN course_employees_master b 
                     ON a.ddscode = b.dds_code
             WHERE a.ddscode = $1
