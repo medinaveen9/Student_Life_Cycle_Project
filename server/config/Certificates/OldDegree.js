@@ -287,10 +287,12 @@ body{font-family:Arial,sans-serif;background:white;}
 
         <div class="prepared-by section_3" style="margin-top : 20px;">
           <div class="employees_info">
-            <div class = "employee_main">
-              <p class = "employee_details" style = "margin-top : 20px;">${designationMap[data.staff1] || ""}</p>
-              <p class = "employee_details employee_id">EmpID: ${data.staff1 || ""}</p>
-            </div>
+            <!--
+              <div class = "employee_main">
+                <p class = "employee_details" style = "margin-top : 20px;">${designationMap[data.staff1] || ""}</p>
+                <p class = "employee_details employee_id">EmpID: ${data.staff1 || ""}</p>
+              </div>
+            -->
             <div class = "employee_main">
               <p class = "employee_details" style = "margin-top : 20px;">${designationMap[data.staff2] || ""}</p>
               <p class = "employee_details employee_id">EmpID: ${data.staff2 || ""}</p>
