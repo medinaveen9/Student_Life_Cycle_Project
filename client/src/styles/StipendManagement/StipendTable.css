@@ -11,6 +11,11 @@
     min-width: 200px;
 }
 
+tbody > tr:hover {
+    background-color: #e6f2ff;
+    cursor: pointer;
+}
+
 /* For medium screens (tablets) */
 @media (max-width: 992px) {
     .filter-container {
@@ -74,4 +79,5 @@
     h2 {
         font-size: 0.9rem;
     }
+    
 }

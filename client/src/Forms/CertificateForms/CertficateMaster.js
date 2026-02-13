@@ -50,7 +50,8 @@ export default function CertificateForm({}) {
         odFinalDate: '',
         provisionalFinalDate: '',
 
-        studentImage: null
+        studentImage: null,
+        hall_ticket: '',
     }));
     
     const [showIssuedCertificates, setShowIssuedCertificates] = useState([]);
@@ -270,7 +271,7 @@ export default function CertificateForm({}) {
                 //     staff4: '', provisionalFeePaid: false, provisionalFee: '', provisionalReceipt: '',
                 //     provisionalReceiptDate: '', odFeePaid: false, odFee: '', odReceipt: '',
                 //     odReceiptDate: '', certificateIssueStatus: '', draftDate: '',
-                //     odFinalDate: '', provisionalFinalDate: '', studentImage: null
+                //     odFinalDate: '', provisionalFinalDate: '', studentImage: null, hall_ticket: '',
                 // });
                 // setShowIssuedCertificates([]);
                 // setShowNotIssuedCertificates([]);
@@ -305,7 +306,8 @@ export default function CertificateForm({}) {
                         fatherName: data.father_name,
                         courseBatch: data.batch_year,
                         icrNumber : data.icr_no,
-                        gender : data.gender
+                        gender : data.gender,
+                        hall_ticket : data.hall_ticket
                     }));
                 } 
             }

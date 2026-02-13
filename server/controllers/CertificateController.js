@@ -222,6 +222,7 @@ const PC_Certificate_Form = async (req, res) => {
 
         result.gender = formData.gender;
         result.academic_section = formData.academic_section;
+        result.hall_ticket = formData.hall_ticket;
 
         const pdfBuffer = await generatePDF(result);
 

@@ -115,7 +115,7 @@ const StipendDialogs = ({
                 <DialogContent dividers className="text-center">Are you sure you want to proceed?</DialogContent>
                 <DialogActions className="justify-center gap-4">
                 <Button variant="outlined" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button variant="contained" color="success" disabled={loading} onClick={handleApprovalSubmit} sx={{ "&.Mui-disabled": { filter: "blur(1px)", opacity: 0.6, cursor: "not-allowed" } }}>Approved</Button>
+                <Button variant="contained" name = "approved" color="success" disabled={loading} onClick={handleApprovalSubmit} sx={{ "&.Mui-disabled": { filter: "blur(1px)", opacity: 0.6, cursor: "not-allowed" } }}>Approved</Button>
                 </DialogActions>
             </Dialog>
 

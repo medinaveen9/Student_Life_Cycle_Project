@@ -47,6 +47,7 @@ const StipendTable = ({ setEditableData, user }) => {
  
   const [leaves, setLeaves] = useState(null);
   const [editRowId, setEditRowId] = useState(null);
+  const [focusedRowId, setFocusedRowId] = useState(null);
 
   const months = [
     { number: 1, name: "January" }, { number: 2, name: "February" },
@@ -479,7 +480,9 @@ const StipendTable = ({ setEditableData, user }) => {
             ) : (
               <React.Fragment>
                 {data.length > 0 ? data.map((row, idx) => (
-                  <tr key={idx}>
+                  <tr key={idx}
+                    className="hover:bg-red-100 transition-colors"
+                  >
                     <td className="border px-2 py-1">
                       <input
                         type="checkbox"

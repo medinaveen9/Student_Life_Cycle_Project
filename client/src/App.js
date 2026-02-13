@@ -3,7 +3,6 @@ import { Routes, Route, useLocation, useNavigate} from 'react-router-dom';
 import { Box, CssBaseline, CircularProgress } from '@mui/material';
 import axiosInstance from './components/AxiosInstance';
 import ErrorBoundary from "./components/ErrorBoundary";
-
 import AppBar from './components/AppBar';
 import Sidebar from './components/SideMenu';
 
@@ -11,8 +10,32 @@ import Sidebar from './components/SideMenu';
 {/* Login Component */}
 const LoginForm = lazy(() => import('./Forms/LoginPage/LoginForm'));
 
-const ApproverDashboard = lazy(() => import('./Forms/LoginPage/ApproverDashboard'));
+{/*Welcome Page Component */}
+const WelcomePage = lazy(() => import('./components/Welcome'));
 
+{/* Stipend Management Components */}
+const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
+const StipendTable = lazy(() => import('./Forms/StipendManagement/MainStipendTable/StipendTable'));
+const YearPromotion = lazy(() => import('./Forms/StipendManagement/YearPromotion'));
+const AddStudent = lazy(() => import('./Forms/StipendManagement/AddStudent'));
+const DeleteStudent = lazy(() => import('./Forms/StipendManagement/DeleteStudent'));
+const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
+
+{/* Certificate Components */ }
+const CertficateMaster = lazy(() => import('./Forms/CertificateForms/CertficateMaster'));
+
+{/* Password Management Components */}
+const PasswordManager = lazy(() => import("./components/ChangePassword"));
+const ForgotPassword = lazy(() => import("./Forms/LoginPage/ForgotPassword"));
+const ResetPassword = lazy(() => import("./Forms/LoginPage/ResetPassword"));
+
+{/* Administration Assignment Components (Dean role) */ }
+const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
+const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
+
+
+{/* Un necessary files for now, can be added later when needed */ }
+const ApproverDashboard = lazy(() => import('./Forms/LoginPage/ApproverDashboard'));
 const TransferCertificate = lazy(() => import('./Forms/Certificates/TransferCertificate'));
 const Bonafide = lazy(() => import('./Forms/Certificates/Bonafide'));
 const BscNursing2Year = lazy(() => import('./Forms/BscNursingForms/BscNursing2Year'));
@@ -75,49 +98,17 @@ const MedicalFeeNote = lazy(() => import('./Forms/Certificates/MedicalFeeNote'))
 const ObserversAttendance = lazy(() => import('./Forms/Certificates/ObserverAttendance'));
 const ObserverPermission = lazy(() => import('./Forms/Certificates/ObserverPermission'));
 const ProvisionalAdmission = lazy(() => import('./Forms/Certificates/ProvisionalAdmission'));
-
 const StipendTableAgreements = lazy(() => import('./Forms/Certificates/StipendTableAgreements'));
-
 const GCAdministrativeInformation = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/AdministrativeInformation'));
 const GCFeePaymentDetails = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/FeePaymentDetails'));
 const GCPersonalInformation = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/PersonalInformation'));
 const GCDocumentsUpload = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/DocumentsUpload'));
 const GCContactDetails = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/ContactDetails'));
 const GCEducationalDetails = lazy(() => import('./Forms/MPTGeneticCounsellingCourseApplication/EducationalDetails'));
-
 const MPTReportPersonalAcademicInfo = lazy(() => import('./Forms/MasterPhysiotherapyApplicationReport/PersonalAcademicInfo'));
 const MPTReportUploads = lazy(() => import('./Forms/MasterPhysiotherapyApplicationReport/Uploads'));
-
 const GcReportPersonalAcademicInfo = lazy(() => import('./Forms/GeneticCounsellingApplicationCourseReport/GcPersonalAcademicInfo'));
 const GcReportUploads = lazy(() => import('./Forms/GeneticCounsellingApplicationCourseReport/GcUploads'));
-
-const RoleAssignment = lazy(() => import('./Forms/AdministrationAssignment/RoleAssignment'));
-const CourseStipendForm = lazy(() => import('./Forms/AdministrationAssignment/AddCourseStipend'));
-
-const LeavesManagement = lazy(() => import('./Forms/StipendManagement/LeavesManagement'));
-
-{/*Welcome Page Component */}
-const WelcomePage = lazy(() => import('./components/Welcome'));
-
-{/* Demo Components for Stipend Management */}
-const StipendForm = lazy(() => import('./Forms/StipendManagement/StipendForm'));
-// const StipendTable = lazy(() => import('./Forms/StipendManagement/StpendTable'));
-const StipendTable = lazy(() => import('./Forms/StipendManagement/MainStipendTable/StipendTable'));
-
-// const DemoStipendTable = lazy(() => import('./Forms/StipendManagement/MainStipendTable/StipendTable'));
-const YearPromotion = lazy(() => import('./Forms/StipendManagement/YearPromotion'));
-const AddStudent = lazy(() => import('./Forms/StipendManagement/AddStudent'));
-const DeleteStudent = lazy(() => import('./Forms/StipendManagement/DeleteStudent'));
-
-{/* Password Management Components */}
-const PasswordManager = lazy(() => import("./components/ChangePassword"));
-const ForgotPassword = lazy(() => import("./Forms/LoginPage/ForgotPassword"));
-const ResetPassword = lazy(() => import("./Forms/LoginPage/ResetPassword"));
-
-{/* Certificate Selection and Dashboard Components */ }
-const CertificateSelection = lazy(() => import('./Forms/CertificateForms/SelectCertificate'));
-const CertificatesDashboard = lazy(() => import('./Forms/CertificateForms/CertificatesDashboard'));
-
 {/* Course Application Report Components */ }
 const CourseApplicationSelection = lazy(() => import('./Forms/CourseApplication/CourseSelection'));
 
@@ -126,10 +117,9 @@ const MHM_MarksMemo = lazy(() => import('./Forms/MarksMemos/MHM_Marks_Memo'));
 const PGD_NMT_MarksMemo = lazy(() => import('./Forms/MarksMemos/PGD_NMT_Memo'));
 
 {/* Master Certificate for provisional */}
-const CertficateMaster = lazy(() => import('./Forms/CertificateForms/CertficateMaster'));
+const CertificateSelection = lazy(() => import('./Forms/CertificateForms/SelectCertificate'));
+const CertificatesDashboard = lazy(() => import('./Forms/CertificateForms/CertificatesDashboard'));
 const DemoCertificateTemplate = lazy(() => import('./Forms/CertificateForms/DemoCertificateTemplate'));
-
-
 
 
 const App = () => {
@@ -174,7 +164,6 @@ const App = () => {
         {isRegistration ? (
           <Routes>
             <Route path="/login" element={<LoginForm setUser = {setUser} setSidebarOpen = {setSidebarOpen} />} />
-            
           </Routes>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -185,8 +174,32 @@ const App = () => {
                 onClose={() => setSidebarOpen(false)}/>
               <Box component="main" sx={{ flexGrow: 1, padding: 3, height: '100vh' }}>
                   <Routes location={location}>
+
+                    {/* Welcome Page */}
+                    <Route path="/" element={<WelcomePage user={user} />} />
+
+                    {/* Stipend Management Routes */}
+                    <Route path="/stipendform" element={<StipendForm editableData = {editableData} user = {user} setEditableData = {setEditableData}/>} />
+                    <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} user = {user} />} />
+                    <Route path="/promotion" element={<YearPromotion setEditableData = {setEditableData} user = {user} />} />
+                    <Route path="/student" element={<AddStudent setEditableData = {setEditableData} user = {user} />} />
+                    <Route path="/delete-student" element={<DeleteStudent setEditableData = {setEditableData} user = {user} />} />
+                    <Route path="/leavesmanagement" element={<LeavesManagement setEditableData = {setEditableData}  user = {user} />} />
+
+                    {/* Certificate Components */ }
+                    <Route path="/certificate_master" element={<CertficateMaster />} />
+
+                    {/* Password Management Components */}
+                    <Route path="/change-password" element={<PasswordManager user={user} />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+
+                    {/* Administration Assignment Components (Dean role) */ }
+                    <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
+                    <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
+
+                    {/* Un necessary files for now, can be added later when needed */ }
                     <Route path="/tc" element={<TransferCertificate />} />
-                    
                     <Route path="/approver" element={<ApproverDashboard/>} />
                     <Route path="/nurs2y" element={<BscNursing2Year />} />
                     <Route path="/nurs3y" element={<BscNursing3Year />} />
@@ -227,8 +240,7 @@ const App = () => {
                     <Route path="/uploads" element={<Uploads />} />
                     
 
-                    {/* Welcome Page */}
-                    <Route path="/" element={<WelcomePage user={user} />} />
+                    
 
                     {/* Certificates */}
                     <Route path="/attendancecertificate" element={<Attendance_Certificate />} />
@@ -242,23 +254,7 @@ const App = () => {
                     <Route path="/observpermisson" element={<ObserverPermission />} />
                     <Route path="/proadmission" element={<ProvisionalAdmission />} />
 
-                    <Route path="/stipendform" element={<StipendForm editableData = {editableData} 
-                      user = {user} setEditableData = {setEditableData}/>} />
-                    <Route path="/stipendtable" element={<StipendTable setEditableData = {setEditableData} 
-                      user = {user} />} />
-
-                    <Route path="/promotion" element={<YearPromotion setEditableData = {setEditableData} 
-                      user = {user} />} />
-
-                    <Route path="/student" element={<AddStudent setEditableData = {setEditableData} 
-                      user = {user} />} />
-
-                    <Route path="/delete-student" element={<DeleteStudent setEditableData = {setEditableData} 
-                      user = {user} />} />
-
-
-                    <Route path="/leavesmanagement" element={<LeavesManagement setEditableData = {setEditableData} 
-                      user = {user} />} />
+                    
                     <Route path="/stipendagreements" element={<StipendTableAgreements />} />
 
                     {/* mptapplicationReport */}
@@ -281,14 +277,10 @@ const App = () => {
                     <Route path="/selectcertificate" element={<CertificateSelection user = {user}/>} />
                     <Route path="/certificates/dashboard" element ={<CertificatesDashboard user = {user}/>} />
 
-                    {/* Administration Assignment */ }
-                    <Route path="/roleassignment" element={<RoleAssignment user = {user}/>} />
-                    <Route path="/course_stipend" element={<CourseStipendForm user = {user}/>} />
+                    
 
                     {/*Change Password */}
-                    <Route path="/change-password" element={<PasswordManager user={user} />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+                    
 
                     {/* Course Application Report */}
                     <Route path="/course-selection" element={<CourseApplicationSelection user={user}
@@ -309,7 +301,7 @@ const App = () => {
                     <Route path="/pgd_nmt_memo" element={<PGD_NMT_MarksMemo />} />
 
                     {/* Master Certificate for Provisional */}
-                    <Route path="/certificate_master" element={<CertficateMaster />} />
+                    
                     <Route path="/certificate_template" element={<DemoCertificateTemplate />} />
                   </Routes>
               </Box>

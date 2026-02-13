@@ -213,7 +213,7 @@ body{font-family:Arial,sans-serif;background:white;}
 
         <div style="margin:25px 0 30px;display:flex;justify-content:space-between;align-items:center;">
           <div style="font-family:Arial;font-weight:bold;font-size:17px;margin-left : 10px;">
-            Roll No. ${data.roll_no || ""}
+            Roll No. ${data.hall_ticket || data.roll_no || ""}
           </div>
 
           <div style="border:0.5px dashed gray;background-color:white;padding:10px;">

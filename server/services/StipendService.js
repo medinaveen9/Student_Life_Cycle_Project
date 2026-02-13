@@ -208,8 +208,10 @@ const fetchAllStipends = async (role, month, course, year, roll_no, stipend_year
       conditions.push(`sd.checker_status = 'approved'`);
     } else if (role === "Approver") {
       conditions.push(`sd.checker_status = 'approved' AND sd.verifier_status = 'approved'`);
-    } else if (role === "FA" || role === "FC") {
+    } else if (role === "FC") {
       conditions.push(`sd.approver_status = 'approved'`);
+    } else if (role === "FA") {
+      conditions.push(`sd.fc_status = 'approved'`);
     }
 
     // Add conditions
@@ -248,6 +250,18 @@ const stipendApprovalStatus = async (id, status, role, userInfo) => {
         [status, userInfo.userId, userInfo.user_name, id]
       );
       return result.rowCount > 0;
+    } else if (role === 'FC') {
+        const result = await pool.query(
+          'UPDATE stipend_details SET fc_status = $1  WHERE id = $2',
+          [status, id]
+        );
+        return result.rowCount > 0;
+    } else if (role === 'FA') {
+        const result = await pool.query(
+          'UPDATE stipend_details SET fa_status = $1, payment_status = $2 WHERE id = $3',
+          [status, status, id]
+        );
+        return result.rowCount > 0;
     }
     else {
       throw new Error('Invalid role');
@@ -279,6 +293,22 @@ const stipendBulkApproval = async (data, status, role, userInfo) => {
             const result = await pool.query(
               'UPDATE stipend_details SET approver_status = $1, approver_id = $2, approver_name = $3 WHERE id = $4',
               [status, userInfo.userId, userInfo.user_name, id]
+            );
+          }
+      return true;
+    } else if (role === 'FC') {
+          for (let id of data) {
+            const result = await pool.query(
+              'UPDATE stipend_details SET fc_status = $1  WHERE id = $2',
+              [status, id]
+            );
+          }
+      return true;
+    } else if (role === 'FA') {
+          for (let id of data) {
+            const result = await pool.query(
+              'UPDATE stipend_details SET fa_status = $1, payment_status = $2  WHERE id = $3',
+              [status, status, id]
             );
           }
       return true;

@@ -11,7 +11,7 @@ import "../../styles/StipendManagement/PromotionYear.css";
 
 /* ===== Field Order (UNCHANGED) ===== */
 const FIELDS = [
-  "reg_no", "roll_no", "name", "university", "course", "adhar", 
+  "reg_no", "roll_no", "hall_ticket", "name", "university", "course", "adhar", 
   "dob", "gender", "social_status", "father_name", "mother_name",
   "address", "district", "state", "country", "mobile", "email",
   "marks", "percentage", "emcet", "educationtype",
@@ -20,7 +20,7 @@ const FIELDS = [
 ];
 
 const REQUIRED_FIELDS = [
-  "name", "roll_no", "course",
+  "name", "roll_no", "hall_ticket", "course",
   // "account_no","ifsc_code",
   "doj",
   "year","leaves","batch_year"
@@ -168,7 +168,7 @@ const StudentAddStipend = () => {
             onClick={handleSearch}
             disabled={loading}
           >
-            {loading ? "Searching..." : "Check Student"}
+            {loading ? "Searching..." : "Fetch Student"}
           </button>
         </div>
       </div>

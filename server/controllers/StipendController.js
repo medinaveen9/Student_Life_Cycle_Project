@@ -60,7 +60,8 @@ const getAllStipends = async (req, res) => {
 //stipend approval status update
 const stipendApprovalController = async (req, res) => {
   try {
-    const { id, status, role, userInfo } = req.query;
+    const { id, status, role } = req.query;
+    const userInfo = req.user; // from auth middleware
     if (!id || !status || !role) {
       return res.status(400).json({ success: false, error: 'Missing required query parameters' });
     }
@@ -80,6 +81,7 @@ const stipendBulkApprovalController = async (req, res) => {
   try {
     const { ids, role, userInfo } = req.body;
     const status = 'approved'; 
+    
     const isUpdated = await stipendBulkApproval(ids, status, role, userInfo);
     if (isUpdated) {
       return res.json({ success: true, message: 'Bulk stipend status updated successfully' });

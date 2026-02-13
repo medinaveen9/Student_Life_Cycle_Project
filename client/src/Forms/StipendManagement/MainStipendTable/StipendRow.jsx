@@ -7,11 +7,51 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import "../../../styles/StipendManagement/StipendTable.css";
 
+const roleStatusMap = {
+    Verifier: "verifier_status",
+    Approver: "approver_status",
+    Checker: "checker_status",
+    FA: "fa_status",
+    FC: "fc_status",
+};
+
 const StipendRow = (
     { data, dataLoaded, selected, selectAll, handleRowSelect, handleSelectAll,
       handleView, handleRowEdit, editRowId, leaves, handleChangeLeaves,
       handleLeavesUpdate, handleDelete, handleApproval, user, handleSelectedRowEdit }
-) => {
+    ) => {
+
+
+    const renderStatusIcon = (status, row) => {
+        if (!status) return null;
+
+        switch (status.toLowerCase()) {
+            case "pending":
+                return (
+                    <HourglassEmptyIcon style={{ color: "orange", fontSize: "20px" }}
+                        titleAccess="Pending" onClick={() => handleApproval(row)} />
+                );
+
+            case "approved":
+                return (
+                    <CheckCircleIcon
+                    style={{ color: "green", fontSize: "20px" }}
+                    titleAccess="Approved"
+                    />
+                );
+
+            case "rejected":
+                return (
+                    <CancelIcon
+                    style={{ color: "red", fontSize: "20px" }}
+                    titleAccess="Rejected"
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <table className="min-w-full border border-gray-400 text-sm text-center">
             <thead>
@@ -84,54 +124,35 @@ const StipendRow = (
                         <td className="border px-2 py-1">{row.stipend}</td>
                         <td className="border px-2 py-1">
                             <button
-                                className={`${ "text-blue-600 hover:text-blue-800" }`}
-                                    onClick={() => handleSelectedRowEdit(row) }
+                                disabled={row.payment_status === "approved"}
+                                onClick={() => handleSelectedRowEdit(row)}
+                                className={`
+                                    px-2
+                                    ${ row.payment_status === "approved"
+                                        ? "text-gray-400 cursor-not-allowed"
+                                        : "text-blue-600 hover:text-blue-800 cursor-pointer"
+                                    }
+                                `}
                             >
                             <FaEdit />
                             </button>
                         </td>
                         <td className="border px-2 py-1">
-                            <button className="text-red-600 hover:text-blue-800" onClick={() => handleDelete(row)}>
-                            <FaTrash />
+                            <button
+                                disabled={row.payment_status === "approved"}
+                                onClick={() => row.payment_status !== "approved" && handleDelete(row)}
+                                className={row.payment_status === "approved"
+                                    ? "text-gray-400 cursor-not-allowed"
+                                    : "text-red-600 hover:text-red-800"}
+                            >
+                                <FaTrash />
                             </button>
                         </td>
-                        {user.role === "Verifier" ? (
+                        {roleStatusMap[user.role] && (
                             <td className="border px-2 py-1">
-                                {row.verifier_status === "Pending" && (
-                                <HourglassEmptyIcon style={{ color: "orange", fontSize: "20px" }} titleAccess="Pending" onClick={() => handleApproval(row)}/>
-                                )}
-                                {row.verifier_status === "approved" && (
-                                <CheckCircleIcon style={{ color: "green", fontSize: "20px" }} titleAccess="Approved" />
-                                )}
-                                {row.verifier_status === "rejected" && (
-                                <CancelIcon style={{ color: "red", fontSize: "20px" }} titleAccess="Rejected" />
-                                )}
+                                {renderStatusIcon(row[roleStatusMap[user.role]], row)}
                             </td>
-                            ) : (user.role === "Approver" || user.role === "FA" || user.role === "FC") ? (
-                                <td className="border px-2 py-1">
-                                {row.approver_status === "Pending" && (
-                                    <HourglassEmptyIcon style={{ color: "orange", fontSize: "20px" }} titleAccess="Pending" onClick={() => handleApproval(row)} />
-                                )}
-                                {row.approver_status === "approved" && (
-                                    <CheckCircleIcon style={{ color: "green", fontSize: "20px" }} titleAccess="Approved" />
-                                )}
-                                {row.approver_status === "rejected" && (
-                                    <CancelIcon style={{ color: "red", fontSize: "20px" }} titleAccess="Rejected" />
-                                )}
-                                </td>
-                            ) : user.role === "Checker" ? (
-                                <td className="border px-2 py-1">
-                                {row.checker_status === "Pending" && (
-                                    <HourglassEmptyIcon style={{ color: "orange", fontSize: "20px" }} titleAccess="Pending" onClick={() => handleApproval(row)} />
-                                )}
-                                {row.checker_status === "approved" && (
-                                    <CheckCircleIcon style={{ color: "green", fontSize: "20px" }} titleAccess="Approved" />
-                                )}
-                                {row.checker_status === "rejected" && (
-                                    <CancelIcon style={{ color: "red", fontSize: "20px" }} titleAccess="Rejected" />
-                                )}
-                                </td>
-                            ) : null}
+                        )}
                         </tr>
                     )) : (
                         <tr>
@@ -145,4 +166,4 @@ const StipendRow = (
     )
 }
 
-export default StipendRow
+export default StipendRow;
