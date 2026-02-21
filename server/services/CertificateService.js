@@ -6,7 +6,8 @@ dotenv.config();
 const puppeteer = require("puppeteer");
 const { generateCertificateHTML } = require("../config/Certificates/Provisional");
 const { ObjectId } = require('mongodb');
-const { generateODCertificateHTML} = require("../config/Certificates/OldDegree");
+const { generateODCertificateHTML } = require("../config/Certificates/OldDegree");
+const {generateNewODHTML} = require("../config/Certificates/NewDegree");
 
 //Certificate Request Service
 
@@ -157,6 +158,9 @@ async function generatePDF(data) {
     else if(data.type_issued.includes("Provisional Certificate")){
         html = generateCertificateHTML(data, designationMap);
     }
+    else if(data.type_issued.includes("New Degree")){
+        html = await generateNewODHTML(data, designationMap);
+    }
 
     const browser = await puppeteer.launch({
         headless: true,
@@ -184,6 +188,14 @@ async function generatePDF(data) {
 
     }
     else if(data.type_issued.includes("Provisional Certificate")){
+        pdf = await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: { top: "10mm", bottom: "10mm" }
+        });
+
+    }
+    else if(data.type_issued.includes("New Degree")){
         pdf = await page.pdf({
             format: "A4",
             printBackground: true,

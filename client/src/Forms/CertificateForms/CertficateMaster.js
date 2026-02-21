@@ -63,7 +63,7 @@ export default function CertificateForm({}) {
 
 
     const certificateOptions = useMemo(
-        () => ['Degree', 'Provisional Certificate'],
+        () => ['Degree', 'Provisional Certificate', 'New Degree' ],
         []
     );
 
@@ -209,6 +209,10 @@ export default function CertificateForm({}) {
             if (!form.odReceiptDate) return "OD Fee Receipt Date is required";
         }
 
+        if(form.typeIssued?.includes("New Degree") ) {
+            if (!form.studentImage) return "Student Image is required for New Degree certificate";
+        }
+
         return null; // all valid
     };
 
@@ -222,7 +226,7 @@ export default function CertificateForm({}) {
             }
             else{
                 form.draftDate = '';
-                form.odFinalDate = form.typeIssued?.includes("Degree") ? (form.odFinalDate || new Date().toISOString().split('T')[0]) : '';
+                form.odFinalDate = ( form.typeIssued?.includes("Degree") || form.typeIssued?.includes("New Degree") ) ? (form.odFinalDate || new Date().toISOString().split('T')[0]) : '';
                 form.provisionalFinalDate = form.typeIssued?.includes("Provisional Certificate") ? (form.provisionalFinalDate || new Date().toISOString().split('T')[0]) : '';
             }
             // Validate form
@@ -274,7 +278,7 @@ export default function CertificateForm({}) {
                 //     odFinalDate: '', provisionalFinalDate: '', studentImage: null, hall_ticket: '',
                 // });
                 // setShowIssuedCertificates([]);
-                // setShowNotIssuedCertificates([]);
+                // setShowNotIssuedCertificates([]);   
                 // setImagePreview(null);
             } catch (err) {
                 console.error("Upload failed:", err);
@@ -518,7 +522,7 @@ export default function CertificateForm({}) {
                         </Grid>
                     )}
                     {/* 4. OD Fee Paid Checkbox */}
-                    {form.typeIssued?.includes("Degree") && (
+                    {( form.typeIssued?.includes("Degree") || form.typeIssued?.includes("New Degree") ) && (
                         <Grid item size={12}>
                             <div className="checkbox-row" style={{ marginTop: "14px" }}>
                                 <label className="checkbox-item">
@@ -567,7 +571,7 @@ export default function CertificateForm({}) {
                                 value={form.draftDate || new Date().toISOString().split('T')[0]} onChange={handleChange}
                                 InputLabelProps={{ shrink: true }} fullWidth required />
                         </Grid> ) : (<>
-                        {form.typeIssued?.includes("Degree") && (
+                        {(form.typeIssued?.includes("Degree") || form.typeIssued?.includes("New Degree")) && (
                             <Grid item size={6}>
                                 {/* OD Final Date */}
                                 <TextField type="date" label="OD Final Date" name="odFinalDate"
@@ -583,12 +587,13 @@ export default function CertificateForm({}) {
                             </Grid>
                         )}
                     </>)}
-                    {form.typeIssued?.includes("Degree") && (
+                    {(form.typeIssued?.includes("Degree") || form.typeIssued?.includes("New Degree") ) && (
                         <>
                             {/* 27 Upload Image */}
                             <Grid item size={12}>
                                 <input accept="image/*" style={{ display: 'none' }} id="student-image-upload"
-                                    type="file" name="studentImage" onChange={handleChange} loading="lazy"/>
+                                    type="file" name="studentImage" onChange={handleChange} 
+                                    loading="lazy"/>
                                 <label htmlFor="student-image-upload">
                                     <Button variant="contained" component="span" startIcon={<PhotoCamera />} >
                                         Upload Student Image

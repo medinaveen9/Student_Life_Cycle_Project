@@ -224,6 +224,14 @@ const PC_Certificate_Form = async (req, res) => {
         result.academic_section = formData.academic_section;
         result.hall_ticket = formData.hall_ticket;
 
+        // 👇 If image exists, convert to Base64
+        if (studentImage) {
+            const base64Image = studentImage.buffer.toString("base64");
+            result.photoDataURL = `data:${studentImage.mimetype};base64,${base64Image}`;
+        } else {
+            result.photoDataURL = null;
+        }
+
         const pdfBuffer = await generatePDF(result);
 
         res.set({
