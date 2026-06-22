@@ -59,6 +59,49 @@ const getStudentDetails = async (application_no, selectedMonth) => {
 // Insert Stipend details
 const insertStipendDetails = async (data) => {
   try {
+
+const today = new Date();
+const stipendResult = await pool.query(
+  `SELECT stipend
+   FROM course_stipend
+   WHERE course = $1
+     AND year = $2
+     AND (
+       (to_date IS NULL AND from_date <= $3)
+       OR
+       (to_date IS NOT NULL AND from_date <= $3 AND to_date >= $3)
+     )
+   ORDER BY from_date DESC
+   LIMIT 1`,
+  [data.course, data.year, today]
+);
+
+if (stipendResult.rows.length === 0) {
+  throw new Error(`No active stipend found for course "${data.course}", year "${data.year}"`);
+}
+
+const monthlyStipend = Number(stipendResult.rows[0].stipend);
+
+// Validate present days
+const presentDays = parseInt(data.presentAndHolidays, 10);
+if (isNaN(presentDays) || presentDays < 0) {
+  throw new Error("Invalid presentAndHolidays value");
+}
+
+// Get actual days in the month (not always 30)
+const submittedMonth = parseInt(data.cur_month, 10);
+const submittedYear  = parseInt(data.stipend_year, 10) || new Date().getFullYear();
+const daysInMonth    = new Date(submittedYear, submittedMonth, 0).getDate();
+
+// Cap present days — cannot exceed days in month
+const safePresentDays = Math.min(presentDays, daysInMonth);
+
+// Server calculates stipend — client value is ignored
+const calculatedStipend = monthlyStipend;
+const calculatedActualStipend = Math.round(
+  (monthlyStipend * safePresentDays) / daysInMonth
+);
+
     // Determine the role-specific columns
     let column_id = null;
     let column_name = null;
@@ -89,7 +132,10 @@ const insertStipendDetails = async (data) => {
       `;
       await pool.query(query, [
         data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
-        data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
+        data.leavesBalance, data.presentAndHolidays,
+        //  data.stipend, data.actualStipend,
+  calculatedStipend,
+  calculatedActualStipend,
         data.cur_month || null, data.requested_leaves || 0, data.userId || null, data.user_name || null,
         data.ifsc_code || null, data.year || null, data.stipend_year, data.id
       ]);
@@ -111,7 +157,11 @@ const insertStipendDetails = async (data) => {
         WHERE roll_no = $15 AND cur_month = $16`,
         [
           data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
-          data.presentAndHolidays, data.stipend, data.actualStipend, data.requested_leaves || 0,
+          data.presentAndHolidays,
+          //  data.stipend, data.actualStipend,
+           calculatedStipend,
+  calculatedActualStipend,
+            data.requested_leaves || 0,
           data.userId || null, data.user_name || null,
           data.ifsc_code, data.year, data.stipend_year, data.rollNo, data.cur_month
         ]
@@ -141,7 +191,10 @@ const insertStipendDetails = async (data) => {
 
     await pool.query(query, [
       data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
-      data.leavesBalance, data.presentAndHolidays, data.stipend, data.actualStipend,
+      data.leavesBalance, data.presentAndHolidays, 
+      // data.stipend, data.actualStipend,
+    calculatedStipend,
+  calculatedActualStipend,   
       data.cur_month || null, data.requested_leaves || 0,
       data.userId || null, data.user_name || null,
       data.ifsc_code, data.year, data.stipend_year,
@@ -643,51 +696,165 @@ const deleteStudentStipendById = async (id) => {
   }
 };
 
-// Update leaves and present days in stipend_details
-const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, stipend, is_status_changed }) => {
-  try {
-    // 1. Check record exists
-    const { rowCount } = await pool.query(
-      "SELECT 1 FROM stipend_details WHERE id = $1", [id] );
 
-    if (!rowCount) {
+const updateLeavesAndPresent = async ({ id, leaves, present, userInfo, status, is_status_changed }) => {
+  // stipend intentionally NOT accepted from client
+  // server calculates it from course_stipend table
+  try {
+
+    // STEP 1 — Fetch existing record from DB
+    const existing = await pool.query(
+      "SELECT * FROM stipend_details WHERE id = $1",
+      [id]
+    );
+    if (!existing.rowCount) {
       throw new Error("Record not found");
     }
+    const record = existing.rows[0];
 
-    // 2. Update record
-    const { rows } = await pool.query(
-      `
-      UPDATE stipend_details
-      SET 
-        leaves = COALESCE($1, leaves),
-        present = COALESCE($2, present),
-        checker_id = $3,
-        checker_name = $4,
-        student_status = COALESCE($5, student_status),
-        stipend = COALESCE($6, stipend)
-      WHERE id = $7
-      RETURNING *
-      `,
-      [
-        leaves, present, userInfo?.userId ?? null, userInfo?.user_name ?? null, status, stipend, id
-      ]
+    // STEP 2 — Validate inputs
+    const leavesNum  = parseInt(leaves, 10);
+    const presentNum = parseInt(present, 10);
+    if (isNaN(leavesNum) || leavesNum < 0) {
+      throw new Error("Invalid leaves value");
+    }
+    if (isNaN(presentNum) || presentNum < 0) {
+      throw new Error("Invalid present days value");
+    }
+
+    // STEP 3 — Fetch monthly stipend from course_stipend table
+    // client value completely ignored
+    const today = new Date();
+    const stipendRes = await pool.query(
+      `SELECT stipend
+       FROM course_stipend
+       WHERE course = $1
+         AND year = $2
+         AND (
+           (to_date IS NULL AND from_date <= $3)
+           OR
+           (to_date IS NOT NULL AND from_date <= $3 AND to_date >= $3)
+         )
+       ORDER BY from_date DESC
+       LIMIT 1`,
+      [record.course, record.year, today]
     );
-
-    if(is_status_changed && rows.length > 0) {
-      const roll_no = rows[0].roll_no;
-      // Fetch current leaves_used and total leaves from students table
-      const studentRes = await pool.query(
-        `update students set student_status = $1 where roll_no = $2`,
-        [status, roll_no]
+    if (stipendRes.rows.length === 0) {
+      throw new Error(
+        `No active stipend found for course "${record.course}", year "${record.year}"`
       );
     }
+    const monthlyStipend = Number(stipendRes.rows[0].stipend);
+
+    // STEP 4 — Get actual days in the record's month
+    // cur_month is 1-based (1=Jan, 10=Oct, 12=Dec)
+    // new Date(year, month, 0) gives last day of that month
+    // Example: new Date(2026, 6, 0) → June = 30 days ✅
+    //          new Date(2026, 1, 0) → January = 31 days ✅
+    //          new Date(2026, 10, 0) → October = 31 days ✅
+    const recordMonth = parseInt(record.cur_month, 10);
+    const recordYear  = record.stipend_year
+      ? parseInt(record.stipend_year, 10)
+      : new Date().getFullYear();
+    const daysInMonth = new Date(recordYear, recordMonth, 0).getDate();
+
+    // STEP 5 — Cap present days (cannot exceed days in month)
+    const safePresentDays = Math.min(presentNum, daysInMonth);
+
+    // STEP 6 — Calculate stipend based on status
+    // Regular / Re-admission → prorated stipend
+    // Long Absent / Discontinue → zero stipend
+    let recalculatedMonthly = monthlyStipend;
+    let recalculatedActual  = 0;
+    const isActiveStatus = status === "Regular" || status === "Re-admission";
+    if (isActiveStatus) {
+      recalculatedActual = Math.round(
+        (monthlyStipend * safePresentDays) / daysInMonth
+      );
+    } else {
+      recalculatedMonthly = 0;
+      recalculatedActual  = 0;
+    }
+
+    // STEP 7 — Save old values for audit log
+    const oldStipend       = Number(record.stipend);
+    const oldActualStipend = Number(record.actual_stipend);
+    const oldStatus        = record.student_status;
+
+    // STEP 8 — Update stipend_details in DB
+    const { rows } = await pool.query(
+      `UPDATE stipend_details
+       SET
+         leaves         = $1,
+         present        = $2,
+         checker_id     = $3,
+         checker_name   = $4,
+         student_status = $5,
+         stipend        = $6,
+         actual_stipend = $7
+       WHERE id = $8
+       RETURNING *`,
+      [
+        leavesNum,
+        safePresentDays,
+        userInfo?.userId    ?? null,
+        userInfo?.user_name ?? null,
+        status,
+        recalculatedMonthly,
+        recalculatedActual,
+        id
+      ]
+    );
+    if (rows.length === 0) {
+      throw new Error("Update failed — record not found");
+    }
+
+    // STEP 9 — If student status changed update students table
+    if (is_status_changed && rows.length > 0) {
+      await pool.query(
+        "UPDATE students SET student_status = $1 WHERE roll_no = $2",
+        [status, record.roll_no]
+      );
+    }
+
+    // STEP 10 — Audit log (only if something actually changed)
+    const somethingChanged =
+      oldStipend       !== recalculatedMonthly ||
+      oldActualStipend !== recalculatedActual  ||
+      oldStatus        !== status;
+
+    if (somethingChanged) {
+      await pool.query(
+        `INSERT INTO stipend_audit_log
+           (roll_no, action,
+            old_stipend, new_stipend,
+            old_actual_stipend, new_actual_stipend,
+            old_status, new_status,
+            changed_by_id, changed_by_name,
+            changed_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())`,
+        [
+          record.roll_no,
+          "UPDATE_LEAVES_PRESENT",
+          oldStipend,
+          recalculatedMonthly,
+          oldActualStipend,
+          recalculatedActual,
+          oldStatus,
+          status,
+          userInfo?.userId    ?? null,
+          userInfo?.user_name ?? null
+        ]
+      );
+    }
+
     return rows[0];
+
   } catch (error) {
-      console.error("Error updating leaves and present:", error);
-      throw error; // let controller handle response
+    console.error("Error updating leaves and present:", error.message);
+    throw error;
   }
 };
-
 
 
 module.exports = { getStudentDetails, insertStipendDetails, fetchAllStipends, autoFillStipendData, 

@@ -1,3 +1,4 @@
+
 const { userAuthentication, changePasswordService, forgotPasswordService , resetPasswordService,
   registerUserService
    } = require("../services/LoginService");
@@ -43,7 +44,9 @@ const userLogout = async (req, res) => {
 //Change password
 const changePassword = async (req, res) => {
   try {
-    const { userId, oldPassword, newPassword } = req.body;
+    //added 162 ,163
+ const {  oldPassword, newPassword } = req.body;
+const userId = req.user.userId;
 
     if (!userId || !oldPassword || !newPassword)
       return res.status(400).json({ success: false, message: "All fields required" });

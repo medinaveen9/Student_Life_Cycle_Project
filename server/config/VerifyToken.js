@@ -1,3 +1,4 @@
+
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -8,6 +9,7 @@ const createToken = (payload) => {
 };
 
 const verifyToken = (req, res, next) => {
+  
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
@@ -20,4 +22,26 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { createToken, verifyToken };
+// middleware/authorizeRole.js
+
+const authorizeRole = (...roles) => {
+  return (req, res, next) => {
+
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "Access Denied"
+      });
+    }
+
+    next();
+  };
+};
+
+
+module.exports = { createToken, verifyToken ,authorizeRole};

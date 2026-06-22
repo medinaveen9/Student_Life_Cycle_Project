@@ -151,8 +151,8 @@ const getCertificatesDashboard = async (req, res) => {
 const updateStatus = async (req, res) => {
     try {
         const { request_id, certificate_id, status, answers } = req.body;
-        const user = req.user || req.body.user;
-
+        // const user = req.user || req.body.user;
+      const user = req.user;
         // use null/undefined checks so values like false or 0 are accepted
         if (request_id == null || certificate_id == null || status == null) {
             return res.status(400).json({ error: "Missing required fields!" });

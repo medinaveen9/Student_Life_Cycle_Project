@@ -507,7 +507,7 @@ const StipendTable = ({ setEditableData, user }) => {
                         : row.leaves}
                     </td>
                     <td className="border px-2 py-1">{row.present}</td>
-                    <td className="border px-2 py-1">{row.stipend}</td>
+                    <td className="border px-2 py-1">{row.actual_stipend}</td>
                     <td className="border px-2 py-1">
                       <button className="text-blue-600 hover:text-blue-800" onClick={() => handleRowEdit(row)}>
                         <FaEdit />
@@ -596,7 +596,7 @@ const StipendTable = ({ setEditableData, user }) => {
               <div><strong>Account No:</strong> {selectedRow.account_no}</div>
               <div><strong>Leaves:</strong> {selectedRow.leaves}</div>
               <div><strong>Present Days:</strong> {selectedRow.present || "N/A"}</div>
-              <div><strong>Stipend:</strong> {selectedRow.stipend || "N/A"}</div>
+              <div><strong>Stipend:</strong> {selectedRow.actual_stipend || "N/A"}</div>
               
               <div><strong>Verifier ID:</strong> {selectedRow.verifier_id || "N/A"}</div>
               <div><strong>Verifier Name:</strong> {selectedRow.verifier_name || "N/A"}</div>

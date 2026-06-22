@@ -27,16 +27,25 @@ const getStudentInfo = async (req, res) => {
 const submitStipend = async (req, res) => {
   try {
     const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, requested_leaves,  
-      stipend, actualStipend, cur_month, ifsc_code, year, total_leaves, available_leaves, stipend_year} = req.body;
-    const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
+    //  calculatedStipend,
+    //  calculatedActualStipend,
+      // stipend, actualStipend, 
+      cur_month, ifsc_code, year, total_leaves, available_leaves, stipend_year} = req.body;
+    // const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
+    //added 2 lines below to get id, isEdit and isModified from query parameters for edit functionality
+  const { id, isEdit, isModified } = req.query;
+    const { userId, role: userRole, user_name } = req.user;
 
     if (!rollNo || !name || !course || !accountNo || !joiningDate) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
     await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year, requested_leaves,
-      rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, stipend, 
-      actualStipend, total_leaves, available_leaves, isModified, stipend_year});
+      rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays,
+      //  stipend, 
+      // actualStipend, 
+      // calculatedStipend, calculatedActualStipend,
+      total_leaves, available_leaves, isModified, stipend_year});
     return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
   } catch (err) {
     console.error('Error submitting stipend:', err.message);
@@ -46,13 +55,26 @@ const submitStipend = async (req, res) => {
 
 const getAllStipends = async (req, res) => {
   try {
-    const role = req.query.role; // e.g., 'Checker', 'Verifier', 'Approver'
+    // const role = req.query.role; // e.g., 'Checker', 'Verifier', 'Approver'
+    //added just user
+      const role = req.user.role;
     const month = req.query.month; // e.g., '2023-09'
     const {course, year, roll_no, stipend_year} = req.query;
     const data = await fetchAllStipends(role, month, course, year, roll_no, stipend_year); // call service
-    res.json({ success: true, data });
+
+    // Mask account numbers
+    const maskedData = data.map(row => ({
+      ...row,
+      account_no: row.account_no
+        ? row.account_no
+            .toString()
+            .slice(-4)
+            .padStart(row.account_no.toString().length, "*")
+        : null
+    }));
+    res.json({ success: true, data: maskedData });
   } catch (error) {
-    console.error('Error fetching stipends in controller:', err.message);
+    console.error('Error fetching stipends in controller:', error.message);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 };
@@ -79,7 +101,12 @@ const stipendApprovalController = async (req, res) => {
 
 const stipendBulkApprovalController = async (req, res) => {
   try {
-    const { ids, role, userInfo } = req.body;
+    // const { ids, role, userInfo } = req.body;
+    //added 411,412,413
+      const { ids } = req.body;
+    const role = req.user.role;
+    const userInfo = req.user;
+
     const status = 'approved'; 
     
     const isUpdated = await stipendBulkApproval(ids, status, role, userInfo);
@@ -98,7 +125,8 @@ const stipendBulkApprovalController = async (req, res) => {
 const addCourseStipendController = async (req, res) => {
   try {
     const data = req.body;
-    const {userId, user_name} = req.query;
+    //added user last
+    const { userId, user_name } = req.user;
     data.userId = userId;
     data.user_name = user_name;
     const result = await addCourseStipend(data);
@@ -124,7 +152,10 @@ const addOrUpdateStudentLeave = async (req, res) => {
 
 const autoFillStipends = async (req, res) => {
   try {
-    const { course, month, userId, user_name, stipend_year } = req.query;
+    // const { course, month, userId, user_name, stipend_year } = req.query;
+    //added 463,464
+ const { course, month, stipend_year } = req.query;
+    const { userId, user_name } = req.user;
 
     if (!course) {
       return res.status(400).json({ success: false, error: "Course is required" });

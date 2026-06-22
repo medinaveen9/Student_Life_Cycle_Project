@@ -5,22 +5,30 @@ require('dotenv').config();
 const  {MongoClient} = require('mongodb');
 
 
+const pool = new Pool({
+  user: "neondb_owner",
+  host: "ep-floral-recipe-adwtj77g-pooler.c-2.us-east-1.aws.neon.tech",
+  database: "Student_LifeCycle",
+  password: "npg_riZ7A8BKwXuY",
+  port: 5432,
+  ssl: { require: true, rejectUnauthorized: false }
+});
+
 // const pool = new Pool({
-//   user: "neondb_owner",
-//   host: "ep-floral-recipe-adwtj77g-pooler.c-2.us-east-1.aws.neon.tech",
-//   database: "Student_LifeCycle",
-//   password: "npg_riZ7A8BKwXuY",
+//   host: '172.26.0.50',
+//   user: 'postgres',
+//   password: 'postgres',
 //   port: 5432,
-//   ssl: { require: true, rejectUnauthorized: false }
+//   database: 'Student_LifeCycle'
 // });
 
-const pool = new Pool({
-    user: "postgres",          // default user
-    host: "localhost",         // local db
-    database: "Student_LifeCycle",  // database you created
-    password: "postgres", // the password you set
-    port: 5432
-});
+// const pool = new Pool({
+//     user: "postgres",          // default user
+//     host: "localhost",         // local db
+//     database: "Student_LifeCycle",  // database you created
+//     password: "postgres", // the password you set
+//     port: 5432
+// });
 
 let client;
 let isConnected = false;

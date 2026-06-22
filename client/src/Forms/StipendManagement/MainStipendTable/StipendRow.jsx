@@ -121,7 +121,7 @@ const StipendRow = (
                             </td>
                             )
                         }
-                        <td className="border px-2 py-1">{row.stipend}</td>
+                        <td className="border px-2 py-1">{row.actual_stipend}</td>
                         <td className="border px-2 py-1">
                             <button
                                 disabled={row.payment_status === "approved"}

@@ -1,3 +1,5 @@
+
+
 const puppeteer = require('puppeteer');
 const path = require("path");
 const {numberToWords, formatYear} = require("../config/Utils");
@@ -9,7 +11,10 @@ const {fetchAllStipends} = require("../services/StipendService");
 const generateReport = async (req, res) => {
   try {
     const { currentMonth, year, batch, course, user, selectStipendYear } = req.body;
-    const { role, month, roll_no} = req.query;
+   //removed role and added 381
+    const { month, roll_no} = req.query;
+    const role = req.user.role;
+
     const selectedCourse = req.query.course;
     const studentYear = req.query.year;
     const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no, selectStipendYear); // call service
@@ -51,7 +56,7 @@ const generateReport = async (req, res) => {
 
     // ✅ Calculate total amount
     const totalAmount = data.reduce(
-      (sum, row) => sum + (parseInt(row.stipend) || 0),
+      (sum, row) => sum + (parseInt(row.actual_stipend) || 0),
       0
     );
 
@@ -115,11 +120,11 @@ const generateReport = async (req, res) => {
               ? `<td colspan="2" style="text-align:center;font-weight:600;">
                   ${row.student_status}
                 </td>
-                <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>`
+                <td>${row.actual_stipend?.toLocaleString("en-IN") || ""}</td>`
               : `
                 <td>${row.present}</td>
                 <td>${row.leaves}</td>
-                <td>${row.stipend?.toLocaleString("en-IN") || ""}</td>
+                <td>${row.actual_stipend?.toLocaleString("en-IN") || ""}</td>
               `
           }
         </tr>
@@ -337,7 +342,9 @@ const generateReport = async (req, res) => {
 
 const downloadExcel = async (req, res) => {
   try {
-    const { role, month, roll_no, stipend_year} = req.query;
+    const { month, roll_no, stipend_year} = req.query;
+    //added role 712
+    const role = req.user.role;
     const selectedCourse = req.query.course;
     const studentYear = req.query.year;
     const data = await fetchAllStipends(role, month, selectedCourse, studentYear, roll_no, stipend_year); // call service

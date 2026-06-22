@@ -18,7 +18,9 @@ exports.streamFile = async (req, res) => {
       bucket = new GridFSBucket(db, { bucketName: "certificate_uploads" });
       fileDoc = await db
         .collection("certificate_uploads.files")
-        .findOne({ "metadata.form_id": formId }); 
+        .findOne({ "metadata.form_id": formId ,
+              // "metadata.userId": req.user.userId
+        }); 
     }
 
     if (!fileDoc) {

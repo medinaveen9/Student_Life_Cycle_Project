@@ -56,7 +56,9 @@ const StipendTable = ({ setEditableData, user }) => {
         try {
             setDataLoaded(true);
             const response = await axiosInstance.get("/api/stipend/stipend_details", {
-                params: { role: user.role, month: currentMonth, course : course, 
+                params: { 
+                    // role: user.role,
+                     month: currentMonth, course : course, 
                     year : year, roll_no : rollNo || "", stipend_year : selectStipendYear  },
             });
             const result = response.data;
@@ -142,7 +144,9 @@ const StipendTable = ({ setEditableData, user }) => {
         try {
             setLoading(true);
             const response = await axiosInstance.delete("/api/stipend/delete_student_stipend", {
-            params: { id: row.id, userInfo : user },
+            params: { id: row.id, 
+                // userInfo : user
+             },
             });
             const result = response.data;
             if (result.success) {
@@ -173,7 +177,9 @@ const StipendTable = ({ setEditableData, user }) => {
         if (selected.length === 0) return;
         try{
         const result = await axiosInstance.post("/api/stipend/bulk_approval", {
-            ids: selected, role: user.role, userInfo : user
+            ids: selected,
+            //  role: user.role, 
+            //  userInfo : user
         });
         if(result.data.success){
             alert("Stipends approved successfully");
@@ -205,7 +211,9 @@ const StipendTable = ({ setEditableData, user }) => {
         try {
         setLoading(true);
         const response = await axiosInstance.get("/api/stipend/action_status", {
-            params: { id: selectedItem.id, status : status, role : user.role, userInfo : user },
+            params: { id: selectedItem.id, status : status,
+                //  role : user.role, userInfo : user 
+                },
         });
         const result = response.data;
         if (result.success) {
@@ -410,6 +418,8 @@ const StipendTable = ({ setEditableData, user }) => {
             setEditStatus={setEditStatus}
             data ={data}
             setData={setData}
+             fetchStipends={fetchStipends}
+
         />
 
         </React.Fragment>

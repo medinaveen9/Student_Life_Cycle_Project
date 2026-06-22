@@ -6,7 +6,7 @@ import axiosInstance from "../../../components/AxiosInstance";
 
 const StipendDialogs = ({ 
     open, setOpen, showModal, setShowModal, selectedRow, handleApprovalSubmit, loading, 
-    editOpen, setEditOpen, editRowData, editLeaves, setEditLeaves, editStatus, setEditStatus, data, setData
+    editOpen, setEditOpen, editRowData, editLeaves, setEditLeaves, editStatus, setEditStatus, data, setData,fetchStipends
      
     }) => {
 
@@ -28,8 +28,9 @@ const StipendDialogs = ({
             alert("Status can be changed to Re-admission only when student is Long Absent.");
             return;
         }
-        // Reset leaves if status is not Regular
-        if (value !== "Regular" || value !== "Re-admission") {
+        // Reset leaves if status is not Regular just added &&
+        // if (value !== "Regular" || value !== "Re-admission") {
+           if (value !== "Regular" && value !== "Re-admission") {
             setEditLeaves(totalDays);
         }
         else {
@@ -42,28 +43,13 @@ const StipendDialogs = ({
         const handleLeavesUpdate = async () => {
             const leavesNum = Number(editLeaves);
             const presentNum = Number(presentDays);
-            const totalDaysNum = Number(totalDays);
-            const actualStipendNum = Number(editRowData?.actual_stipend || 0);
-
-            if (Number(editRowData.leaves) === leavesNum && editStatus === editRowData.student_status) {
-                alert("No changes made to leaves.");
-                return;
-            }
-
-            let calculatedStipend = 0;
-
-            if ((editStatus === "Regular" || editStatus === "Re-admission" ) && totalDaysNum > 0) {
-                const perDayStipend = actualStipendNum / totalDaysNum;
-                const calStipend = perDayStipend * presentNum;
-
-                const roundedStipend =
-                    calStipend % 1 < 0.5
-                    ? Math.floor(calStipend)
-                    : Math.ceil(calStipend);
-
-                calculatedStipend = roundedStipend;
-            }
-
+   
+     // No changes made check
+        if (Number(editRowData.leaves) === leavesNum && 
+            editStatus === editRowData.student_status) {
+            alert("No changes made to leaves.");
+            return;
+        }
             try {
                 setLeavesEditLoading(true);
 
@@ -74,7 +60,7 @@ const StipendDialogs = ({
                     leaves: leavesNum,
                     present: presentNum,
                     status: editStatus,
-                    stipend: calculatedStipend,
+                    // stipend: calculatedStipend,
                     is_status_changed: editRowData.student_status !== editStatus
                 }
                 );
@@ -89,7 +75,7 @@ const StipendDialogs = ({
                             ...item,
                             leaves: leavesNum,
                             present: presentNum,
-                            stipend: calculatedStipend,
+                            // stipend: calculatedStipend,
                             student_status: editStatus
                         }
                         : item
@@ -102,6 +88,7 @@ const StipendDialogs = ({
                 console.error("Error updating leaves:", err);
             } finally {
                 setLeavesEditLoading(false);
+                  await fetchStipends();
                 setEditOpen(false);
             }
         };
@@ -131,7 +118,7 @@ const StipendDialogs = ({
                 <div><strong>Account No:</strong> {selectedRow.account_no}</div>
                 <div><strong>Leaves:</strong> {selectedRow.leaves}</div>
                 <div><strong>Present Days:</strong> {selectedRow.present || "N/A"}</div>
-                <div><strong>Stipend:</strong> {selectedRow.stipend || "N/A"}</div>
+                <div><strong>Stipend:</strong> {selectedRow.actual_stipend || "N/A"}</div>
                 <div><strong>Verifier ID:</strong> {selectedRow.verifier_id || "N/A"}</div>
                 <div><strong>Verifier Name:</strong> {selectedRow.verifier_name || "N/A"}</div>
                 <div><strong>Verifier Status:</strong> {selectedRow.verifier_status || "N/A"}</div>

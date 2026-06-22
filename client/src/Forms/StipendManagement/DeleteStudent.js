@@ -23,8 +23,8 @@ const DeleteStudent = () => {
       setStudent(null); // 🔥 Reset old data
 
       const res = await axiosInstance.get("/api/certificates/student_info", {
-                          params: { roll_no: rollNo },
-                      });
+             params: { roll_no: rollNo },
+           });
 
         // If res.data is an array, pick the first element
         if (Array.isArray(res.data) && res.data.length > 0) {
@@ -44,19 +44,33 @@ const DeleteStudent = () => {
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
-  //  Delete student
-  const handleDelete = async () => {
-    try {
-      axiosInstance.delete(`/api/stipend/delete-student/${rollNo}`);
+const handleDelete = async () => {
+  try {
+    const response = await axiosInstance.delete(
+      `/api/stipend/delete-student/${rollNo}`
+    );
+
+    if (response.status === 200) {
       alert("Student deleted successfully");
       setStudent(null);
       setRollNo("");
       handleCloseDialog();
-    } catch (err) {
+    }
+
+  } catch (err) {
+
+    if (err.response?.status === 403) {
+      alert("Access Denied");
+    }
+    else if (err.response?.status === 401) {
+      alert("Unauthorized");
+    }
+    else {
       alert(err.response?.data?.message || "Delete failed");
     }
-  };
 
+  }
+};
   return (
     <form className="study-main" onSubmit={handleSearch}>
       <div className="sub-study-main">Delete Student</div>

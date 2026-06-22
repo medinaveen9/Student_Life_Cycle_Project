@@ -6,6 +6,7 @@ const { getAllUploadedFiles, streamFile } = require("../controllers/UploadsContr
 // const verifyToken = require("../middleware/auth"); // uncomment when you have token middleware
 const {administration, personal, contact, education, payment, getCourseName,
   fetchAdministration,fetchPersonal, employeeRoleController, fetchStudentInfo  } = require("../controllers/MasterController");
+const { verifyToken ,authorizeRole} = require('../config/VerifyToken');
 
 const uri = process.env.MONGO_URI;
 
@@ -20,7 +21,7 @@ router.get("/course_name", getCourseName);
 
 router.get("/administrative_information",fetchAdministration);
 router.get("/personal_information", fetchPersonal);
-router.post("/employee_role", employeeRoleController);
+router.post("/employee_role", verifyToken, authorizeRole("Dean"),employeeRoleController);
 
 router.get("/student_info", fetchStudentInfo);
 

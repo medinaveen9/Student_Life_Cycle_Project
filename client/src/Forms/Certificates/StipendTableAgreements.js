@@ -99,7 +99,7 @@ const StipendTableAgreements = () => {
               <td className="border px-2 py-1">{row.leaveWithoutPermission}</td>
               <td className="border px-2 py-1">{row.holidays}</td>
               <td className="border px-2 py-1">{row.totalPresent}</td>
-              <td className="border px-2 py-1">{row.stipend}</td>
+              <td className="border px-2 py-1">{row.actual_stipend}</td>
                <td className="border px-2 py-1">{row.status}</td>
             </tr>
           ))}

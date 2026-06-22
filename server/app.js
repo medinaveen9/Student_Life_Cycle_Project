@@ -1,4 +1,5 @@
 const express = require('express');
+const helmet = require('helmet');
 const cors = require('cors');
 require('dotenv').config(); 
 const cookieParser = require('cookie-parser');
@@ -16,6 +17,36 @@ const fileRoutes = require('./routes/FileRoutes');
 const reportRoutes = require('./routes/ReportRoute');
 
 const app = express();
+app.set('trust proxy', 1); // ← add this line immediately after
+app.disable('x-powered-by');
+
+app.use(helmet());
+app.use((req, res, next) => {
+
+    res.setHeader("X-Frame-Options", "DENY");
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+
+    res.setHeader(
+        "Permissions-Policy",
+        "camera=(), microphone=(), geolocation=()"
+    );
+
+    res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, private"
+    );
+
+    res.setHeader(
+        "Pragma",
+        "no-cache"
+    );
+   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none';");
+    next();
+
+});
+
 
 app.use(cookieParser());
 // Middleware

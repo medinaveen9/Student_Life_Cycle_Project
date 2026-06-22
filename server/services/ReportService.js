@@ -31,7 +31,7 @@ const generateExcel = async ({ data, currentMonth, year, user }) => {
     // Add rows
     let totalAmount = 0;
     data.forEach((row, idx) => {
-        const stipendAmount = Number(row.stipend || 0);
+        const stipendAmount = Number(row.actual_stipend || 0);
         totalAmount += stipendAmount;
 
         worksheet.addRow({
