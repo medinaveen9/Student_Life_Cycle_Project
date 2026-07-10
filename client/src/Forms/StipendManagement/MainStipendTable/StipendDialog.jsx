@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Table, TableBody,
     TableRow, TableCell, TextField, FormControl, Select, MenuItem } from "@mui/material";
 import axiosInstance from "../../../components/AxiosInstance";
-
+import { encrypt } from "../../../utils/Crypto"
 
 const StipendDialogs = ({ 
     open, setOpen, showModal, setShowModal, selectedRow, handleApprovalSubmit, loading, 
@@ -57,9 +57,9 @@ const StipendDialogs = ({
                 "/api/stipend/update_leaves_present",
                 {
                     id: editRowData.id,
-                    leaves: leavesNum,
-                    present: presentNum,
-                    status: editStatus,
+                    leaves: encrypt(leavesNum),
+                    present: encrypt(presentNum),
+                    status: encrypt(editStatus),
                     // stipend: calculatedStipend,
                     is_status_changed: editRowData.student_status !== editStatus
                 }

@@ -59,10 +59,17 @@ const LoginForm = ({ setUser, setSidebarOpen}) => {
       setUser(res.data.user);
       setSidebarOpen(true);
       navigate("/");
-    } catch (err) {
-      console.error("Auth Error:", err.response?.data?.message || err);
-      setError(err.response?.data?.message || "Something went wrong");
-    } finally {
+    // } catch (err) {
+    //   console.error("Auth Error:", err.response?.data?.message || err);
+    //   setError(err.response?.data?.message || "Something went wrong");
+    // } 
+     } catch (err) {
+  console.error("Auth Error:", err.response?.data || err);
+
+  setError(
+   err.response?.data?.message ||  err.response?.data?.error ||"Something went wrong");
+}
+    finally {
       setLoading(false);
     }
   };

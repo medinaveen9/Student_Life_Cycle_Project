@@ -34,7 +34,7 @@ const Sidebar = ({user, selectedCourse, open, onClose}) => {
   };
 
   return (
-    <Drawer variant="temporary" // temporary for mobile
+    <Drawer variant="permanent" // temporary for mobile
       open={open} onClose={onClose} ModalProps={{ keepMounted: true }} className = "custom-drawer">
       <Box sx={{ overflow: 'auto' }}>
         <List>

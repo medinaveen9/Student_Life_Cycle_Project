@@ -30,10 +30,24 @@ const verifyUser = async (req, res) => {
 };
 
 // Controller for user logout
+// const userLogout = async (req, res) => {
+//     try {
+//         // Clear the cookie (e.g., "token")
+//         res.clearCookie('token', { httpOnly: true,  secure: true, sameSite: 'Strict',  });
+//         return res.status(200).json({ message: 'Logout successful' });
+//     } catch (error) {
+//         console.error('Logout Error:', error);
+//         return res.status(500).json({ message: 'Something went wrong during logout' });
+//     }
+// };
 const userLogout = async (req, res) => {
     try {
-        // Clear the cookie (e.g., "token")
-        res.clearCookie('token', { httpOnly: true,  secure: true, sameSite: 'Strict',  });
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax'
+        });
+
         return res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         console.error('Logout Error:', error);

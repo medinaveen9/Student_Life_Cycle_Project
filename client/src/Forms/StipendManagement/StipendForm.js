@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../components/AxiosInstance';
+import { encrypt, decrypt } from "../../utils/Crypto";
 import {Box, Button, CircularProgress } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -123,9 +124,11 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     // 2️⃣ CURRENT MONTH CHANGE
     // ------------------------------
     if (name === "cur_month") {
+      
       try {
         const res = await axiosInstance.get(`/api/stipend/student`, {
-          params: { application_no: formData.rollNo, selectedMonth : value },
+          params: {   application_no: encrypt(formData.rollNo),
+    selectedMonth: encrypt(value), },
         });
 
         if (res.status === 200 && res.data) {
@@ -191,14 +194,13 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
   setFormData((prev) => ({ ...prev, [name]: value }));
 };
 
-
   // Handle Delete Stipend Records
   const handleDeleteStipend = async () => {
     try {
       setDeleteLoading(true);
 
       const res = await axiosInstance.post(`/api/stipend/delete`, null, {
-        params: { course: selectedCourse, month: selectedMonth, stipend_year : selectStipendYear },
+        params: { course: encrypt(selectedCourse), month: encrypt(selectedMonth), stipend_year : encrypt(selectStipendYear) },
       });
 
       if (res.data.success) {
@@ -221,8 +223,8 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
 
         // Example API call (GET request with course in query)
         const res = await axiosInstance.post(`/api/stipend/auto-fill`, null, {
-            params: { course: selectedCourse, month: selectedMonth, userId : user.userId,
-                 userRole : user.role, user_name : user.user_name, stipend_year : selectStipendYear
+            params: { course:encrypt (selectedCourse), month: encrypt(selectedMonth), userId : user.userId,
+                 userRole : user.role, user_name : user.user_name, stipend_year : encrypt(selectStipendYear)
             },
         });
 
@@ -245,24 +247,28 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
       e.preventDefault();
       setFormData((prev) => ({ ...prev, 
           name: '', course: '', accountNo: '', joiningDate: '', leavesBalance: '',
-          presentAndHolidays: '', stipend: '', actualStipend: '', ifsc_code : "", year : "" }));
+          presentAndHolidays: '',  stipend: '', actualStipend: '', ifsc_code : "", year : "" }));
+
       if (!formData.rollNo || loading) return; // prevent multiple requests
       setLoading(true); // disable inputs
       try {
         const res = await axiosInstance.get(`/api/stipend/student`, {
-          params: { application_no: formData.rollNo, selectedMonth : formData.cur_month  },
+          params: { application_no: encrypt(formData.rollNo), selectedMonth : encrypt(formData.cur_month)  },
         });
 
         if (res.status === 200 && res.data) {
           const data = res.data.data;
           setFormData((prev) => ({
             ...prev,
-            name: data.name || '',
-            course: data.course || '',
-            accountNo: data.account_no || '',
-            joiningDate: data.doj   ?new Date(data.doj).toISOString().split('T')[0] : '',
-            ifsc_code : data.ifsc_code,
-            year : data.year,
+            name:decrypt( data.name || ''),
+            course: decrypt(data.course || ''),
+            rollNo: decrypt(data.roll_no),
+            accountNo: decrypt(data.account_no),
+            ifsc_code: decrypt(data.ifsc_code),
+            year : decrypt(data.year),    
+            joiningDate: decrypt(data.doj)   ?new Date(decrypt(data.doj)).toISOString().split('T')[0] : '',
+            // ifsc_code : data.ifsc_code,
+         
             available_leaves : data.leaves - data.leaves_used
           }));
           setStudentData(data);
@@ -275,7 +281,10 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
         alert('Student not found');
         setFormData({
           rollNo: '', name: '', course: '', accountNo: '', joiningDate: '', cur_month : new Date().getMonth() + 1,
-          leavesBalance: '', presentAndHolidays: '', stipend: '', actualStipend: '', ifsc_code : "", year : ""
+          leavesBalance: '', presentAndHolidays: '',
+           stipend: '', 
+          actualStipend: '', 
+          ifsc_code : "", year : ""
         });
         setIsFormDisabled(true);
       }  finally {
@@ -289,10 +298,29 @@ const StipendForm = ({ editableData, user, setEditableData }) => {
     if (submitting) return; // prevent double submit
     setSubmitting(true);
     try {
-      formData.total_leaves = studentData.leaves;
-      const res = await axiosInstance.post("/api/stipend/submit", formData, {
-        params: { id: uniqueID, isEdit, userId : user.userId, userRole : user.role, 
-          user_name : user.user_name, isModified : isModified  },
+
+    formData.total_leaves = studentData.leaves;
+   
+    const payload = {
+  
+      rollNo: encrypt(formData.rollNo),
+      available_leaves: formData.available_leaves,
+      leavesBalance: encrypt(formData.leavesBalance),
+      presentAndHolidays:encrypt( formData.presentAndHolidays),
+      requested_leaves: encrypt(formData.requested_leaves),
+      cur_month: encrypt(formData.cur_month),
+      stipend_year: encrypt(formData.stipend_year),
+  
+   };
+
+    const res = await axiosInstance.post("/api/stipend/submit", payload, {
+  
+        params: { 
+          id: uniqueID,  isEdit: encrypt(isEdit),
+   
+        //   userId : user.userId, userRole : user.role, 
+        // user_name : user.user_name,
+         isModified: encrypt(isModified) },
       });
       alert(res.data.message || "Stipend submitted successfully");
       setFormData({

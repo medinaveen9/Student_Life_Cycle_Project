@@ -1,6 +1,6 @@
 const { getStipendCollection } = require('../models/db');
 const {pool} =require("../models/db");
-
+const { encrypt } = require("../config/Crypto");
 exports.createStipend = async (data) => {
   const collection = getStipendCollection();
   
@@ -38,7 +38,7 @@ const getStudentDetails = async (application_no, selectedMonth) => {
       [student.course, student.year, todayDate]
     );
 
-    student.actualStipend = stipendResult.rows[0]?.stipend || 0;
+    // student.actualStipend = stipendResult.rows[0]?.stipend || 0;
     const stipendHistoryResult = await pool.query(
       `SELECT * FROM stipend_details
        WHERE roll_no = $1 AND year = $2 AND cur_month = $3
@@ -49,7 +49,24 @@ const getStudentDetails = async (application_no, selectedMonth) => {
       let requested_leaves = stipendHistoryResult.rows[0].requested_leaves;
       student.leaves_used -= requested_leaves;
     }
-    return student;
+    return {
+      ...student,
+
+  // Encrypt only sensitive fields
+  account_no: encrypt(student.account_no),
+  ifsc_code: encrypt(student.ifsc_code),
+  mobile_number: encrypt(student.mobile_number),
+  course: encrypt(student.course),
+  name: encrypt(student.name),
+  student_status: encrypt(student.student_status),
+  leaves: student.leaves,
+  leaves_used: student.leaves_used,
+  year: encrypt(student.year),
+  actualStipend: student.actualStipend,
+  available_leaves: student.available_leaves,
+  doj: encrypt(student.doj),
+  roll_no: encrypt(student.roll_no),
+    };
   } catch (error) {
     console.error("Error fetching student details:", error.message);
     throw error;
@@ -59,8 +76,26 @@ const getStudentDetails = async (application_no, selectedMonth) => {
 // Insert Stipend details
 const insertStipendDetails = async (data) => {
   try {
+const studentResult = await pool.query(
+  `SELECT
+      name,
+      course,
+      account_no,
+      ifsc_code,
+      doj,
+      year
+   FROM students
+   WHERE roll_no = $1`,
+  [data.rollNo]
+);
 
+if (studentResult.rows.length === 0) {
+  throw new Error("Student not found");
+}
+
+const student = studentResult.rows[0];
 const today = new Date();
+
 const stipendResult = await pool.query(
   `SELECT stipend
    FROM course_stipend
@@ -73,14 +108,15 @@ const stipendResult = await pool.query(
      )
    ORDER BY from_date DESC
    LIMIT 1`,
-  [data.course, data.year, today]
+  [student.course, student.year, today]
 );
 
 if (stipendResult.rows.length === 0) {
-  throw new Error(`No active stipend found for course "${data.course}", year "${data.year}"`);
+  throw new Error(`No active stipend found for course "${student.course}", year "${student.year}"`);
 }
 
 const monthlyStipend = Number(stipendResult.rows[0].stipend);
+// ✅ ADD THIS HERE
 
 // Validate present days
 const presentDays = parseInt(data.presentAndHolidays, 10);
@@ -101,6 +137,7 @@ const calculatedStipend = monthlyStipend;
 const calculatedActualStipend = Math.round(
   (monthlyStipend * safePresentDays) / daysInMonth
 );
+
 
     // Determine the role-specific columns
     let column_id = null;
@@ -131,13 +168,13 @@ const calculatedActualStipend = Math.round(
         ${column_id}=$12, ${column_name}=$13, ifsc_code=$14, year=$15, stipend_year = $16 WHERE id=$17
       `;
       await pool.query(query, [
-        data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
+        data.rollNo, student.name, student.course, student.account_no, student.doj,
         data.leavesBalance, data.presentAndHolidays,
         //  data.stipend, data.actualStipend,
-  calculatedStipend,
-  calculatedActualStipend,
+     calculatedStipend,
+    calculatedActualStipend,
         data.cur_month || null, data.requested_leaves || 0, data.userId || null, data.user_name || null,
-        data.ifsc_code || null, data.year || null, data.stipend_year, data.id
+        student.ifsc_code || null, student.year || null, data.stipend_year, data.id
       ]);
       return;
     }
@@ -156,14 +193,14 @@ const calculatedActualStipend = Math.round(
           ${column_id} = $10, ${column_name} = $11, ifsc_code = $12, year = $13, stipend_year = $14
         WHERE roll_no = $15 AND cur_month = $16`,
         [
-          data.name, data.course, data.accountNo, data.joiningDate, data.leavesBalance,
+          student.name, student.course, student.account_no, student.doj, data.leavesBalance,
           data.presentAndHolidays,
           //  data.stipend, data.actualStipend,
            calculatedStipend,
   calculatedActualStipend,
             data.requested_leaves || 0,
           data.userId || null, data.user_name || null,
-          data.ifsc_code, data.year, data.stipend_year, data.rollNo, data.cur_month
+          student.ifsc_code, student.year, data.stipend_year, data.rollNo, data.cur_month
         ]
       );
 
@@ -190,14 +227,14 @@ const calculatedActualStipend = Math.round(
       `;
 
     await pool.query(query, [
-      data.rollNo, data.name, data.course, data.accountNo, data.joiningDate,
+      data.rollNo, student.name, student.course, student.account_no, student.doj,
       data.leavesBalance, data.presentAndHolidays, 
       // data.stipend, data.actualStipend,
     calculatedStipend,
   calculatedActualStipend,   
       data.cur_month || null, data.requested_leaves || 0,
       data.userId || null, data.user_name || null,
-      data.ifsc_code, data.year, data.stipend_year,
+      student.ifsc_code, student.year, data.stipend_year,
     ]);
 
     // Update students.leaves_used by requested_leaves for this roll_no
@@ -276,7 +313,42 @@ const fetchAllStipends = async (role, month, course, year, roll_no, stipend_year
     query += ` ORDER BY sd.roll_no ASC`;
 
     const result = await pool.query(query, params);
-    return result.rows;
+ 
+    // return result.rows;
+ const encryptedData = result.rows.map((row) => ({
+  id: row.id, // Keep ID plain if you use it for edit/delete
+
+  roll_no: encrypt(row.roll_no),
+  course: encrypt(row.course),
+  name: encrypt(row.name),
+  account_no: encrypt(row.account_no),
+  doj: encrypt(row.doj),
+  leaves: encrypt(row.leaves),
+  present: encrypt(row.present),
+  stipend: encrypt(row.stipend),
+  actual_stipend: encrypt(row.actual_stipend),
+  requested_leaves: encrypt(row.requested_leaves),
+
+  checker_status: encrypt(row.checker_status),
+  verifier_status: encrypt(row.verifier_status),
+  approver_status: encrypt(row.approver_status),
+
+  checker_id: encrypt(row.checker_id),
+  checker_name: encrypt(row.checker_name),
+  verifier_id: encrypt(row.verifier_id),
+  verifier_name: encrypt(row.verifier_name),
+  approver_id: encrypt(row.approver_id),
+  approver_name: encrypt(row.approver_name),
+
+  cur_month: encrypt(row.cur_month),
+  year: encrypt(row.year),
+  stipend_year: encrypt(row.stipend_year),
+  ifsc_code: encrypt(row.ifsc_code),
+  bal_leaves: encrypt(row.bal_leaves),
+  student_status: encrypt(row.student_status),
+}));
+
+return encryptedData;
   } catch (err) {
     console.error("Error fetching stipends in service:", err.message);
     throw err;

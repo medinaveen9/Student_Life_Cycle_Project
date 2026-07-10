@@ -1,14 +1,27 @@
-// const stipendService = require('../services/StipendService');
 
+const CryptoJS = require("crypto-js");
 const { getStudentDetails, insertStipendDetails ,fetchAllStipends, studentLeaveService, deleteStipendData,
    stipendApprovalStatus, stipendBulkApproval, addCourseStipend, autoFillStipendData,
   promoteStudentsService , addStudentService, fetchStudentsByFilter, deleteStudent, 
   addOrUpdateStudentService, deleteStudentStipendById, updateLeavesAndPresent } = require('../services/StipendService');
+const { decrypt } = require("../config/Crypto");
+
+ const maskSensitiveData = (row) => {
+  if (!row) return row;
+  return {
+    ...row,
+
+  };
+};
 
   // Get student info by application number
 const getStudentInfo = async (req, res) => {
   try {
-    const { application_no, selectedMonth } = req.query;
+    
+    // const { application_no, selectedMonth } = req.query;
+    const application_no = decrypt(req.query.application_no);
+    const selectedMonth = decrypt(req.query.selectedMonth);
+
     if (!application_no) {
       return res.status(400).json({ error: 'application_no query parameter is required' });
     }
@@ -16,37 +29,46 @@ const getStudentInfo = async (req, res) => {
     if (!student) {
       return res.status(404).json({ error: 'Student not found' });
     }
-    res.json({ success: true, data: student });
+    res.json({ success: true, data:  maskSensitiveData(student)  });
   } catch (err) {
     console.error('Error fetching student details:', err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 };
 
-// Submit stipend details
 const submitStipend = async (req, res) => {
   try {
-    const { rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays, requested_leaves,  
-    //  calculatedStipend,
-    //  calculatedActualStipend,
-      // stipend, actualStipend, 
-      cur_month, ifsc_code, year, total_leaves, available_leaves, stipend_year} = req.body;
+    const { rollNo:encryptedRollNo, name,  leavesBalance:encryptedLeavesBalance, presentAndHolidays:encryptedPresentAndHolidays
+    ,requested_leaves: encryptedRequestedLeaves,  
+    //  calculatedStipend,  //  calculatedActualStipend, // stipend, actualStipend,
+      cur_month: encryptedCurMonth,
+       total_leaves, available_leaves,
+       stipend_year: encryptedStipendYear } = req.body;
     // const {id, isEdit, userId, userRole, user_name, isModified} = req.query;
     //added 2 lines below to get id, isEdit and isModified from query parameters for edit functionality
-  const { id, isEdit, isModified } = req.query;
+    // const { id, isEdit, isModified } = req.query;
     const { userId, role: userRole, user_name } = req.user;
 
-    if (!rollNo || !name || !course || !accountNo || !joiningDate) {
+    const id = decrypt(req.query.id);
+    const isEdit = decrypt(req.query.isEdit) === "true";
+    const isModified = decrypt(req.query.isModified) === "true";
+
+    const rollNo =Number( decrypt(encryptedRollNo));
+    if (!rollNo ) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
+ 
+    const requested_leaves = Number( decrypt(encryptedRequestedLeaves)); 
+    const leavesBalance = Number(decrypt(encryptedLeavesBalance));
+    const presentAndHolidays = Number(decrypt(encryptedPresentAndHolidays));
+    const stipend_year = decrypt(encryptedStipendYear);
+    const cur_month = decrypt(encryptedCurMonth);
 
-    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month, ifsc_code, year, requested_leaves,
-      rollNo, name, course, accountNo, joiningDate, leavesBalance, presentAndHolidays,
-      //  stipend, 
-      // actualStipend, 
-      // calculatedStipend, calculatedActualStipend,
+    await insertStipendDetails({id, isEdit, userId, userRole, user_name, cur_month,  requested_leaves,
+      rollNo, leavesBalance, presentAndHolidays,
+      //  stipend,   // actualStipend, // calculatedStipend, calculatedActualStipend,
       total_leaves, available_leaves, isModified, stipend_year});
-    return res.status(201).json({ success: true, message: 'Stipend details submitted successfully' });
+    return res.status(201).json({ success: true, message: 'Stipend details SSubmitted successfully' });
   } catch (err) {
     console.error('Error submitting stipend:', err.message);
     return res.status(500).json({ success: false, error: 'Internal server error' });
@@ -57,22 +79,21 @@ const getAllStipends = async (req, res) => {
   try {
     // const role = req.query.role; // e.g., 'Checker', 'Verifier', 'Approver'
     //added just user
-      const role = req.user.role;
+    const role = req.user.role;
     const month = req.query.month; // e.g., '2023-09'
     const {course, year, roll_no, stipend_year} = req.query;
-    const data = await fetchAllStipends(role, month, course, year, roll_no, stipend_year); // call service
+      // Decrypt them
+    const decryptedMonth = decrypt(month);
+    const decryptedCourse = decrypt(course);
+    const decryptedYear = decrypt(year);
+    const decryptedRollNo = decrypt(roll_no);
+    const decryptedStipendYear = decrypt(stipend_year);
+    const data = await fetchAllStipends(role, decryptedMonth, decryptedCourse, decryptedYear, decryptedRollNo,
+       decryptedStipendYear); // call service
 
     // Mask account numbers
-    const maskedData = data.map(row => ({
-      ...row,
-      account_no: row.account_no
-        ? row.account_no
-            .toString()
-            .slice(-4)
-            .padStart(row.account_no.toString().length, "*")
-        : null
-    }));
-    res.json({ success: true, data: maskedData });
+   
+    res.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching stipends in controller:', error.message);
     res.status(500).json({ success: false, error: 'Server error' });
@@ -154,7 +175,10 @@ const autoFillStipends = async (req, res) => {
   try {
     // const { course, month, userId, user_name, stipend_year } = req.query;
     //added 463,464
- const { course, month, stipend_year } = req.query;
+    // const { course, month, stipend_year } = req.query;
+    const course = decrypt(req.query.course);
+    const month = decrypt(req.query.month);
+    const stipend_year = decrypt(req.query.stipend_year);
     const { userId, user_name } = req.user;
 
     if (!course) {
@@ -175,7 +199,10 @@ const autoFillStipends = async (req, res) => {
 
 const deleteStipends = async (req, res) => {
   try {
-    const { course, month, stipend_year } = req.query;
+    // const { course, month, stipend_year } = req.query;
+    const course = decrypt(req.query.course);
+    const month = decrypt(req.query.month);
+    const stipend_year = decrypt(req.query.stipend_year);
     if (!course || month === undefined) {
       return res.status(400).json({ success: false, error: "Course and month are required" });
     }
@@ -320,18 +347,27 @@ const deleteStudentStipend = async (req, res) => {
 //Update leaves and present days for a student stipend details table
 const updateLeavesController = async (req, res) => {
   try {
-    const { id, leaves, present, status, stipend, is_status_changed } = req.body;
-    const userInfo = req.user;
+    const { id,  leaves: encryptedLeaves, present: encryptedPresent, status: encryptedStatus,
+       stipend, is_status_changed } = req.body;
+      const userInfo = req.user;
 
-    if (!id || leaves === undefined || present === undefined) {
+    if (!id || encryptedLeaves === undefined || encryptedPresent === undefined) {
       return res.status(400).json({message: "Required fields missing",});
     }
+    const leaves = Number(decrypt(encryptedLeaves));
+    const present = Number(decrypt(encryptedPresent));
+    const status = decrypt(encryptedStatus);
 
-    const updatedRow = await updateLeavesAndPresent({
+    await updateLeavesAndPresent({
       id, leaves, present, userInfo, status, stipend, is_status_changed });
 
-    return res.status(200).json({
-      message: "Updated successfully", data: updatedRow, });
+    // return res.status(200).json({
+    //   message: "Updated successfully", data: updatedRow, });
+// return res.status(200).json({ message: "Updated successfully", data: maskSensitiveData(updatedRow) })
+   return res.status(200).json({
+       success: true,
+       message: "Updated sSuccessfully"
+   });
 
   } catch (error) {
     console.error("Update Error:", error);
@@ -341,6 +377,6 @@ const updateLeavesController = async (req, res) => {
 
 
 module.exports = { getStudentInfo, submitStipend,getAllStipends, stipendApprovalController,
-   stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
+  stipendBulkApprovalController, addCourseStipendController, addOrUpdateStudentLeave, autoFillStipends,
   deleteStipends, addStudentController, getFilteredStudents, promoteSelectedStudents, deleteStudentController,
-addOrUpdateStudentController, deleteStudentStipend, updateLeavesController};
+  addOrUpdateStudentController, deleteStudentStipend, updateLeavesController};

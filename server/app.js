@@ -50,9 +50,13 @@ app.use((req, res, next) => {
 
 app.use(cookieParser());
 // Middleware
-const allowedOrigins = ['http://localhost', 'http://localhost:3000', 
-  'http://172.25.4.79:3000', 'http://172.26.0.50:3000', 'http://172.26.0.50'];
+// const allowedOrigins = ['http://localhost', 'http://localhost:3000',
+//   'http://172.25.4.79:3000', 'http://172.26.0.50:3000', 'http://172.26.0.50'];
 
+  const allowedOrigins = [
+  'http://localhost','http://localhost:3000','http://172.19.1.18:3000','http://10.10.175.59:3000','http://10.10.175.59',
+  'http://172.25.4.79:3000','http://172.26.0.50:3000','http://172.26.0.50'
+];
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {

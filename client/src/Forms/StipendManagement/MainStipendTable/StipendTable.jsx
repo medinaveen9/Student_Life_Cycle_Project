@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../../../components/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../../../styles/StipendManagement/StipendTable.css";
-
+import { encrypt, decrypt } from "../../../utils/Crypto";
 import StipendFilters from "./StipendFilters";
 import StipendRow from "./StipendRow";
 import StipendDialogs from "./StipendDialog";
@@ -58,16 +58,49 @@ const StipendTable = ({ setEditableData, user }) => {
             const response = await axiosInstance.get("/api/stipend/stipend_details", {
                 params: { 
                     // role: user.role,
-                     month: currentMonth, course : course, 
-                    year : year, roll_no : rollNo || "", stipend_year : selectStipendYear  },
+                     month: encrypt(currentMonth), course :encrypt(course), 
+                    year : encrypt(year), roll_no : rollNo || "", stipend_year : encrypt(selectStipendYear)  },
             });
             const result = response.data;
 
-            if (result.success) {
-                setData(result.data);
-            } else {
-                console.error("Failed to fetch stipends:", result.error);
-            }
+        if (result.success) {
+           const decryptedData = result.data.map((row) => ({
+            ...row,
+
+        roll_no: decrypt(row.roll_no),
+        course: decrypt(row.course),
+        name: decrypt(row.name),
+        account_no: decrypt(row.account_no),
+        doj: decrypt(row.doj),
+
+        leaves: decrypt(row.leaves),
+        present: decrypt(row.present),
+        stipend: decrypt(row.stipend),
+        actual_stipend: decrypt(row.actual_stipend),
+        requested_leaves: decrypt(row.requested_leaves),
+
+        checker_status: decrypt(row.checker_status),
+        verifier_status: decrypt(row.verifier_status),
+        approver_status: decrypt(row.approver_status),
+
+        checker_name: decrypt(row.checker_name),
+        verifier_name: decrypt(row.verifier_name),
+        approver_name: decrypt(row.approver_name),
+
+        cur_month: decrypt(row.cur_month),
+        year: decrypt(row.year),
+        stipend_year: decrypt(row.stipend_year),
+
+        ifsc_code: decrypt(row.ifsc_code),
+        bal_leaves: decrypt(row.bal_leaves),
+         student_status: decrypt(row.student_status),  
+    }));
+
+    setData(decryptedData);
+
+    } else {
+    console.error("Failed to fetch stipends:", result.error);
+     }       
         } catch (err) {
         console.error("Error fetching stipend data:", err);
         } finally {

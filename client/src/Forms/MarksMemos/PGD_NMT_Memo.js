@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "../../styles/MarksMemo/PGD_NMT_memo.css";
-
+// import "../../styles/MarksMemo/PGD_NMT_memo.css";
 // Reusable MarksEntry component
 // Props:
 // - initialData: { semester, rollNo, name, parentName, examMonthYear, dateOfIssue, subjects: [{paper,name,max,secured}], image }

@@ -9,7 +9,7 @@ const { userLogin,verifyUser, userLogout, changePassword, forgotPasswordControll
 // Rate limiter for login endpoint
 const loginRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
-    max: 10,                     // max 10 attempts per 15 minutes
+    max: 5,                     // max 10 attempts per 15 minutes
     message: {
         error: "Too many login attempts. Please try again after 15 minutes."
     },
