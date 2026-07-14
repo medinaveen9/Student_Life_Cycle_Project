@@ -8,12 +8,26 @@ addOrUpdateStudentController, deleteStudentStipend, updateLeavesController } = r
 
 const { verifyToken, authorizeRole } = require('../config/VerifyToken');
 
+
+const rateLimit = require("express-rate-limit");
+
+const stipendLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 17,
+  message: {
+    error: "Too many requests. Please try again later."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const stipendViewRoles = ["Checker", "Verifier", "Approver", "FA", "FC",];
 const stipendApprovalRoles = ["Checker", "Verifier", "Approver", "FA", "FC"];
 const stipendEntryRoles = ["Checker", "Verifier", "Approver"];
 const stipendAdminRoles = [ "Checker"];
 const stipendReportRoles = [ "Dean"];
 
+router.use(stipendLimiter);
 router.get('/stipend_details', verifyToken, authorizeRole(...stipendViewRoles), getAllStipends); 
 router.get('/student', verifyToken, authorizeRole(...stipendEntryRoles), getStudentInfo);
 router.post('/submit', verifyToken, authorizeRole(...stipendEntryRoles), submitStipend);
